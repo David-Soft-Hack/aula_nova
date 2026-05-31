@@ -26,7 +26,7 @@ class StudentController {
     if ((carrera ?? '').trim().isNotEmpty) base.add(carrera!.trim());
     if ((grupo ?? '').trim().isNotEmpty) base.add(grupo!.trim());
 
-    final prefix = base.isEmpty ? '$year' : '${base.join('-')}-$year';
+    final prefix = base.isEmpty ? year : '${base.join('-')}-$year';
 
     final existing = await _dao.getAllStudents();
     final matching = existing.where((s) {

@@ -174,7 +174,27 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (!isKeyboardOpen) ...[
+              // Header (always visible, but compact when keyboard open)
+              if (isKeyboardOpen) ...[
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.pop(context),
+                      icon: Icon(
+                        LucideIcons.x,
+                        color: Colors.grey.shade400,
+                        size: 18,
+                      ),
+                      splashRadius: 18,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+              ] else ...[
                 Row(
                   children: [
                     Expanded(
@@ -202,81 +222,66 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                   ],
                 ),
                 const SizedBox(height: 10),
-                Row(
-                  children: List.generate(2, (index) {
-                    final isActive = index <= _currentStep;
-                    return Expanded(
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 24,
-                            height: 24,
-                            decoration: BoxDecoration(
+              ],
+
+              // Progress indicator (ALWAYS visible)
+              Row(
+                children: List.generate(2, (index) {
+                  final isActive = index <= _currentStep;
+                  return Expanded(
+                    child: Column(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: isActive
+                                ? AppTheme.academic600
+                                : Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                color: isActive
+                                    ? Colors.white
+                                    : Colors.grey.shade600,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          index == 0 ? 'Datos Personales' : 'Grupo de Clase',
+                          style: TextStyle(
+                            fontWeight: index <= _currentStep
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 11,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (index < 1)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 3),
+                            child: Container(
+                              height: 1.5,
                               color: isActive
                                   ? AppTheme.academic600
                                   : Colors.grey.shade200,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${index + 1}',
-                                style: TextStyle(
-                                  color: isActive
-                                      ? Colors.white
-                                      : Colors.grey.shade600,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 12,
-                                ),
-                              ),
                             ),
                           ),
-                          const SizedBox(height: 3),
-                          Text(
-                            index == 0 ? 'Datos Personales' : 'Grupo de Clase',
-                            style: TextStyle(
-                              fontWeight: index <= _currentStep
-                                  ? FontWeight.w600
-                                  : FontWeight.w400,
-                              fontSize: 11,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          if (index < 1)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 3),
-                              child: Container(
-                                height: 1.5,
-                                color: isActive
-                                    ? AppTheme.academic600
-                                    : Colors.grey.shade200,
-                              ),
-                            ),
-                        ],
-                      ),
-                    );
-                  }),
-                ),
-                const SizedBox(height: 10),
-              ] else ...[
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: _isSaving
-                          ? null
-                          : () => Navigator.pop(context),
-                      icon: Icon(
-                        LucideIcons.x,
-                        color: Colors.grey.shade400,
-                        size: 18,
-                      ),
-                      splashRadius: 18,
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(),
+                      ],
                     ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-              ],
+                  );
+                }),
+              ),
+              const SizedBox(height: 10),
+
+              // Content
               _currentStep == 0
                   ? PersonalDataStep(
                       codigoCtrl: _codigoCtrl,
@@ -352,9 +357,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                           : Text(
                               _currentStep == 0 ? 'Siguiente' : 'Guardar',
                               style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 13,
-                                ),
+                                fontWeight: FontWeight.w600,
+                                fontSize: 13,
+                              ),
                             ),
                     ),
                   ),
