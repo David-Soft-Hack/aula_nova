@@ -108,9 +108,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _save() async {
@@ -132,7 +132,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
         nombres: _nombresCtrl.text.trim(),
         apellidos: _apellidosCtrl.text.trim(),
         email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
-        telefono: _telefonoCtrl.text.trim().isEmpty ? null : _telefonoCtrl.text.trim(),
+        telefono: _telefonoCtrl.text.trim().isEmpty
+            ? null
+            : _telefonoCtrl.text.trim(),
         carrera: _selectedCarrera,
         grupo: _selectedGrupo,
         status: _selectedStatus,
@@ -184,15 +186,29 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                       color: AppTheme.academic50,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(LucideIcons.userPlus, color: AppTheme.academic600, size: 20),
+                    child: const Icon(
+                      LucideIcons.userPlus,
+                      color: AppTheme.academic600,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Nuevo Estudiante', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+                    child: Text(
+                      'Nuevo Estudiante',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                   IconButton(
                     onPressed: _isSaving ? null : () => Navigator.pop(context),
-                    icon: Icon(LucideIcons.x, color: Colors.grey.shade400, size: 20),
+                    icon: Icon(
+                      LucideIcons.x,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
                     splashRadius: 20,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -212,17 +228,32 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
-                            color: isActive ? AppTheme.academic600 : Colors.grey.shade200,
+                            color: isActive
+                                ? AppTheme.academic600
+                                : Colors.grey.shade200,
                             shape: BoxShape.circle,
                           ),
                           child: Center(
-                            child: Text('${index + 1}', style: TextStyle(color: isActive ? Colors.white : Colors.grey.shade600, fontWeight: FontWeight.bold)),
+                            child: Text(
+                              '${index + 1}',
+                              style: TextStyle(
+                                color: isActive
+                                    ? Colors.white
+                                    : Colors.grey.shade600,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           index == 0 ? 'Datos Personales' : 'Grupo de Clase',
-                          style: TextStyle(fontWeight: index <= _currentStep ? FontWeight.w600 : FontWeight.w400, fontSize: 12),
+                          style: TextStyle(
+                            fontWeight: index <= _currentStep
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                            fontSize: 12,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                         if (index < 1)
@@ -230,7 +261,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                             padding: const EdgeInsets.only(top: 8),
                             child: Container(
                               height: 2,
-                              color: isActive ? AppTheme.academic600 : Colors.grey.shade200,
+                              color: isActive
+                                  ? AppTheme.academic600
+                                  : Colors.grey.shade200,
                             ),
                           ),
                       ],
@@ -252,14 +285,24 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSaving ? null : () => Navigator.pop(context),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.slate900,
                         side: BorderSide(color: Colors.grey.shade200),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -271,11 +314,26 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: _isSaving
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : Text(_currentStep == 0 ? 'Siguiente' : 'Guardar', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              _currentStep == 0 ? 'Siguiente' : 'Guardar',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -305,13 +363,41 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Paso 1: Información Personal', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text(
+          'Paso 1: Información Personal',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 16),
-        _buildTextField(label: 'Código', controller: _codigoCtrl, icon: LucideIcons.hash, keyboardType: TextInputType.text),
-        _buildTextField(label: 'Nombres', controller: _nombresCtrl, icon: LucideIcons.user, keyboardType: TextInputType.text),
-        _buildTextField(label: 'Apellidos', controller: _apellidosCtrl, icon: LucideIcons.user, keyboardType: TextInputType.text),
-        _buildTextField(label: 'Email', controller: _emailCtrl, icon: LucideIcons.mail, keyboardType: TextInputType.emailAddress),
-        _buildTextField(label: 'Teléfono', controller: _telefonoCtrl, icon: LucideIcons.phone, keyboardType: TextInputType.phone),
+        _buildTextField(
+          label: 'Código',
+          controller: _codigoCtrl,
+          icon: LucideIcons.hash,
+          keyboardType: TextInputType.text,
+        ),
+        _buildTextField(
+          label: 'Nombres',
+          controller: _nombresCtrl,
+          icon: LucideIcons.user,
+          keyboardType: TextInputType.text,
+        ),
+        _buildTextField(
+          label: 'Apellidos',
+          controller: _apellidosCtrl,
+          icon: LucideIcons.user,
+          keyboardType: TextInputType.text,
+        ),
+        _buildTextField(
+          label: 'Email',
+          controller: _emailCtrl,
+          icon: LucideIcons.mail,
+          keyboardType: TextInputType.emailAddress,
+        ),
+        _buildTextField(
+          label: 'Teléfono',
+          controller: _telefonoCtrl,
+          icon: LucideIcons.phone,
+          keyboardType: TextInputType.phone,
+        ),
       ],
     );
   }
@@ -320,7 +406,10 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Paso 2: Datos de Grupo de Clase', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        const Text(
+          'Paso 2: Datos de Grupo de Clase',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
         const SizedBox(height: 16),
         if (_isLoadingData)
           const Padding(
@@ -351,16 +440,19 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
           },
         ),
         const SizedBox(height: 16),
-        const Text('Estado', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+        const Text(
+          'Estado',
+          style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+        ),
         const SizedBox(height: 8),
         DropdownButtonFormField<StudentStatus>(
-          value: _selectedStatus,
+          initialValue: _selectedStatus,
           items: StudentStatus.values.map((status) {
             final label = status == StudentStatus.activo
                 ? 'Activo'
                 : status == StudentStatus.inactivo
-                    ? 'Inactivo'
-                    : 'Graduado';
+                ? 'Inactivo'
+                : 'Graduado';
             return DropdownMenuItem(value: status, child: Text(label));
           }).toList(),
           onChanged: (value) {
@@ -373,8 +465,14 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey.shade200),
+            ),
           ),
         ),
         const SizedBox(height: 16),
@@ -387,10 +485,14 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                   foregroundColor: AppTheme.slate900,
                   side: BorderSide(color: Colors.grey.shade200),
                   padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
                 ),
                 child: Text(
-                  _fechaIngreso == null ? 'Fecha de ingreso' : '${_fechaIngreso!.day}/${_fechaIngreso!.month}/${_fechaIngreso!.year}',
+                  _fechaIngreso == null
+                      ? 'Fecha de ingreso'
+                      : '${_fechaIngreso!.day}/${_fechaIngreso!.month}/${_fechaIngreso!.year}',
                 ),
               ),
             ),
@@ -411,7 +513,10 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: controller,
@@ -420,10 +525,25 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
               prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 18),
               filled: true,
               fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppTheme.academic600,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ],
@@ -443,10 +563,13 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: value,
+            initialValue: value,
             items: items.map((item) {
               return DropdownMenuItem(value: item, child: Text(item));
             }).toList(),
@@ -455,10 +578,25 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
               prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 18),
               filled: true,
               fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppTheme.academic600,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ],
