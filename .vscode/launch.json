@@ -1,0 +1,32 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "debugpy",
+            "request": "launch",
+            "name": "Python Debugger: Current File",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "type": "dart",
+            "request": "launch",
+            "name": "aula_nova"
+        },
+        {
+            "type": "dart",
+            "request": "launch",
+            "name": "aula_nova (profile mode)",
+            "flutterMode": "profile"
+        },
+        {
+            "type": "dart",
+            "request": "launch",
+            "name": "aula_nova (release mode)",
+            "flutterMode": "release"
+        }
+    ]
+}
