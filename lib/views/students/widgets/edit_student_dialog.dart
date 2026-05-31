@@ -10,7 +10,11 @@ class EditStudentDialog extends StatefulWidget {
   final StudentController controller;
   final Student student;
 
-  const EditStudentDialog({super.key, required this.controller, required this.student});
+  const EditStudentDialog({
+    super.key,
+    required this.controller,
+    required this.student,
+  });
 
   @override
   State<EditStudentDialog> createState() => _EditStudentDialogState();
@@ -90,10 +94,18 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
       codigo: _codigoCtrl.text.trim(),
       nombres: _nombresCtrl.text.trim(),
       apellidos: _apellidosCtrl.text.trim(),
-      email: Value(_emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim()),
-      telefono: Value(_telefonoCtrl.text.trim().isEmpty ? null : _telefonoCtrl.text.trim()),
-      carrera: Value(_carreraCtrl.text.trim().isEmpty ? null : _carreraCtrl.text.trim()),
-      grupo: Value(_grupoCtrl.text.trim().isEmpty ? null : _grupoCtrl.text.trim()),
+      email: Value(
+        _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
+      ),
+      telefono: Value(
+        _telefonoCtrl.text.trim().isEmpty ? null : _telefonoCtrl.text.trim(),
+      ),
+      carrera: Value(
+        _carreraCtrl.text.trim().isEmpty ? null : _carreraCtrl.text.trim(),
+      ),
+      grupo: Value(
+        _grupoCtrl.text.trim().isEmpty ? null : _grupoCtrl.text.trim(),
+      ),
       estado: _selectedStatus,
       fechaIngreso: Value(_fechaIngreso),
     );
@@ -135,15 +147,29 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                       color: AppTheme.academic50,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(LucideIcons.edit3, color: AppTheme.academic600, size: 20),
+                    child: const Icon(
+                      LucideIcons.edit3,
+                      color: AppTheme.academic600,
+                      size: 20,
+                    ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text('Editar Estudiante', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, fontSize: 18)),
+                    child: Text(
+                      'Editar Estudiante',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                   IconButton(
                     onPressed: () => Navigator.pop(context),
-                    icon: Icon(LucideIcons.x, color: Colors.grey.shade400, size: 20),
+                    icon: Icon(
+                      LucideIcons.x,
+                      color: Colors.grey.shade400,
+                      size: 20,
+                    ),
                     splashRadius: 20,
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -156,11 +182,36 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildTextField(label: 'Código', controller: _codigoCtrl, icon: LucideIcons.hash, keyboardType: TextInputType.text),
-                      _buildTextField(label: 'Nombres', controller: _nombresCtrl, icon: LucideIcons.user, keyboardType: TextInputType.text),
-                      _buildTextField(label: 'Apellidos', controller: _apellidosCtrl, icon: LucideIcons.user, keyboardType: TextInputType.text),
-                      _buildTextField(label: 'Email', controller: _emailCtrl, icon: LucideIcons.mail, keyboardType: TextInputType.emailAddress),
-                      _buildTextField(label: 'Teléfono', controller: _telefonoCtrl, icon: LucideIcons.phone, keyboardType: TextInputType.phone),
+                      _buildTextField(
+                        label: 'Código',
+                        controller: _codigoCtrl,
+                        icon: LucideIcons.hash,
+                        keyboardType: TextInputType.text,
+                      ),
+                      _buildTextField(
+                        label: 'Nombres',
+                        controller: _nombresCtrl,
+                        icon: LucideIcons.user,
+                        keyboardType: TextInputType.text,
+                      ),
+                      _buildTextField(
+                        label: 'Apellidos',
+                        controller: _apellidosCtrl,
+                        icon: LucideIcons.user,
+                        keyboardType: TextInputType.text,
+                      ),
+                      _buildTextField(
+                        label: 'Email',
+                        controller: _emailCtrl,
+                        icon: LucideIcons.mail,
+                        keyboardType: TextInputType.emailAddress,
+                      ),
+                      _buildTextField(
+                        label: 'Teléfono',
+                        controller: _telefonoCtrl,
+                        icon: LucideIcons.phone,
+                        keyboardType: TextInputType.phone,
+                      ),
 
                       // Carrera: prefer dropdown if data loaded
                       if (_isLoadingData)
@@ -172,7 +223,9 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                         _buildDropdownField(
                           label: 'Carrera',
                           icon: LucideIcons.graduationCap,
-                          value: _carreras.contains(_carreraCtrl.text) ? _carreraCtrl.text : null,
+                          value: _carreras.contains(_carreraCtrl.text)
+                              ? _carreraCtrl.text
+                              : null,
                           items: _carreras,
                           onChanged: (v) {
                             setState(() {
@@ -181,14 +234,21 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                           },
                         )
                       else
-                        _buildTextField(label: 'Carrera', controller: _carreraCtrl, icon: LucideIcons.graduationCap, keyboardType: TextInputType.text),
+                        _buildTextField(
+                          label: 'Carrera',
+                          controller: _carreraCtrl,
+                          icon: LucideIcons.graduationCap,
+                          keyboardType: TextInputType.text,
+                        ),
 
                       // Grupo: prefer dropdown if data loaded
                       if (_grupos.isNotEmpty)
                         _buildDropdownField(
                           label: 'Grupo',
                           icon: LucideIcons.users,
-                          value: _grupos.contains(_grupoCtrl.text) ? _grupoCtrl.text : null,
+                          value: _grupos.contains(_grupoCtrl.text)
+                              ? _grupoCtrl.text
+                              : null,
                           items: _grupos,
                           onChanged: (v) {
                             setState(() {
@@ -197,24 +257,43 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                           },
                         )
                       else
-                        _buildTextField(label: 'Grupo', controller: _grupoCtrl, icon: LucideIcons.users, keyboardType: TextInputType.text),
+                        _buildTextField(
+                          label: 'Grupo',
+                          controller: _grupoCtrl,
+                          icon: LucideIcons.users,
+                          keyboardType: TextInputType.text,
+                        ),
                       const SizedBox(height: 16),
-                      const Text('Estado', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+                      const Text(
+                        'Estado',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13,
+                        ),
+                      ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<StudentStatus>(
-                        value: _selectedStatus,
+                        initialValue: _selectedStatus,
                         items: StudentStatus.values.map((status) {
-                          return DropdownMenuItem(value: status, child: Text(status.name.toUpperCase()));
+                          return DropdownMenuItem(
+                            value: status,
+                            child: Text(status.name.toUpperCase()),
+                          );
                         }).toList(),
                         onChanged: (value) {
                           if (value != null) {
-                            setState(() { _selectedStatus = value; });
+                            setState(() {
+                              _selectedStatus = value;
+                            });
                           }
                         },
                         decoration: InputDecoration(
                           filled: true,
                           fillColor: Colors.grey.shade50,
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: BorderSide(color: Colors.grey.shade200),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 16),
@@ -226,10 +305,18 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                               style: OutlinedButton.styleFrom(
                                 foregroundColor: AppTheme.slate900,
                                 side: BorderSide(color: Colors.grey.shade200),
-                                padding: const EdgeInsets.symmetric(vertical: 14),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                               ),
-                              child: Text(_fechaIngreso == null ? 'Fecha de ingreso' : '${_fechaIngreso!.day}/${_fechaIngreso!.month}/${_fechaIngreso!.year}'),
+                              child: Text(
+                                _fechaIngreso == null
+                                    ? 'Fecha de ingreso'
+                                    : '${_fechaIngreso!.day}/${_fechaIngreso!.month}/${_fechaIngreso!.year}',
+                              ),
                             ),
                           ),
                         ],
@@ -242,14 +329,24 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: _isSaving ? null : () => Navigator.pop(context),
+                      onPressed: _isSaving
+                          ? null
+                          : () => Navigator.pop(context),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: AppTheme.slate900,
                         side: BorderSide(color: Colors.grey.shade200),
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
-                      child: const Text('Cancelar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -261,11 +358,26 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
                         foregroundColor: Colors.white,
                         elevation: 0,
                         padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
                       ),
                       child: _isSaving
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                          : const Text('Actualizar', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : const Text(
+                              'Actualizar',
+                              style: TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                              ),
+                            ),
                     ),
                   ),
                 ],
@@ -277,13 +389,21 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
     );
   }
 
-  Widget _buildTextField({required String label, required TextEditingController controller, required IconData icon, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField({
+    required String label,
+    required TextEditingController controller,
+    required IconData icon,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           TextField(
             controller: controller,
@@ -292,10 +412,25 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
               prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 18),
               filled: true,
               fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppTheme.academic600,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ],
@@ -315,20 +450,40 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13)),
+          Text(
+            label,
+            style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+          ),
           const SizedBox(height: 8),
           DropdownButtonFormField<String>(
-            value: value,
-            items: items.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
+            initialValue: value,
+            items: items
+                .map((item) => DropdownMenuItem(value: item, child: Text(item)))
+                .toList(),
             onChanged: onChanged,
             decoration: InputDecoration(
               prefixIcon: Icon(icon, color: Colors.grey.shade500, size: 18),
               filled: true,
               fillColor: Colors.grey.shade50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide(color: Colors.grey.shade200)),
-              focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5)),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey.shade200),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: const BorderSide(
+                  color: AppTheme.academic600,
+                  width: 1.5,
+                ),
+              ),
             ),
           ),
         ],
