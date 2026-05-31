@@ -36,31 +36,65 @@ class StudentCard extends StatelessWidget {
                 color: AppTheme.academic50,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(LucideIcons.user, color: AppTheme.academic600, size: 20),
+              child: const Icon(
+                LucideIcons.user,
+                color: AppTheme.academic600,
+                size: 20,
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(student.fullName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14.5)),
+                  Text(
+                    student.fullName,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5,
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Wrap(
                     crossAxisAlignment: WrapCrossAlignment.center,
                     spacing: 10,
                     runSpacing: 4,
                     children: [
-                      Text(student.codigo, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                      if (student.carrera != null && student.carrera!.isNotEmpty)
-                        Text(student.carrera!, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
-                      Text(student.statusLabel, style: const TextStyle(color: AppTheme.academic600, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(
+                        student.codigo,
+                        style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 12,
+                        ),
+                      ),
+                      if (student.carrera != null &&
+                          student.carrera!.isNotEmpty)
+                        Text(
+                          student.carrera!,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      Text(
+                        student.statusLabel,
+                        style: const TextStyle(
+                          color: AppTheme.academic600,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],
               ),
             ),
             IconButton(
-              icon: Icon(LucideIcons.edit3, color: Colors.blue.shade600, size: 18),
+              icon: Icon(
+                LucideIcons.edit3,
+                color: Colors.blue.shade600,
+                size: 18,
+              ),
               visualDensity: VisualDensity.compact,
               padding: const EdgeInsets.all(6),
               constraints: const BoxConstraints(),
