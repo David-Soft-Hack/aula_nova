@@ -7,18 +7,22 @@ import '../models/database_provider.dart';
 class CareerController {
   final CareerDao _dao = DatabaseProvider.careerDao;
 
-  Future<List<Career>> getAllCareers() async {
-    return await _dao.getAllCareers();
-  }
+  Future<List<Career>> getAllCareers() => _dao.getAllCareers();
 
-  Stream<List<Career>> watchAllCareers() {
-    return _dao.watchAllCareers();
+  Stream<List<Career>> watchAllCareers() => _dao.watchAllCareers();
+
+  Future<Career?> getCareerByName(String nombre) async {
+    final careers = await _dao.getAllCareers();
+    final normalized = nombre.trim().toLowerCase();
+    try {
+      return careers.firstWhere((c) => c.nombre.trim().toLowerCase() == normalized);
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<bool> existsCareer(String nombre) async {
-    final careers = await getAllCareers();
-    final normalizedInput = nombre.trim().toLowerCase();
-    return careers.any((c) => c.nombre.trim().toLowerCase() == normalizedInput);
+    return await getCareerByName(nombre) != null;
   }
 
   Future<void> addCareer(String nombre, TipoCarrera tipo) async {

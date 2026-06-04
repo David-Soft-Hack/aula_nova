@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
@@ -82,8 +83,38 @@ class StudentController {
       
       return grupos.toList();
     } catch (e) {
-      print('Error fetching groups: $e');
+      debugPrint('Error fetching groups: $e');
       return [];
+    }
+  }
+
+  /// Genera el siguiente código de estudiante autoincremental de acuerdo con el grupo
+  Future<String> generateNextStudentCodigo(String grupoCodigo) async {
+    try {
+      final all = await getAllStudents();
+      final groupStudents = all
+          .where((s) => s.grupo?.trim().toLowerCase() == grupoCodigo.trim().toLowerCase())
+          .toList();
+
+      int maxNum = 0;
+      final prefix = '${grupoCodigo.trim()}-';
+
+      for (final s in groupStudents) {
+        if (s.codigo.toLowerCase().startsWith(prefix.toLowerCase())) {
+          final numStr = s.codigo.substring(prefix.length);
+          final num = int.tryParse(numStr);
+          if (num != null && num > maxNum) {
+            maxNum = num;
+          }
+        }
+      }
+
+      final nextNum = maxNum + 1;
+      final suffix = nextNum.toString().padLeft(2, '0');
+      return '${grupoCodigo.trim()}-$suffix';
+    } catch (e) {
+      debugPrint('Error generating next student code: $e');
+      return '${grupoCodigo.trim()}-01';
     }
   }
 }

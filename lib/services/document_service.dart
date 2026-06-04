@@ -12,5 +12,59 @@ class DocumentService {
     return File('$path/$fileName');
   }
 
-  // Add methods to read/write documents here
+  Future<Directory> get documentsDir async {
+    final path = await localPath;
+    final dir = Directory('$path/documentos');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  Future<Directory> get bitacoraDocsDir async {
+    final path = await localPath;
+    final dir = Directory('$path/documentos/bitacoras');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    return dir;
+  }
+
+  Future<File> saveDocument(String subfolder, String fileName, List<int> bytes) async {
+    final path = await localPath;
+    final dir = Directory('$path/documentos/$subfolder');
+    if (!await dir.exists()) {
+      await dir.create(recursive: true);
+    }
+    final file = File('${dir.path}/$fileName');
+    return file.writeAsBytes(bytes);
+  }
+
+  Future<File> saveBitacoraDocument(int bitacoraId, String fileName, List<int> bytes) async {
+    return saveDocument('bitacoras/$bitacoraId', fileName, bytes);
+  }
+
+  Future<List<FileSystemEntity>> listDocuments({String? subfolder}) async {
+    final path = await localPath;
+    final dir = Directory(subfolder != null
+        ? '$path/documentos/$subfolder'
+        : '$path/documentos');
+    if (!await dir.exists()) return [];
+    return dir.list().toList();
+  }
+
+  Future<void> deleteDocument(String filePath) async {
+    final file = File(filePath);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
+
+  Future<void> deleteBitacoraDocuments(int bitacoraId) async {
+    final path = await localPath;
+    final dir = Directory('$path/documentos/bitacoras/$bitacoraId');
+    if (await dir.exists()) {
+      await dir.delete(recursive: true);
+    }
+  }
 }

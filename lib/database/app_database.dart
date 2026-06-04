@@ -32,7 +32,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -49,6 +49,9 @@ class AppDatabase extends _$AppDatabase {
           if (from < 5) {
             await m.create(students);
           }
+          // v6: StudentStatus gained suspendido/finalizado/desertado.
+          // Stored as INTEGER, no DDL changes required.
+          if (from < 6) {}
         },
         beforeOpen: (details) async {
           // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.

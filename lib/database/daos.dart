@@ -136,8 +136,12 @@ class UnitDao extends DatabaseAccessor<AppDatabase> with _$UnitDaoMixin {
 
   Future<List<Unit>> getUnitsByModule(String idModule) => 
       (select(units)..where((t) => t.idModule.equals(idModule))).get();
+  Future<List<Unit>> getAllUnits() => select(units).get();
   Future insertUnit(Insertable<Unit> unit) => into(units).insert(unit);
   Future updateUnit(Insertable<Unit> unit) => update(units).replace(unit);
+  Future deleteUnit(Insertable<Unit> unit) => delete(units).delete(unit);
+  Future deleteUnitsByModule(String idModule) =>
+      (delete(units)..where((t) => t.idModule.equals(idModule))).go();
 }
 
 @DriftAccessor(tables: [Activities])
@@ -146,6 +150,12 @@ class ActivityDao extends DatabaseAccessor<AppDatabase> with _$ActivityDaoMixin 
 
   Future insertActivity(Insertable<Activity> activity) => into(activities).insert(activity);
   Future updateActivity(Insertable<Activity> activity) => update(activities).replace(activity);
+  Future deleteActivity(Insertable<Activity> activity) => delete(activities).delete(activity);
+  Future<List<Activity>> getActivitiesByUnit(String idUnit) =>
+      (select(activities)..where((t) => t.idUnit.equals(idUnit))).get();
+  Future<List<Activity>> getAllActivities() => select(activities).get();
+  Future deleteActivitiesByUnit(String idUnit) =>
+      (delete(activities)..where((t) => t.idUnit.equals(idUnit))).go();
 }
 
 @DriftAccessor(tables: [Bitacoras, CalendarioBitacoras])
@@ -184,6 +194,14 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
           estado: const Value(EstadoBitacora.finalizado),
           fechaFinal: Value(now),
         ));
+
+        // Transition active students in the group to 'finalizado'
+        if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
+          await _updateActiveStudentsForGroup(
+            bitacora.codigoGrupo!,
+            StudentStatus.finalizado,
+          );
+        }
       }
     }
   }
@@ -225,10 +243,47 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
 
   // Delete a bitacora and its associated calendar entries
   Future<void> deleteBitacora(int idBitacora) async {
-    // First delete related calendar entries
+    // 1. Obtain the bitacora to read its group code
+    final bitacora = await (select(bitacoras)
+          ..where((t) => t.id.equals(idBitacora)))
+        .getSingleOrNull();
+
+    if (bitacora != null &&
+        bitacora.codigoGrupo != null &&
+        bitacora.codigoGrupo!.isNotEmpty) {
+      // 2. Determine if the calendar was fully completed
+      final sessions = await getCalendarioForBitacora(idBitacora);
+      final allCompleted =
+          sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido);
+
+      // 3. Transition only ACTIVE students:
+      //    - Calendar finished → finalizado
+      //    - Calendar not finished → suspendido
+      //    - Desertado students are never modified
+      final newStatus =
+          allCompleted ? StudentStatus.finalizado : StudentStatus.suspendido;
+      await _updateActiveStudentsForGroup(bitacora.codigoGrupo!, newStatus);
+    }
+
+    // 4. Delete calendar entries then the bitacora
     await deleteCalendarioForBitacora(idBitacora);
-    // Then delete the bitacora record itself
     await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
+  }
+
+  /// Transitions only [StudentStatus.activo] students in [grupo] to [newStatus].
+  /// Students with any other status (inactivo, graduado, suspendido,
+  /// finalizado, desertado) are NOT modified.
+  Future<void> _updateActiveStudentsForGroup(
+    String grupo,
+    StudentStatus newStatus,
+  ) async {
+    await (db.update(db.students)
+          ..where(
+            (s) =>
+                s.grupo.equals(grupo) &
+                s.estado.equals(StudentStatus.activo.index),
+          ))
+        .write(StudentsCompanion(estado: Value(newStatus)));
   }
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);

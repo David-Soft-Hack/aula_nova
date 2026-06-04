@@ -90,7 +90,8 @@ class CalendarioBitacoras extends Table {
   TextColumn get rutaDocumento => text().nullable()();
 }
 
-enum StudentStatus { activo, inactivo, graduado }
+enum StudentStatus { activo, inactivo, graduado, suspendido, finalizado, desertado }
+
 
 class Students extends Table {
   IntColumn get id => integer().autoIncrement()();

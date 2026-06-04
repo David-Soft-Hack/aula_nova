@@ -50,6 +50,50 @@ class ModuleController {
     }
   }
 
+  /// Actualiza un módulo completo: reemplaza unidades y actividades.
+  Future<void> updateModuleWithDetails({
+    required Module module,
+    required List<Unit> units,
+    required List<Activity> activities,
+  }) async {
+    final db = DatabaseProvider.db;
+
+    await db.transaction(() async {
+      await DatabaseProvider.moduleDao.updateModule(module);
+
+      final existingUnits = await DatabaseProvider.unitDao.getUnitsByModule(module.codModule);
+      for (final u in existingUnits) {
+        await (db.delete(db.activities)..where((a) => a.idUnit.equals(u.codUnit))).go();
+      }
+      await DatabaseProvider.unitDao.deleteUnitsByModule(module.codModule);
+
+      for (final unit in units) {
+        await DatabaseProvider.unitDao.insertUnit(
+          UnitsCompanion.insert(
+            codUnit: unit.codUnit,
+            nombre: unit.nombre,
+            totalHoraAcademic: unit.totalHoraAcademic,
+            totalHoraReloj: unit.totalHoraReloj,
+            ponderacion: unit.ponderacion,
+            idModule: unit.idModule,
+          ),
+        );
+      }
+
+      for (final activity in activities) {
+        await DatabaseProvider.activityDao.insertActivity(
+          ActivitiesCompanion.insert(
+            codActivity: activity.codActivity,
+            descripcion: activity.descripcion,
+            totalHoraAcademic: activity.totalHoraAcademic,
+            totalHoraReloj: activity.totalHoraReloj,
+            idUnit: activity.idUnit,
+          ),
+        );
+      }
+    });
+  }
+
   /// Elimina un módulo y todas sus dependencias (unidades, actividades, bitácoras)
   Future<void> deleteModuleWithDetails(String moduleCode) async {
     final db = DatabaseProvider.db;

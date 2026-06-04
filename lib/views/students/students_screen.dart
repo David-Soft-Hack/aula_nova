@@ -57,9 +57,8 @@ class _StudentsScreenState extends State<StudentsScreen> {
       child: Column(
         children: [
           _buildHeader(context),
-          _buildSearchBar(),
-          _buildAddButton(),
-          const SizedBox(height: 16),
+          _buildSearchAndActionRow(context),
+          const SizedBox(height: 8),
           Expanded(child: _buildStudentList()),
         ],
       ),
@@ -68,7 +67,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
 
   Widget _buildHeader(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24.0),
+      padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 8.0),
       child: Row(
         children: [
           Expanded(
@@ -77,15 +76,16 @@ class _StudentsScreenState extends State<StudentsScreen> {
               children: [
                 Text(
                   'Gestión de Estudiantes',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w900,
                         fontFamily: 'Outfit',
+                        color: AppTheme.slate900,
                       ),
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 2),
                 Text(
-                  'Crea, edita y administra tu lista de estudiantes',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey.shade500),
+                  'Administra la lista de estudiantes registrados',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.grey.shade500),
                 ),
               ],
             ),
@@ -95,46 +95,57 @@ class _StudentsScreenState extends State<StudentsScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildSearchAndActionRow(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: TextField(
-        onChanged: (value) {
-          setState(() {
-            _searchQuery = value;
-          });
-        },
-        decoration: InputDecoration(
-          hintText: 'Buscar por nombre, código o carrera',
-          prefixIcon: const Icon(LucideIcons.search),
-          filled: true,
-          fillColor: Colors.grey.shade100,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 4.0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              onChanged: (value) {
+                setState(() {
+                  _searchQuery = value;
+                });
+              },
+              decoration: InputDecoration(
+                hintText: 'Buscar estudiante...',
+                hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
+                prefixIcon: Icon(LucideIcons.search, color: Colors.grey.shade500, size: 18),
+                filled: true,
+                fillColor: Colors.grey.shade50,
+                contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade200),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5),
+                ),
+              ),
+            ),
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddButton() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton.icon(
-          onPressed: _showAddStudentDialog,
-          icon: const Icon(LucideIcons.plus, size: 20),
-          label: const Text('Agregar Estudiante'),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.academic600,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 4,
+          const SizedBox(width: 12),
+          ElevatedButton.icon(
+            onPressed: _showAddStudentDialog,
+            icon: const Icon(LucideIcons.userPlus, size: 16),
+            label: const Text(
+              'Agregar',
+              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.academic600,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

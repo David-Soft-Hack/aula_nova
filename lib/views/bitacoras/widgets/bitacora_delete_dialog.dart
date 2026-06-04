@@ -27,8 +27,12 @@ Future<void> confirmDeleteBitacora(
         ],
       ),
       content: const Text(
-        'Esta acción eliminará la bitácora y todas sus sesiones asociadas. No se puede deshacer.',
+        'Esta acción eliminará la bitácora y todas sus sesiones asociadas.\n\n'
+        'Los estudiantes activos del grupo de clase pasarán a estado '
+        'Suspendido (o Finalizado si el calendario estaba completo).\n\n'
+        'Esta acción no se puede deshacer.',
       ),
+
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(c, false),
