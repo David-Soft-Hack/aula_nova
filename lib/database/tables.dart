@@ -69,6 +69,7 @@ class Bitacoras extends Table {
   
   IntColumn get tipoCarrera => intEnum<TipoCarrera>()();
   IntColumn get estado => intEnum<EstadoBitacora>()();
+  TextColumn get turno => text().nullable()();
 
   // Foreign Key to Modules
   TextColumn get idModule => text().references(Modules, #codModule)();

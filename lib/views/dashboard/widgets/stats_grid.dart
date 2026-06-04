@@ -3,8 +3,17 @@ import 'package:lucide_icons/lucide_icons.dart';
 
 /// Cuadrícula de estadísticas dinámicas del Dashboard.
 class StatsGrid extends StatelessWidget {
+  final int totalModules;
+  final int totalBitacoras;
+  final int totalStudents;
+  final int totalHours;
+
   const StatsGrid({
     super.key,
+    required this.totalModules,
+    required this.totalBitacoras,
+    required this.totalStudents,
+    required this.totalHours,
   });
 
   @override
@@ -16,31 +25,31 @@ class StatsGrid extends StatelessWidget {
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
       childAspectRatio: 0.88,
-      children: const [
+      children: [
         StatCard(
           title: 'Módulos',
-          value: '12',
+          value: totalModules.toString(),
           icon: LucideIcons.bookOpen,
           color: Colors.blue,
           trend: 'Activos',
         ),
         StatCard(
           title: 'Bitácoras',
-          value: '8',
+          value: totalBitacoras.toString(),
           icon: LucideIcons.fileText,
           color: Colors.green,
-          trend: 'Configuradas',
+          trend: 'Activas',
         ),
         StatCard(
           title: 'Estudiantes',
-          value: '124',
+          value: totalStudents.toString(),
           icon: LucideIcons.users,
           color: Colors.indigo,
-          trend: '+12 este mes',
+          trend: 'Activos',
         ),
         StatCard(
           title: 'Horas Totales',
-          value: '340',
+          value: totalHours.toString(),
           icon: LucideIcons.clock,
           color: Colors.amber,
           trend: 'Académicas',

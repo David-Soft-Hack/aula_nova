@@ -288,10 +288,77 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);
 
+  Stream<List<TodaySessionData>> watchTodaySessions() {
+    autoCompletePastSessions();
+    final todayStart = DateTime.now();
+    final todayEnd = DateTime(todayStart.year, todayStart.month, todayStart.day, 23, 59, 59);
+
+    final query = select(calendarioBitacoras).join([
+      innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
+      innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
+    ])
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(todayStart, todayEnd) & calendarioBitacoras.estadoImpartido.equals(false));
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final bitacora = row.readTable(bitacoras);
+        return TodaySessionData(
+          entry: row.readTable(calendarioBitacoras),
+          moduleName: row.readTable(modules).nombre,
+          groupCode: bitacora.codigoGrupo,
+          career: bitacora.carrera,
+          turno: bitacora.turno,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<TodaySessionData>> watchUpcomingSessions({int days = 7}) {
+    autoCompletePastSessions();
+    final today = DateTime.now();
+    final start = DateTime(today.year, today.month, today.day, 0, 0, 0).add(const Duration(days: 1));
+    final end = DateTime(today.year, today.month, today.day, 23, 59, 59).add(Duration(days: days));
+
+    final query = select(calendarioBitacoras).join([
+      innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
+      innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
+    ])
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(start, end) & calendarioBitacoras.estadoImpartido.equals(false))
+      ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final bitacora = row.readTable(bitacoras);
+        return TodaySessionData(
+          entry: row.readTable(calendarioBitacoras),
+          moduleName: row.readTable(modules).nombre,
+          groupCode: bitacora.codigoGrupo,
+          career: bitacora.carrera,
+          turno: bitacora.turno,
+        );
+      }).toList();
+    });
+  }
 }
 
 class BitacoraWithModule {
   final Bitacora bitacora;
   final Module module;
   BitacoraWithModule({required this.bitacora, required this.module});
+}
+
+class TodaySessionData {
+  final CalendarioBitacora entry;
+  final String moduleName;
+  final String? groupCode;
+  final String career;
+  final String? turno;
+
+  TodaySessionData({
+    required this.entry,
+    required this.moduleName,
+    required this.groupCode,
+    required this.career,
+    required this.turno,
+  });
 }

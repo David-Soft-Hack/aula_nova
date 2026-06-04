@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import '../../controllers/dashboard_controller.dart';
+import '../../database/daos.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/stats_grid.dart';
 import 'widgets/active_sessions.dart';
@@ -15,6 +17,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  final DashboardController _controller = DashboardController();
+
   @override
   void initState() {
     super.initState();
@@ -37,22 +41,62 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header modularizado
               DashboardHeader(dateStr: dateStr),
               const SizedBox(height: 32),
 
-              // Stats Grid modularizado
-              const StatsGrid(),
+              // Stats Grid con streams
+              StreamBuilder<int>(
+                stream: _controller.totalModules,
+                initialData: 0,
+                builder: (context, modules) {
+                  return StreamBuilder<int>(
+                    stream: _controller.activeBitacoras,
+                    initialData: 0,
+                    builder: (context, bitacoras) {
+                      return StreamBuilder<int>(
+                        stream: _controller.activeStudents,
+                        initialData: 0,
+                        builder: (context, students) {
+                          return StreamBuilder<int>(
+                            stream: _controller.totalHours,
+                            initialData: 0,
+                            builder: (context, hours) {
+                              return StatsGrid(
+                                totalModules: modules.data ?? 0,
+                                totalBitacoras: bitacoras.data ?? 0,
+                                totalStudents: students.data ?? 0,
+                                totalHours: hours.data ?? 0,
+                              );
+                            },
+                          );
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
               const SizedBox(height: 32),
 
-              // Contenido principal (Sesiones activas y Agenda lateral)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const ActiveSessions(),
-                  const SizedBox(height: 32),
-                  const AgendaSidebar(),
-                ],
+              // Sesiones de hoy y Agenda
+              StreamBuilder<List<TodaySessionData>>(
+                stream: _controller.todaySessions,
+                initialData: const [],
+                builder: (context, today) {
+                  return StreamBuilder<List<TodaySessionData>>(
+                    stream: _controller.upcomingSessions,
+                    initialData: const [],
+                    builder: (context, upcoming) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ActiveSessions(sessions: today.data ?? []),
+                          const SizedBox(height: 32),
+                          AgendaSidebar(upcoming: upcoming.data ?? []),
+                        ],
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),

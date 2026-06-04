@@ -1716,6 +1716,15 @@ class $BitacorasTable extends Bitacoras
         type: DriftSqlType.int,
         requiredDuringInsert: true,
       ).withConverter<EstadoBitacora>($BitacorasTable.$converterestado);
+  static const VerificationMeta _turnoMeta = const VerificationMeta('turno');
+  @override
+  late final GeneratedColumn<String> turno = GeneratedColumn<String>(
+    'turno',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _idModuleMeta = const VerificationMeta(
     'idModule',
   );
@@ -1743,6 +1752,7 @@ class $BitacorasTable extends Bitacoras
     carrera,
     tipoCarrera,
     estado,
+    turno,
     idModule,
   ];
   @override
@@ -1814,6 +1824,12 @@ class $BitacorasTable extends Bitacoras
     } else if (isInserting) {
       context.missing(_carreraMeta);
     }
+    if (data.containsKey('turno')) {
+      context.handle(
+        _turnoMeta,
+        turno.isAcceptableOrUnknown(data['turno']!, _turnoMeta),
+      );
+    }
     if (data.containsKey('id_module')) {
       context.handle(
         _idModuleMeta,
@@ -1883,6 +1899,10 @@ class $BitacorasTable extends Bitacoras
           data['${effectivePrefix}estado'],
         )!,
       ),
+      turno: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}turno'],
+      ),
       idModule: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}id_module'],
@@ -1917,6 +1937,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
   final String carrera;
   final TipoCarrera tipoCarrera;
   final EstadoBitacora estado;
+  final String? turno;
   final String idModule;
   const Bitacora({
     required this.id,
@@ -1930,6 +1951,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
     required this.carrera,
     required this.tipoCarrera,
     required this.estado,
+    this.turno,
     required this.idModule,
   });
   @override
@@ -1966,6 +1988,9 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
         $BitacorasTable.$converterestado.toSql(estado),
       );
     }
+    if (!nullToAbsent || turno != null) {
+      map['turno'] = Variable<String>(turno);
+    }
     map['id_module'] = Variable<String>(idModule);
     return map;
   }
@@ -1987,6 +2012,9 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
       carrera: Value(carrera),
       tipoCarrera: Value(tipoCarrera),
       estado: Value(estado),
+      turno: turno == null && nullToAbsent
+          ? const Value.absent()
+          : Value(turno),
       idModule: Value(idModule),
     );
   }
@@ -2012,6 +2040,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
       estado: $BitacorasTable.$converterestado.fromJson(
         serializer.fromJson<int>(json['estado']),
       ),
+      turno: serializer.fromJson<String?>(json['turno']),
       idModule: serializer.fromJson<String>(json['idModule']),
     );
   }
@@ -2034,6 +2063,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
       'estado': serializer.toJson<int>(
         $BitacorasTable.$converterestado.toJson(estado),
       ),
+      'turno': serializer.toJson<String?>(turno),
       'idModule': serializer.toJson<String>(idModule),
     };
   }
@@ -2050,6 +2080,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
     String? carrera,
     TipoCarrera? tipoCarrera,
     EstadoBitacora? estado,
+    Value<String?> turno = const Value.absent(),
     String? idModule,
   }) => Bitacora(
     id: id ?? this.id,
@@ -2063,6 +2094,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
     carrera: carrera ?? this.carrera,
     tipoCarrera: tipoCarrera ?? this.tipoCarrera,
     estado: estado ?? this.estado,
+    turno: turno.present ? turno.value : this.turno,
     idModule: idModule ?? this.idModule,
   );
   Bitacora copyWithCompanion(BitacorasCompanion data) {
@@ -2092,6 +2124,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
           ? data.tipoCarrera.value
           : this.tipoCarrera,
       estado: data.estado.present ? data.estado.value : this.estado,
+      turno: data.turno.present ? data.turno.value : this.turno,
       idModule: data.idModule.present ? data.idModule.value : this.idModule,
     );
   }
@@ -2110,6 +2143,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
           ..write('carrera: $carrera, ')
           ..write('tipoCarrera: $tipoCarrera, ')
           ..write('estado: $estado, ')
+          ..write('turno: $turno, ')
           ..write('idModule: $idModule')
           ..write(')'))
         .toString();
@@ -2128,6 +2162,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
     carrera,
     tipoCarrera,
     estado,
+    turno,
     idModule,
   );
   @override
@@ -2145,6 +2180,7 @@ class Bitacora extends DataClass implements Insertable<Bitacora> {
           other.carrera == this.carrera &&
           other.tipoCarrera == this.tipoCarrera &&
           other.estado == this.estado &&
+          other.turno == this.turno &&
           other.idModule == this.idModule);
 }
 
@@ -2160,6 +2196,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
   final Value<String> carrera;
   final Value<TipoCarrera> tipoCarrera;
   final Value<EstadoBitacora> estado;
+  final Value<String?> turno;
   final Value<String> idModule;
   const BitacorasCompanion({
     this.id = const Value.absent(),
@@ -2173,6 +2210,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
     this.carrera = const Value.absent(),
     this.tipoCarrera = const Value.absent(),
     this.estado = const Value.absent(),
+    this.turno = const Value.absent(),
     this.idModule = const Value.absent(),
   });
   BitacorasCompanion.insert({
@@ -2187,6 +2225,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
     required String carrera,
     required TipoCarrera tipoCarrera,
     required EstadoBitacora estado,
+    this.turno = const Value.absent(),
     required String idModule,
   }) : frecuenciaClase = Value(frecuenciaClase),
        fechaInicio = Value(fechaInicio),
@@ -2208,6 +2247,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
     Expression<String>? carrera,
     Expression<int>? tipoCarrera,
     Expression<int>? estado,
+    Expression<String>? turno,
     Expression<String>? idModule,
   }) {
     return RawValuesInsertable({
@@ -2222,6 +2262,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
       if (carrera != null) 'carrera': carrera,
       if (tipoCarrera != null) 'tipo_carrera': tipoCarrera,
       if (estado != null) 'estado': estado,
+      if (turno != null) 'turno': turno,
       if (idModule != null) 'id_module': idModule,
     });
   }
@@ -2238,6 +2279,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
     Value<String>? carrera,
     Value<TipoCarrera>? tipoCarrera,
     Value<EstadoBitacora>? estado,
+    Value<String?>? turno,
     Value<String>? idModule,
   }) {
     return BitacorasCompanion(
@@ -2252,6 +2294,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
       carrera: carrera ?? this.carrera,
       tipoCarrera: tipoCarrera ?? this.tipoCarrera,
       estado: estado ?? this.estado,
+      turno: turno ?? this.turno,
       idModule: idModule ?? this.idModule,
     );
   }
@@ -2300,6 +2343,9 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
         $BitacorasTable.$converterestado.toSql(estado.value),
       );
     }
+    if (turno.present) {
+      map['turno'] = Variable<String>(turno.value);
+    }
     if (idModule.present) {
       map['id_module'] = Variable<String>(idModule.value);
     }
@@ -2320,6 +2366,7 @@ class BitacorasCompanion extends UpdateCompanion<Bitacora> {
           ..write('carrera: $carrera, ')
           ..write('tipoCarrera: $tipoCarrera, ')
           ..write('estado: $estado, ')
+          ..write('turno: $turno, ')
           ..write('idModule: $idModule')
           ..write(')'))
         .toString();
@@ -5018,6 +5065,7 @@ typedef $$BitacorasTableCreateCompanionBuilder =
       required String carrera,
       required TipoCarrera tipoCarrera,
       required EstadoBitacora estado,
+      Value<String?> turno,
       required String idModule,
     });
 typedef $$BitacorasTableUpdateCompanionBuilder =
@@ -5033,6 +5081,7 @@ typedef $$BitacorasTableUpdateCompanionBuilder =
       Value<String> carrera,
       Value<TipoCarrera> tipoCarrera,
       Value<EstadoBitacora> estado,
+      Value<String?> turno,
       Value<String> idModule,
     });
 
@@ -5155,6 +5204,11 @@ class $$BitacorasTableFilterComposer
     builder: (column) => ColumnWithTypeConverterFilters(column),
   );
 
+  ColumnFilters<String> get turno => $composableBuilder(
+    column: $table.turno,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$ModulesTableFilterComposer get idModule {
     final $$ModulesTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -5268,6 +5322,11 @@ class $$BitacorasTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get turno => $composableBuilder(
+    column: $table.turno,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$ModulesTableOrderingComposer get idModule {
     final $$ModulesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -5349,6 +5408,9 @@ class $$BitacorasTableAnnotationComposer
 
   GeneratedColumnWithTypeConverter<EstadoBitacora, int> get estado =>
       $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get turno =>
+      $composableBuilder(column: $table.turno, builder: (column) => column);
 
   $$ModulesTableAnnotationComposer get idModule {
     final $$ModulesTableAnnotationComposer composer = $composerBuilder(
@@ -5439,6 +5501,7 @@ class $$BitacorasTableTableManager
                 Value<String> carrera = const Value.absent(),
                 Value<TipoCarrera> tipoCarrera = const Value.absent(),
                 Value<EstadoBitacora> estado = const Value.absent(),
+                Value<String?> turno = const Value.absent(),
                 Value<String> idModule = const Value.absent(),
               }) => BitacorasCompanion(
                 id: id,
@@ -5452,6 +5515,7 @@ class $$BitacorasTableTableManager
                 carrera: carrera,
                 tipoCarrera: tipoCarrera,
                 estado: estado,
+                turno: turno,
                 idModule: idModule,
               ),
           createCompanionCallback:
@@ -5467,6 +5531,7 @@ class $$BitacorasTableTableManager
                 required String carrera,
                 required TipoCarrera tipoCarrera,
                 required EstadoBitacora estado,
+                Value<String?> turno = const Value.absent(),
                 required String idModule,
               }) => BitacorasCompanion.insert(
                 id: id,
@@ -5480,6 +5545,7 @@ class $$BitacorasTableTableManager
                 carrera: carrera,
                 tipoCarrera: tipoCarrera,
                 estado: estado,
+                turno: turno,
                 idModule: idModule,
               ),
           withReferenceMapper: (p0) => p0

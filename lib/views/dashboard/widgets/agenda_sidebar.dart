@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
+import '../../../database/daos.dart';
 
 /// Barra lateral de la agenda académica con eventos programados.
 class AgendaSidebar extends StatelessWidget {
-  const AgendaSidebar({super.key});
+  final List<TodaySessionData> upcoming;
+
+  const AgendaSidebar({
+    super.key,
+    required this.upcoming,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,29 +33,36 @@ class AgendaSidebar extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 24),
-          const AgendaItem(
-            day: '15',
-            month: 'MAY',
-            title: 'Programación Web',
-            career: 'Ing. Sistemas',
-            shift: 'Mañana',
-          ),
-          const SizedBox(height: 12),
-          const AgendaItem(
-            day: '16',
-            month: 'MAY',
-            title: 'Bases de Datos II',
-            career: 'Ing. Sistemas',
-            shift: 'Tarde',
-          ),
-          const SizedBox(height: 12),
-          const AgendaItem(
-            day: '17',
-            month: 'MAY',
-            title: 'Estructura de Datos',
-            career: 'Ing. Sistemas',
-            shift: 'Noche',
-          ),
+          if (upcoming.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: AppTheme.academic50.withValues(alpha: 0.5),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Center(
+                child: Text(
+                  'No hay sesiones próximas',
+                  style: TextStyle(color: Colors.grey.shade500),
+                ),
+              ),
+            )
+          else
+            ...upcoming.take(5).map((s) {
+              final date = s.entry.fechaProgramada;
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: AgendaItem(
+                  day: date != null ? date.day.toString() : '--',
+                  month: date != null
+                      ? DateFormat('MMM', 'es').format(date).toUpperCase()
+                      : '---',
+                  title: s.moduleName,
+                  career: s.career,
+                  shift: s.turno ?? 'Mañana',
+                ),
+              );
+            }),
           const SizedBox(height: 24),
           SizedBox(
             width: double.infinity,
