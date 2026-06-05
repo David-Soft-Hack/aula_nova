@@ -184,6 +184,14 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
           estado: const Value(EstadoBitacora.finalizado),
           fechaFinal: Value(now),
         ));
+
+        // Transition active students in the group to 'finalizado'
+        if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
+          await _updateActiveStudentsForGroup(
+            bitacora.codigoGrupo!,
+            StudentStatus.finalizado,
+          );
+        }
       }
     }
   }
@@ -225,10 +233,47 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
 
   // Delete a bitacora and its associated calendar entries
   Future<void> deleteBitacora(int idBitacora) async {
-    // First delete related calendar entries
+    // 1. Obtain the bitacora to read its group code
+    final bitacora = await (select(bitacoras)
+          ..where((t) => t.id.equals(idBitacora)))
+        .getSingleOrNull();
+
+    if (bitacora != null &&
+        bitacora.codigoGrupo != null &&
+        bitacora.codigoGrupo!.isNotEmpty) {
+      // 2. Determine if the calendar was fully completed
+      final sessions = await getCalendarioForBitacora(idBitacora);
+      final allCompleted =
+          sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido);
+
+      // 3. Transition only ACTIVE students:
+      //    - Calendar finished → finalizado
+      //    - Calendar not finished → suspendido
+      //    - Desertado students are never modified
+      final newStatus =
+          allCompleted ? StudentStatus.finalizado : StudentStatus.suspendido;
+      await _updateActiveStudentsForGroup(bitacora.codigoGrupo!, newStatus);
+    }
+
+    // 4. Delete calendar entries then the bitacora
     await deleteCalendarioForBitacora(idBitacora);
-    // Then delete the bitacora record itself
     await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
+  }
+
+  /// Transitions only [StudentStatus.activo] students in [grupo] to [newStatus].
+  /// Students with any other status (inactivo, graduado, suspendido,
+  /// finalizado, desertado) are NOT modified.
+  Future<void> _updateActiveStudentsForGroup(
+    String grupo,
+    StudentStatus newStatus,
+  ) async {
+    await (db.update(db.students)
+          ..where(
+            (s) =>
+                s.grupo.equals(grupo) &
+                s.estado.equals(StudentStatus.activo.index),
+          ))
+        .write(StudentsCompanion(estado: Value(newStatus)));
   }
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);

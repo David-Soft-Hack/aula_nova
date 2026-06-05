@@ -13,6 +13,12 @@ extension StudentHelpers on Student {
         return 'Inactivo';
       case StudentStatus.graduado:
         return 'Graduado';
+      case StudentStatus.suspendido:
+        return 'Suspendido';
+      case StudentStatus.finalizado:
+        return 'Finalizado';
+      case StudentStatus.desertado:
+        return 'Desertado';
     }
   }
 }
