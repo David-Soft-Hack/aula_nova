@@ -13,6 +13,8 @@ abstract class IModuleRepository {
 
   // Units
   Future<List<Unit>> getUnitsByModule(String idModule);
+  Future<Unit?> getUnitByCod(String codUnit);
+  Stream<Unit?> watchUnitByCod(String codUnit);
   Future<void> insertUnit(Insertable<Unit> unit);
   Future<void> updateUnit(Insertable<Unit> unit);
   Future<void> deleteUnit(Insertable<Unit> unit);
@@ -20,6 +22,8 @@ abstract class IModuleRepository {
 
   // Activities
   Future<List<Activity>> getActivitiesByUnit(String idUnit);
+  Future<Activity?> getActivityByCod(String codActivity);
+  Stream<Activity?> watchActivityByCod(String codActivity);
   Future<void> insertActivity(Insertable<Activity> activity);
   Future<void> updateActivity(Insertable<Activity> activity);
   Future<void> deleteActivity(Insertable<Activity> activity);

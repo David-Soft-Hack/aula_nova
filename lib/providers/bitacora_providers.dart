@@ -47,3 +47,13 @@ final bitacorasWithModuleStreamProvider = StreamProvider<List<BitacoraWithModule
 final calendarioStreamProvider = StreamProvider.family<List<CalendarioBitacora>, int>((ref, idBitacora) {
   return ref.watch(bitacoraControllerProvider).watchCalendario(idBitacora);
 });
+
+final unitByCodProvider = StreamProvider.family<Unit?, String>((ref, codUnit) {
+  if (codUnit.isEmpty) return const Stream.empty();
+  return ref.watch(moduleRepositoryForBitacoraProvider).watchUnitByCod(codUnit);
+});
+
+final activityByCodProvider = StreamProvider.family<Activity?, String>((ref, codActivity) {
+  if (codActivity.isEmpty) return const Stream.empty();
+  return ref.watch(moduleRepositoryForBitacoraProvider).watchActivityByCod(codActivity);
+});

@@ -6,6 +6,7 @@ import '../interfaces/controllers/i_student_controller.dart';
 import 'database_providers.dart';
 import 'career_providers.dart';
 import 'class_group_providers.dart';
+import '../database/tables.dart';
 
 final studentRepositoryProvider = Provider<StudentRepository>((ref) {
   return StudentRepository(ref.watch(studentDaoProvider));
@@ -21,4 +22,11 @@ final studentControllerProvider = Provider<IStudentController>((ref) {
 
 final allStudentsStreamProvider = StreamProvider<List<Student>>((ref) {
   return ref.watch(studentControllerProvider).watchAllStudents();
+});
+
+final studentsByGroupProvider = FutureProvider.family<List<Student>, String>((ref, groupCode) async {
+  final students = await ref.watch(studentRepositoryProvider).searchStudents(groupCode);
+  return students
+      .where((s) => s.grupo?.toLowerCase() == groupCode.toLowerCase() && s.estado == StudentStatus.activo)
+      .toList();
 });

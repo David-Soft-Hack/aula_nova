@@ -1,7 +1,6 @@
 import 'package:aula_nova/database/daos.dart';
 import 'package:drift/drift.dart';
 import '../../database/app_database.dart';
-import '../../database/tables.dart';
 
 abstract class IBitacoraRepository {
   Future<int> createBitacora(Insertable<Bitacora> bitacora);

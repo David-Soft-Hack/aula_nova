@@ -105,6 +105,10 @@ class UnitDao extends DatabaseAccessor<AppDatabase> with _$UnitDaoMixin {
   Future<List<Unit>> getUnitsByModule(String idModule) => 
       (select(units)..where((t) => t.idModule.equals(idModule))).get();
   Future<List<Unit>> getAllUnits() => select(units).get();
+  Future<Unit?> getUnitByCod(String codUnit) => 
+      (select(units)..where((t) => t.codUnit.equals(codUnit))).getSingleOrNull();
+  Stream<Unit?> watchUnitByCod(String codUnit) => 
+      (select(units)..where((t) => t.codUnit.equals(codUnit))).watchSingleOrNull();
   Future insertUnit(Insertable<Unit> unit) => into(units).insert(unit);
   Future updateUnit(Insertable<Unit> unit) => update(units).replace(unit);
   Future deleteUnit(Insertable<Unit> unit) => delete(units).delete(unit);
@@ -124,6 +128,10 @@ class ActivityDao extends DatabaseAccessor<AppDatabase> with _$ActivityDaoMixin 
   Future<List<Activity>> getActivitiesByUnit(String idUnit) =>
       (select(activities)..where((t) => t.idUnit.equals(idUnit))).get();
   Future<List<Activity>> getAllActivities() => select(activities).get();
+  Future<Activity?> getActivityByCod(String codActivity) =>
+      (select(activities)..where((t) => t.codActivity.equals(codActivity))).getSingleOrNull();
+  Stream<Activity?> watchActivityByCod(String codActivity) =>
+      (select(activities)..where((t) => t.codActivity.equals(codActivity))).watchSingleOrNull();
   Future deleteActivitiesByUnit(String idUnit) =>
       (delete(activities)..where((t) => t.idUnit.equals(idUnit))).go();
 }
@@ -220,7 +228,7 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ])
-      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(todayStart, todayEnd) & calendarioBitacoras.estadoImpartido.equals(false));
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(todayStart, todayEnd) & calendarioBitacoras.estadoImpartido.equals(false) & bitacoras.estado.equals(EstadoBitacora.activo.index));
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -245,7 +253,29 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ])
-      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(start, end) & calendarioBitacoras.estadoImpartido.equals(false))
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(start, end) & calendarioBitacoras.estadoImpartido.equals(false) & bitacoras.estado.equals(EstadoBitacora.activo.index))
+      ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final bitacora = row.readTable(bitacoras);
+        return TodaySessionData(
+          entry: row.readTable(calendarioBitacoras),
+          moduleName: row.readTable(modules).nombre,
+          groupCode: bitacora.codigoGrupo,
+          career: bitacora.carrera,
+          turno: bitacora.turno,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<TodaySessionData>> watchAllSessions() {
+    final query = select(calendarioBitacoras).join([
+      innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
+      innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
+    ])
+      ..where(bitacoras.estado.equals(EstadoBitacora.activo.index))
       ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
 
     return query.watch().map((rows) {
@@ -303,5 +333,41 @@ class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMi
 
   Future<void> upsertAttendance(AttendancesCompanion record) {
     return into(attendances).insertOnConflictUpdate(record);
+  }
+
+  Future<void> updateAttendanceJustification({
+    required int sessionId,
+    required int studentId,
+    required String? detalle,
+    required List<String>? rutas,
+  }) async {
+    final existing = await (select(attendances)
+          ..where((t) => t.idSession.equals(sessionId) & t.idStudent.equals(studentId)))
+        .getSingleOrNull();
+
+    if (existing != null) {
+      await (update(attendances)
+            ..where((t) => t.idSession.equals(sessionId) & t.idStudent.equals(studentId)))
+          .write(AttendancesCompanion(
+            estado: const Value(EstadoAsistencia.justificado),
+            justificacionDetalle: Value(detalle),
+            rutasEvidencia: Value(rutas),
+            fechaJustificacion: Value(DateTime.now()),
+          ));
+    } else {
+      await into(attendances).insert(AttendancesCompanion.insert(
+        idSession: sessionId,
+        idStudent: studentId,
+        estado: EstadoAsistencia.justificado,
+        justificacionDetalle: Value(detalle),
+        rutasEvidencia: Value(rutas),
+        fechaJustificacion: Value(DateTime.now()),
+      ));
+    }
+  }
+
+  Future<void> markSessionAsImparted(int sessionId) async {
+    await (db.update(db.calendarioBitacoras)..where((t) => t.id.equals(sessionId)))
+        .write(const CalendarioBitacorasCompanion(estadoImpartido: Value(true)));
   }
 }

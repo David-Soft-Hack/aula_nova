@@ -131,6 +131,9 @@ class Attendances extends Table {
   IntColumn get idStudent => integer().references(Students, #id)();
   IntColumn get estado => intEnum<EstadoAsistencia>()();
   TextColumn get observacion => text().nullable()();
+  TextColumn get justificacionDetalle => text().nullable()();
+  TextColumn get rutasEvidencia => text().map(const ListConverter()).nullable()();
+  DateTimeColumn get fechaJustificacion => dateTime().nullable()();
   DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
 }
 

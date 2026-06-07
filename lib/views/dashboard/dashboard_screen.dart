@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../../database/daos.dart';
 import '../../providers/dashboard_providers.dart';
+import '../calendar/widgets/session_detail_dialog.dart';
 import 'widgets/dashboard_header.dart';
 import 'widgets/stats_grid.dart';
 import 'widgets/active_sessions.dart';
@@ -9,6 +11,13 @@ import 'widgets/agenda_sidebar.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
+
+  void _showSessionDetail(BuildContext context, TodaySessionData session) {
+    showDialog(
+      context: context,
+      builder: (_) => SessionDetailDialog(sessionData: session),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -29,7 +38,7 @@ class DashboardScreen extends ConsumerWidget {
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -44,7 +53,10 @@ class DashboardScreen extends ConsumerWidget {
               const SizedBox(height: 32),
               ActiveSessions(sessions: todaySessions.valueOrNull ?? []),
               const SizedBox(height: 32),
-              AgendaSidebar(upcoming: upcomingSessions.valueOrNull ?? []),
+              AgendaSidebar(
+                upcoming: upcomingSessions.valueOrNull ?? [],
+                onSessionTap: (s) => _showSessionDetail(context, s),
+              ),
             ],
           ),
         ),

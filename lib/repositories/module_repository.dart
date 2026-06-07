@@ -38,6 +38,12 @@ class ModuleRepository implements IModuleRepository {
   Future<List<Unit>> getUnitsByModule(String idModule) => _unitDao.getUnitsByModule(idModule);
 
   @override
+  Future<Unit?> getUnitByCod(String codUnit) => _unitDao.getUnitByCod(codUnit);
+
+  @override
+  Stream<Unit?> watchUnitByCod(String codUnit) => _unitDao.watchUnitByCod(codUnit);
+
+  @override
   Future<void> insertUnit(Insertable<Unit> unit) => _unitDao.insertUnit(unit);
 
   @override
@@ -51,6 +57,12 @@ class ModuleRepository implements IModuleRepository {
 
   @override
   Future<List<Activity>> getActivitiesByUnit(String idUnit) => _activityDao.getActivitiesByUnit(idUnit);
+
+  @override
+  Future<Activity?> getActivityByCod(String codActivity) => _activityDao.getActivityByCod(codActivity);
+
+  @override
+  Stream<Activity?> watchActivityByCod(String codActivity) => _activityDao.watchActivityByCod(codActivity);
 
   @override
   Future<void> insertActivity(Insertable<Activity> activity) => _activityDao.insertActivity(activity);

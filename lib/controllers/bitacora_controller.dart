@@ -234,4 +234,8 @@ class BitacoraController implements IBitacoraController {
   @override
   Future<void> updateCalendarioEntry(CalendarioBitacora entry) =>
       _bitacoraRepository.updateCalendarioEntry(entry);
+
+  @override
+  Stream<List<TodaySessionData>> watchAllSessions() =>
+      _bitacoraRepository.watchAllSessions();
 }

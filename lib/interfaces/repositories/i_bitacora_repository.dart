@@ -23,4 +23,5 @@ abstract class IBitacoraRepository {
   // Dashboard queries
   Stream<List<TodaySessionData>> watchTodaySessions();
   Stream<List<TodaySessionData>> watchUpcomingSessions({int days = 7});
+  Stream<List<TodaySessionData>> watchAllSessions();
 }

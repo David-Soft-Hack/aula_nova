@@ -15,4 +15,21 @@ class AttendanceRepository implements IAttendanceRepository {
 
   @override
   Future<void> upsertAttendance(AttendancesCompanion record) => _dao.upsertAttendance(record);
+
+  @override
+  Future<void> updateJustification({
+    required int sessionId,
+    required int studentId,
+    required String? detalle,
+    required List<String>? rutas,
+  }) =>
+      _dao.updateAttendanceJustification(
+        sessionId: sessionId,
+        studentId: studentId,
+        detalle: detalle,
+        rutas: rutas,
+      );
+
+  @override
+  Future<void> markSessionAsImparted(int sessionId) => _dao.markSessionAsImparted(sessionId);
 }

@@ -53,4 +53,5 @@ abstract class IBitacoraController {
   Future<List<CalendarioBitacora>> getCalendario(int idBitacora);
   Stream<List<CalendarioBitacora>> watchCalendario(int idBitacora);
   Future<void> updateCalendarioEntry(CalendarioBitacora entry);
+  Stream<List<TodaySessionData>> watchAllSessions();
 }

@@ -37,7 +37,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
@@ -65,6 +65,11 @@ class AppDatabase extends _$AppDatabase {
       }
       if (from < 9) {
         await m.create(attendances);
+      }
+      if (from < 10) {
+        await m.addColumn(attendances, attendances.justificacionDetalle);
+        await m.addColumn(attendances, attendances.rutasEvidencia);
+        await m.addColumn(attendances, attendances.fechaJustificacion);
       }
     },
     beforeOpen: (details) async {

@@ -52,4 +52,7 @@ class BitacoraRepository implements IBitacoraRepository {
 
   @override
   Stream<List<TodaySessionData>> watchUpcomingSessions({int days = 7}) => _dao.watchUpcomingSessions(days: days);
+
+  @override
+  Stream<List<TodaySessionData>> watchAllSessions() => _dao.watchAllSessions();
 }

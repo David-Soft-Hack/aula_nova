@@ -7,9 +7,15 @@ class AttendanceRecord {
   final Attendance? attendance;
   EstadoAsistencia? currentStatus;
   String? observacion;
+  String? justificacionDetalle;
+  List<String> rutasEvidencia;
+  DateTime? fechaJustificacion;
 
-  AttendanceRecord({required this.student, this.attendance}) {
+  AttendanceRecord({required this.student, this.attendance})
+      : rutasEvidencia = attendance?.rutasEvidencia ?? [] {
     currentStatus = attendance?.estado ?? EstadoAsistencia.presente;
     observacion = attendance?.observacion;
+    justificacionDetalle = attendance?.justificacionDetalle;
+    fechaJustificacion = attendance?.fechaJustificacion;
   }
 }

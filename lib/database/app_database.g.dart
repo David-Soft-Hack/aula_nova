@@ -4326,6 +4326,37 @@ class $AttendancesTable extends Attendances
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _justificacionDetalleMeta =
+      const VerificationMeta('justificacionDetalle');
+  @override
+  late final GeneratedColumn<String> justificacionDetalle =
+      GeneratedColumn<String>(
+        'justificacion_detalle',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+  rutasEvidencia = GeneratedColumn<String>(
+    'rutas_evidencia',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  ).withConverter<List<String>?>($AttendancesTable.$converterrutasEvidencian);
+  static const VerificationMeta _fechaJustificacionMeta =
+      const VerificationMeta('fechaJustificacion');
+  @override
+  late final GeneratedColumn<DateTime> fechaJustificacion =
+      GeneratedColumn<DateTime>(
+        'fecha_justificacion',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _fechaCreacionMeta = const VerificationMeta(
     'fechaCreacion',
   );
@@ -4346,6 +4377,9 @@ class $AttendancesTable extends Attendances
     idStudent,
     estado,
     observacion,
+    justificacionDetalle,
+    rutasEvidencia,
+    fechaJustificacion,
     fechaCreacion,
   ];
   @override
@@ -4385,6 +4419,24 @@ class $AttendancesTable extends Attendances
         observacion.isAcceptableOrUnknown(
           data['observacion']!,
           _observacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('justificacion_detalle')) {
+      context.handle(
+        _justificacionDetalleMeta,
+        justificacionDetalle.isAcceptableOrUnknown(
+          data['justificacion_detalle']!,
+          _justificacionDetalleMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_justificacion')) {
+      context.handle(
+        _fechaJustificacionMeta,
+        fechaJustificacion.isAcceptableOrUnknown(
+          data['fecha_justificacion']!,
+          _fechaJustificacionMeta,
         ),
       );
     }
@@ -4428,6 +4480,20 @@ class $AttendancesTable extends Attendances
         DriftSqlType.string,
         data['${effectivePrefix}observacion'],
       ),
+      justificacionDetalle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}justificacion_detalle'],
+      ),
+      rutasEvidencia: $AttendancesTable.$converterrutasEvidencian.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}rutas_evidencia'],
+        ),
+      ),
+      fechaJustificacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_justificacion'],
+      ),
       fechaCreacion: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}fecha_creacion'],
@@ -4442,6 +4508,10 @@ class $AttendancesTable extends Attendances
 
   static JsonTypeConverter2<EstadoAsistencia, int, int> $converterestado =
       const EnumIndexConverter<EstadoAsistencia>(EstadoAsistencia.values);
+  static TypeConverter<List<String>, String> $converterrutasEvidencia =
+      const ListConverter();
+  static TypeConverter<List<String>?, String?> $converterrutasEvidencian =
+      NullAwareTypeConverter.wrap($converterrutasEvidencia);
 }
 
 class Attendance extends DataClass implements Insertable<Attendance> {
@@ -4450,6 +4520,9 @@ class Attendance extends DataClass implements Insertable<Attendance> {
   final int idStudent;
   final EstadoAsistencia estado;
   final String? observacion;
+  final String? justificacionDetalle;
+  final List<String>? rutasEvidencia;
+  final DateTime? fechaJustificacion;
   final DateTime fechaCreacion;
   const Attendance({
     required this.id,
@@ -4457,6 +4530,9 @@ class Attendance extends DataClass implements Insertable<Attendance> {
     required this.idStudent,
     required this.estado,
     this.observacion,
+    this.justificacionDetalle,
+    this.rutasEvidencia,
+    this.fechaJustificacion,
     required this.fechaCreacion,
   });
   @override
@@ -4473,6 +4549,17 @@ class Attendance extends DataClass implements Insertable<Attendance> {
     if (!nullToAbsent || observacion != null) {
       map['observacion'] = Variable<String>(observacion);
     }
+    if (!nullToAbsent || justificacionDetalle != null) {
+      map['justificacion_detalle'] = Variable<String>(justificacionDetalle);
+    }
+    if (!nullToAbsent || rutasEvidencia != null) {
+      map['rutas_evidencia'] = Variable<String>(
+        $AttendancesTable.$converterrutasEvidencian.toSql(rutasEvidencia),
+      );
+    }
+    if (!nullToAbsent || fechaJustificacion != null) {
+      map['fecha_justificacion'] = Variable<DateTime>(fechaJustificacion);
+    }
     map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
     return map;
   }
@@ -4486,6 +4573,15 @@ class Attendance extends DataClass implements Insertable<Attendance> {
       observacion: observacion == null && nullToAbsent
           ? const Value.absent()
           : Value(observacion),
+      justificacionDetalle: justificacionDetalle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(justificacionDetalle),
+      rutasEvidencia: rutasEvidencia == null && nullToAbsent
+          ? const Value.absent()
+          : Value(rutasEvidencia),
+      fechaJustificacion: fechaJustificacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaJustificacion),
       fechaCreacion: Value(fechaCreacion),
     );
   }
@@ -4503,6 +4599,15 @@ class Attendance extends DataClass implements Insertable<Attendance> {
         serializer.fromJson<int>(json['estado']),
       ),
       observacion: serializer.fromJson<String?>(json['observacion']),
+      justificacionDetalle: serializer.fromJson<String?>(
+        json['justificacionDetalle'],
+      ),
+      rutasEvidencia: serializer.fromJson<List<String>?>(
+        json['rutasEvidencia'],
+      ),
+      fechaJustificacion: serializer.fromJson<DateTime?>(
+        json['fechaJustificacion'],
+      ),
       fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
     );
   }
@@ -4517,6 +4622,9 @@ class Attendance extends DataClass implements Insertable<Attendance> {
         $AttendancesTable.$converterestado.toJson(estado),
       ),
       'observacion': serializer.toJson<String?>(observacion),
+      'justificacionDetalle': serializer.toJson<String?>(justificacionDetalle),
+      'rutasEvidencia': serializer.toJson<List<String>?>(rutasEvidencia),
+      'fechaJustificacion': serializer.toJson<DateTime?>(fechaJustificacion),
       'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
     };
   }
@@ -4527,6 +4635,9 @@ class Attendance extends DataClass implements Insertable<Attendance> {
     int? idStudent,
     EstadoAsistencia? estado,
     Value<String?> observacion = const Value.absent(),
+    Value<String?> justificacionDetalle = const Value.absent(),
+    Value<List<String>?> rutasEvidencia = const Value.absent(),
+    Value<DateTime?> fechaJustificacion = const Value.absent(),
     DateTime? fechaCreacion,
   }) => Attendance(
     id: id ?? this.id,
@@ -4534,6 +4645,15 @@ class Attendance extends DataClass implements Insertable<Attendance> {
     idStudent: idStudent ?? this.idStudent,
     estado: estado ?? this.estado,
     observacion: observacion.present ? observacion.value : this.observacion,
+    justificacionDetalle: justificacionDetalle.present
+        ? justificacionDetalle.value
+        : this.justificacionDetalle,
+    rutasEvidencia: rutasEvidencia.present
+        ? rutasEvidencia.value
+        : this.rutasEvidencia,
+    fechaJustificacion: fechaJustificacion.present
+        ? fechaJustificacion.value
+        : this.fechaJustificacion,
     fechaCreacion: fechaCreacion ?? this.fechaCreacion,
   );
   Attendance copyWithCompanion(AttendancesCompanion data) {
@@ -4545,6 +4665,15 @@ class Attendance extends DataClass implements Insertable<Attendance> {
       observacion: data.observacion.present
           ? data.observacion.value
           : this.observacion,
+      justificacionDetalle: data.justificacionDetalle.present
+          ? data.justificacionDetalle.value
+          : this.justificacionDetalle,
+      rutasEvidencia: data.rutasEvidencia.present
+          ? data.rutasEvidencia.value
+          : this.rutasEvidencia,
+      fechaJustificacion: data.fechaJustificacion.present
+          ? data.fechaJustificacion.value
+          : this.fechaJustificacion,
       fechaCreacion: data.fechaCreacion.present
           ? data.fechaCreacion.value
           : this.fechaCreacion,
@@ -4559,14 +4688,26 @@ class Attendance extends DataClass implements Insertable<Attendance> {
           ..write('idStudent: $idStudent, ')
           ..write('estado: $estado, ')
           ..write('observacion: $observacion, ')
+          ..write('justificacionDetalle: $justificacionDetalle, ')
+          ..write('rutasEvidencia: $rutasEvidencia, ')
+          ..write('fechaJustificacion: $fechaJustificacion, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, idSession, idStudent, estado, observacion, fechaCreacion);
+  int get hashCode => Object.hash(
+    id,
+    idSession,
+    idStudent,
+    estado,
+    observacion,
+    justificacionDetalle,
+    rutasEvidencia,
+    fechaJustificacion,
+    fechaCreacion,
+  );
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -4576,6 +4717,9 @@ class Attendance extends DataClass implements Insertable<Attendance> {
           other.idStudent == this.idStudent &&
           other.estado == this.estado &&
           other.observacion == this.observacion &&
+          other.justificacionDetalle == this.justificacionDetalle &&
+          other.rutasEvidencia == this.rutasEvidencia &&
+          other.fechaJustificacion == this.fechaJustificacion &&
           other.fechaCreacion == this.fechaCreacion);
 }
 
@@ -4585,6 +4729,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
   final Value<int> idStudent;
   final Value<EstadoAsistencia> estado;
   final Value<String?> observacion;
+  final Value<String?> justificacionDetalle;
+  final Value<List<String>?> rutasEvidencia;
+  final Value<DateTime?> fechaJustificacion;
   final Value<DateTime> fechaCreacion;
   const AttendancesCompanion({
     this.id = const Value.absent(),
@@ -4592,6 +4739,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
     this.idStudent = const Value.absent(),
     this.estado = const Value.absent(),
     this.observacion = const Value.absent(),
+    this.justificacionDetalle = const Value.absent(),
+    this.rutasEvidencia = const Value.absent(),
+    this.fechaJustificacion = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   });
   AttendancesCompanion.insert({
@@ -4600,6 +4750,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
     required int idStudent,
     required EstadoAsistencia estado,
     this.observacion = const Value.absent(),
+    this.justificacionDetalle = const Value.absent(),
+    this.rutasEvidencia = const Value.absent(),
+    this.fechaJustificacion = const Value.absent(),
     this.fechaCreacion = const Value.absent(),
   }) : idSession = Value(idSession),
        idStudent = Value(idStudent),
@@ -4610,6 +4763,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
     Expression<int>? idStudent,
     Expression<int>? estado,
     Expression<String>? observacion,
+    Expression<String>? justificacionDetalle,
+    Expression<String>? rutasEvidencia,
+    Expression<DateTime>? fechaJustificacion,
     Expression<DateTime>? fechaCreacion,
   }) {
     return RawValuesInsertable({
@@ -4618,6 +4774,10 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
       if (idStudent != null) 'id_student': idStudent,
       if (estado != null) 'estado': estado,
       if (observacion != null) 'observacion': observacion,
+      if (justificacionDetalle != null)
+        'justificacion_detalle': justificacionDetalle,
+      if (rutasEvidencia != null) 'rutas_evidencia': rutasEvidencia,
+      if (fechaJustificacion != null) 'fecha_justificacion': fechaJustificacion,
       if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
     });
   }
@@ -4628,6 +4788,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
     Value<int>? idStudent,
     Value<EstadoAsistencia>? estado,
     Value<String?>? observacion,
+    Value<String?>? justificacionDetalle,
+    Value<List<String>?>? rutasEvidencia,
+    Value<DateTime?>? fechaJustificacion,
     Value<DateTime>? fechaCreacion,
   }) {
     return AttendancesCompanion(
@@ -4636,6 +4799,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
       idStudent: idStudent ?? this.idStudent,
       estado: estado ?? this.estado,
       observacion: observacion ?? this.observacion,
+      justificacionDetalle: justificacionDetalle ?? this.justificacionDetalle,
+      rutasEvidencia: rutasEvidencia ?? this.rutasEvidencia,
+      fechaJustificacion: fechaJustificacion ?? this.fechaJustificacion,
       fechaCreacion: fechaCreacion ?? this.fechaCreacion,
     );
   }
@@ -4660,6 +4826,19 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
     if (observacion.present) {
       map['observacion'] = Variable<String>(observacion.value);
     }
+    if (justificacionDetalle.present) {
+      map['justificacion_detalle'] = Variable<String>(
+        justificacionDetalle.value,
+      );
+    }
+    if (rutasEvidencia.present) {
+      map['rutas_evidencia'] = Variable<String>(
+        $AttendancesTable.$converterrutasEvidencian.toSql(rutasEvidencia.value),
+      );
+    }
+    if (fechaJustificacion.present) {
+      map['fecha_justificacion'] = Variable<DateTime>(fechaJustificacion.value);
+    }
     if (fechaCreacion.present) {
       map['fecha_creacion'] = Variable<DateTime>(fechaCreacion.value);
     }
@@ -4674,6 +4853,9 @@ class AttendancesCompanion extends UpdateCompanion<Attendance> {
           ..write('idStudent: $idStudent, ')
           ..write('estado: $estado, ')
           ..write('observacion: $observacion, ')
+          ..write('justificacionDetalle: $justificacionDetalle, ')
+          ..write('rutasEvidencia: $rutasEvidencia, ')
+          ..write('fechaJustificacion: $fechaJustificacion, ')
           ..write('fechaCreacion: $fechaCreacion')
           ..write(')'))
         .toString();
@@ -8098,6 +8280,9 @@ typedef $$AttendancesTableCreateCompanionBuilder =
       required int idStudent,
       required EstadoAsistencia estado,
       Value<String?> observacion,
+      Value<String?> justificacionDetalle,
+      Value<List<String>?> rutasEvidencia,
+      Value<DateTime?> fechaJustificacion,
       Value<DateTime> fechaCreacion,
     });
 typedef $$AttendancesTableUpdateCompanionBuilder =
@@ -8107,6 +8292,9 @@ typedef $$AttendancesTableUpdateCompanionBuilder =
       Value<int> idStudent,
       Value<EstadoAsistencia> estado,
       Value<String?> observacion,
+      Value<String?> justificacionDetalle,
+      Value<List<String>?> rutasEvidencia,
+      Value<DateTime?> fechaJustificacion,
       Value<DateTime> fechaCreacion,
     });
 
@@ -8178,6 +8366,22 @@ class $$AttendancesTableFilterComposer
 
   ColumnFilters<String> get observacion => $composableBuilder(
     column: $table.observacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get justificacionDetalle => $composableBuilder(
+    column: $table.justificacionDetalle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+  get rutasEvidencia => $composableBuilder(
+    column: $table.rutasEvidencia,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaJustificacion => $composableBuilder(
+    column: $table.fechaJustificacion,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8257,6 +8461,21 @@ class $$AttendancesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get justificacionDetalle => $composableBuilder(
+    column: $table.justificacionDetalle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get rutasEvidencia => $composableBuilder(
+    column: $table.rutasEvidencia,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaJustificacion => $composableBuilder(
+    column: $table.fechaJustificacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get fechaCreacion => $composableBuilder(
     column: $table.fechaCreacion,
     builder: (column) => ColumnOrderings(column),
@@ -8327,6 +8546,22 @@ class $$AttendancesTableAnnotationComposer
 
   GeneratedColumn<String> get observacion => $composableBuilder(
     column: $table.observacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get justificacionDetalle => $composableBuilder(
+    column: $table.justificacionDetalle,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get rutasEvidencia =>
+      $composableBuilder(
+        column: $table.rutasEvidencia,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get fechaJustificacion => $composableBuilder(
+    column: $table.fechaJustificacion,
     builder: (column) => column,
   );
 
@@ -8416,6 +8651,9 @@ class $$AttendancesTableTableManager
                 Value<int> idStudent = const Value.absent(),
                 Value<EstadoAsistencia> estado = const Value.absent(),
                 Value<String?> observacion = const Value.absent(),
+                Value<String?> justificacionDetalle = const Value.absent(),
+                Value<List<String>?> rutasEvidencia = const Value.absent(),
+                Value<DateTime?> fechaJustificacion = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
               }) => AttendancesCompanion(
                 id: id,
@@ -8423,6 +8661,9 @@ class $$AttendancesTableTableManager
                 idStudent: idStudent,
                 estado: estado,
                 observacion: observacion,
+                justificacionDetalle: justificacionDetalle,
+                rutasEvidencia: rutasEvidencia,
+                fechaJustificacion: fechaJustificacion,
                 fechaCreacion: fechaCreacion,
               ),
           createCompanionCallback:
@@ -8432,6 +8673,9 @@ class $$AttendancesTableTableManager
                 required int idStudent,
                 required EstadoAsistencia estado,
                 Value<String?> observacion = const Value.absent(),
+                Value<String?> justificacionDetalle = const Value.absent(),
+                Value<List<String>?> rutasEvidencia = const Value.absent(),
+                Value<DateTime?> fechaJustificacion = const Value.absent(),
                 Value<DateTime> fechaCreacion = const Value.absent(),
               }) => AttendancesCompanion.insert(
                 id: id,
@@ -8439,6 +8683,9 @@ class $$AttendancesTableTableManager
                 idStudent: idStudent,
                 estado: estado,
                 observacion: observacion,
+                justificacionDetalle: justificacionDetalle,
+                rutasEvidencia: rutasEvidencia,
+                fechaJustificacion: fechaJustificacion,
                 fechaCreacion: fechaCreacion,
               ),
           withReferenceMapper: (p0) => p0

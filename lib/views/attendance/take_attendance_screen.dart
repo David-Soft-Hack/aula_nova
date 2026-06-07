@@ -74,16 +74,42 @@ class _TakeAttendanceScreenState extends ConsumerState<TakeAttendanceScreen> {
     setState(() {
       for (var r in _records!) {
         r.currentStatus = status;
+        if (status != EstadoAsistencia.justificado) {
+          r.justificacionDetalle = null;
+          r.rutasEvidencia = [];
+          r.fechaJustificacion = null;
+        }
       }
     });
   }
 
+  Map<EstadoAsistencia, int> _getStats() {
+    final stats = {
+      EstadoAsistencia.presente: 0,
+      EstadoAsistencia.tardanza: 0,
+      EstadoAsistencia.ausente: 0,
+      EstadoAsistencia.justificado: 0,
+    };
+    if (_records != null) {
+      for (var r in _records!) {
+        final status = r.currentStatus ?? EstadoAsistencia.presente;
+        stats[status] = (stats[status] ?? 0) + 1;
+      }
+    }
+    return stats;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final stats = _getStats();
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
-        title: Text('Sesión ${widget.sessionNumber} - Grupo ${widget.groupCode}'),
+        title: Text(
+          'Sesión ${widget.sessionNumber} - Grupo ${widget.groupCode}',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Outfit'),
+        ),
         surfaceTintColor: Colors.transparent,
         backgroundColor: Colors.white,
         actions: [
@@ -103,6 +129,7 @@ class _TakeAttendanceScreenState extends ConsumerState<TakeAttendanceScreen> {
           : Column(
               children: [
                 SessionInfoHeader(moduleName: widget.moduleName, session: widget.session),
+                _buildStatsSummaryBanner(stats),
                 Expanded(
                   child: _records == null || _records!.isEmpty
                       ? const Center(child: Text('No hay estudiantes activos en este grupo.'))
@@ -118,6 +145,14 @@ class _TakeAttendanceScreenState extends ConsumerState<TakeAttendanceScreen> {
                                   _records![index].currentStatus = status;
                                 });
                               },
+                              onJustificationChanged: (detalle, evidencias) {
+                                setState(() {
+                                  _records![index].currentStatus = EstadoAsistencia.justificado;
+                                  _records![index].justificacionDetalle = detalle;
+                                  _records![index].rutasEvidencia = evidencias;
+                                  _records![index].fechaJustificacion = DateTime.now();
+                                });
+                              },
                             );
                           },
                         ),
@@ -128,6 +163,48 @@ class _TakeAttendanceScreenState extends ConsumerState<TakeAttendanceScreen> {
         isLoading: _isSaving,
         onPressed: _save,
       ),
+    );
+  }
+
+  Widget _buildStatsSummaryBanner(Map<EstadoAsistencia, int> stats) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatIndicator('P', stats[EstadoAsistencia.presente] ?? 0, Colors.green),
+          _buildStatIndicator('T', stats[EstadoAsistencia.tardanza] ?? 0, Colors.orange),
+          _buildStatIndicator('A', stats[EstadoAsistencia.ausente] ?? 0, Colors.red),
+          _buildStatIndicator('J', stats[EstadoAsistencia.justificado] ?? 0, Colors.blue),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatIndicator(String label, int count, Color color) {
+    return Row(
+      children: [
+        Container(
+          width: 28,
+          height: 28,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 13),
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          '$count',
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+      ],
     );
   }
 }

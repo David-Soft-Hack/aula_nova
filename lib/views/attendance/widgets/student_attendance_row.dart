@@ -4,19 +4,42 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/tables.dart';
 import '../../../models/app_models.dart';
 import 'attendance_status_colors.dart';
+import 'justification_dialog.dart';
 
 class StudentAttendanceRow extends StatelessWidget {
   final AttendanceRecord record;
   final ValueChanged<EstadoAsistencia> onStatusChanged;
+  final Function(String detalle, List<String> evidencias) onJustificationChanged;
 
   const StudentAttendanceRow({
     super.key,
     required this.record,
     required this.onStatusChanged,
+    required this.onJustificationChanged,
   });
+
+  Future<void> _handleJustification(BuildContext context) async {
+    final result = await showDialog<Map<String, dynamic>>(
+      context: context,
+      builder: (context) => JustificationDialog(
+        studentName: '${record.student.apellidos}, ${record.student.nombres}',
+        initialDetail: record.justificacionDetalle,
+        initialEvidencePaths: record.rutasEvidencia,
+      ),
+    );
+
+    if (result != null) {
+      onJustificationChanged(
+        result['detalle'] as String,
+        result['evidencias'] as List<String>,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final hasJustification = record.justificacionDetalle != null && record.justificacionDetalle!.isNotEmpty;
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: Column(
@@ -47,8 +70,42 @@ class StudentAttendanceRow extends StatelessWidget {
                   ],
                 ),
               ),
+              if (record.currentStatus == EstadoAsistencia.justificado)
+                IconButton(
+                  icon: const Icon(LucideIcons.edit3, color: AppTheme.academic600, size: 20),
+                  onPressed: () => _handleJustification(context),
+                  tooltip: 'Editar Justificación',
+                ),
             ],
           ),
+          if (record.currentStatus == EstadoAsistencia.justificado && hasJustification) ...[
+            const SizedBox(height: 8),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade100),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Justificación: ${record.justificacionDetalle}',
+                    style: TextStyle(color: Colors.blue.shade900, fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  if (record.rutasEvidencia.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      '${record.rutasEvidencia.length} archivo(s) de evidencia adjunto(s)',
+                      style: TextStyle(color: Colors.blue.shade800, fontSize: 11, fontStyle: FontStyle.italic),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -76,8 +133,13 @@ class StudentAttendanceRow extends StatelessWidget {
                 ),
               ],
               selected: {record.currentStatus ?? EstadoAsistencia.presente},
-              onSelectionChanged: (Set<EstadoAsistencia> newSelection) {
-                onStatusChanged(newSelection.first);
+              onSelectionChanged: (Set<EstadoAsistencia> newSelection) async {
+                final selected = newSelection.first;
+                if (selected == EstadoAsistencia.justificado) {
+                  await _handleJustification(context);
+                } else {
+                  onStatusChanged(selected);
+                }
               },
               style: ButtonStyle(
                 backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {

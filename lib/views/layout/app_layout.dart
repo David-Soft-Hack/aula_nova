@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../config/theme/app_theme.dart';
+import '../../providers/navigation_providers.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../modules/modules_screen.dart';
 import '../bitacoras/bitacoras_screen.dart';
+import '../calendar/calendar_screen.dart';
 import '../careers/careers_screen.dart';
 import '../students/students_screen.dart';
 import '../groups/groups_screen.dart';
@@ -18,11 +20,7 @@ final _kScreens = <Widget>[
   const DashboardScreen(),
   const ModulesScreen(),
   const BitacorasScreen(),
-  const _PlaceholderScreen(
-    icon: LucideIcons.calendar,
-    title: 'Calendario Académico',
-    subtitle: 'Seguimiento de fechas y evaluaciones',
-  ),
+  const CalendarScreen(),
   const StudentsScreen(),
   const AttendanceScreen(),
   const CareersScreen(),
@@ -30,18 +28,16 @@ final _kScreens = <Widget>[
 ];
 
 /// Layout principal móvil para la navegación inferior.
-class AppLayout extends StatefulWidget {
+class AppLayout extends ConsumerStatefulWidget {
   const AppLayout({super.key});
 
   @override
-  State<AppLayout> createState() => _AppLayoutState();
+  ConsumerState<AppLayout> createState() => _AppLayoutState();
 }
 
-class _AppLayoutState extends State<AppLayout> {
-  int _selectedIndex = 0;
-
+class _AppLayoutState extends ConsumerState<AppLayout> {
   void _navigateTo(int index) {
-    setState(() => _selectedIndex = index);
+    ref.read(appLayoutIndexProvider.notifier).state = index;
   }
 
   void _showSecondaryMenu() {
@@ -116,16 +112,17 @@ class _AppLayoutState extends State<AppLayout> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedIndex = ref.watch(appLayoutIndexProvider);
     return Scaffold(
       drawer: AppDrawer(
-        selectedIndex: _selectedIndex,
+        selectedIndex: selectedIndex,
         onItemSelected: _navigateTo,
         onSettings: () => _showSnack('Configuración - Próximamente'),
         onLogout: () => _showSnack('Sesión Cerrada'),
       ),
-      body: _kScreens[_selectedIndex],
+      body: _kScreens[selectedIndex],
       bottomNavigationBar: BottomNavBar(
-        selectedIndex: _selectedIndex >= 4 ? 4 : _selectedIndex,
+        selectedIndex: selectedIndex >= 4 ? 4 : selectedIndex,
         onTap: (index) {
           if (index == 4) {
             _showSecondaryMenu();
@@ -133,35 +130,6 @@ class _AppLayoutState extends State<AppLayout> {
             _navigateTo(index);
           }
         },
-      ),
-    );
-  }
-}
-
-/// Pantalla placeholder para secciones en construcción.
-class _PlaceholderScreen extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-
-  const _PlaceholderScreen({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: AppTheme.academic600),
-          const SizedBox(height: 16),
-          Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, fontFamily: 'Outfit')),
-          const SizedBox(height: 8),
-          Text(subtitle, style: const TextStyle(color: Colors.grey)),
-        ],
       ),
     );
   }
