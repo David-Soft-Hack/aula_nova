@@ -322,6 +322,577 @@ class CareersCompanion extends UpdateCompanion<Career> {
   }
 }
 
+class $ClassGroupsTable extends ClassGroups
+    with TableInfo<$ClassGroupsTable, ClassGroup> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ClassGroupsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _codigoMeta = const VerificationMeta('codigo');
+  @override
+  late final GeneratedColumn<String> codigo = GeneratedColumn<String>(
+    'codigo',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _carreraMeta = const VerificationMeta(
+    'carrera',
+  );
+  @override
+  late final GeneratedColumn<String> carrera = GeneratedColumn<String>(
+    'carrera',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES careers (nombre)',
+    ),
+  );
+  static const VerificationMeta _turnoMeta = const VerificationMeta('turno');
+  @override
+  late final GeneratedColumn<String> turno = GeneratedColumn<String>(
+    'turno',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _cicloMeta = const VerificationMeta('ciclo');
+  @override
+  late final GeneratedColumn<String> ciclo = GeneratedColumn<String>(
+    'ciclo',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<EstadoGrupo, int> estado =
+      GeneratedColumn<int>(
+        'estado',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+        defaultValue: const Constant(0),
+      ).withConverter<EstadoGrupo>($ClassGroupsTable.$converterestado);
+  static const VerificationMeta _fechaInicioMeta = const VerificationMeta(
+    'fechaInicio',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaInicio = GeneratedColumn<DateTime>(
+    'fecha_inicio',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaFinMeta = const VerificationMeta(
+    'fechaFin',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaFin = GeneratedColumn<DateTime>(
+    'fecha_fin',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaCreacionMeta = const VerificationMeta(
+    'fechaCreacion',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaCreacion =
+      GeneratedColumn<DateTime>(
+        'fecha_creacion',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    codigo,
+    carrera,
+    turno,
+    ciclo,
+    estado,
+    fechaInicio,
+    fechaFin,
+    fechaCreacion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'class_groups';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ClassGroup> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('codigo')) {
+      context.handle(
+        _codigoMeta,
+        codigo.isAcceptableOrUnknown(data['codigo']!, _codigoMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codigoMeta);
+    }
+    if (data.containsKey('carrera')) {
+      context.handle(
+        _carreraMeta,
+        carrera.isAcceptableOrUnknown(data['carrera']!, _carreraMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_carreraMeta);
+    }
+    if (data.containsKey('turno')) {
+      context.handle(
+        _turnoMeta,
+        turno.isAcceptableOrUnknown(data['turno']!, _turnoMeta),
+      );
+    }
+    if (data.containsKey('ciclo')) {
+      context.handle(
+        _cicloMeta,
+        ciclo.isAcceptableOrUnknown(data['ciclo']!, _cicloMeta),
+      );
+    }
+    if (data.containsKey('fecha_inicio')) {
+      context.handle(
+        _fechaInicioMeta,
+        fechaInicio.isAcceptableOrUnknown(
+          data['fecha_inicio']!,
+          _fechaInicioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_fin')) {
+      context.handle(
+        _fechaFinMeta,
+        fechaFin.isAcceptableOrUnknown(data['fecha_fin']!, _fechaFinMeta),
+      );
+    }
+    if (data.containsKey('fecha_creacion')) {
+      context.handle(
+        _fechaCreacionMeta,
+        fechaCreacion.isAcceptableOrUnknown(
+          data['fecha_creacion']!,
+          _fechaCreacionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ClassGroup map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ClassGroup(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      codigo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}codigo'],
+      )!,
+      carrera: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}carrera'],
+      )!,
+      turno: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}turno'],
+      ),
+      ciclo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ciclo'],
+      ),
+      estado: $ClassGroupsTable.$converterestado.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}estado'],
+        )!,
+      ),
+      fechaInicio: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_inicio'],
+      ),
+      fechaFin: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_fin'],
+      ),
+      fechaCreacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_creacion'],
+      ),
+    );
+  }
+
+  @override
+  $ClassGroupsTable createAlias(String alias) {
+    return $ClassGroupsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<EstadoGrupo, int, int> $converterestado =
+      const EnumIndexConverter<EstadoGrupo>(EstadoGrupo.values);
+}
+
+class ClassGroup extends DataClass implements Insertable<ClassGroup> {
+  final int id;
+  final String codigo;
+  final String carrera;
+  final String? turno;
+  final String? ciclo;
+  final EstadoGrupo estado;
+  final DateTime? fechaInicio;
+  final DateTime? fechaFin;
+  final DateTime? fechaCreacion;
+  const ClassGroup({
+    required this.id,
+    required this.codigo,
+    required this.carrera,
+    this.turno,
+    this.ciclo,
+    required this.estado,
+    this.fechaInicio,
+    this.fechaFin,
+    this.fechaCreacion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['codigo'] = Variable<String>(codigo);
+    map['carrera'] = Variable<String>(carrera);
+    if (!nullToAbsent || turno != null) {
+      map['turno'] = Variable<String>(turno);
+    }
+    if (!nullToAbsent || ciclo != null) {
+      map['ciclo'] = Variable<String>(ciclo);
+    }
+    {
+      map['estado'] = Variable<int>(
+        $ClassGroupsTable.$converterestado.toSql(estado),
+      );
+    }
+    if (!nullToAbsent || fechaInicio != null) {
+      map['fecha_inicio'] = Variable<DateTime>(fechaInicio);
+    }
+    if (!nullToAbsent || fechaFin != null) {
+      map['fecha_fin'] = Variable<DateTime>(fechaFin);
+    }
+    if (!nullToAbsent || fechaCreacion != null) {
+      map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
+    }
+    return map;
+  }
+
+  ClassGroupsCompanion toCompanion(bool nullToAbsent) {
+    return ClassGroupsCompanion(
+      id: Value(id),
+      codigo: Value(codigo),
+      carrera: Value(carrera),
+      turno: turno == null && nullToAbsent
+          ? const Value.absent()
+          : Value(turno),
+      ciclo: ciclo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ciclo),
+      estado: Value(estado),
+      fechaInicio: fechaInicio == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaInicio),
+      fechaFin: fechaFin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaFin),
+      fechaCreacion: fechaCreacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fechaCreacion),
+    );
+  }
+
+  factory ClassGroup.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ClassGroup(
+      id: serializer.fromJson<int>(json['id']),
+      codigo: serializer.fromJson<String>(json['codigo']),
+      carrera: serializer.fromJson<String>(json['carrera']),
+      turno: serializer.fromJson<String?>(json['turno']),
+      ciclo: serializer.fromJson<String?>(json['ciclo']),
+      estado: $ClassGroupsTable.$converterestado.fromJson(
+        serializer.fromJson<int>(json['estado']),
+      ),
+      fechaInicio: serializer.fromJson<DateTime?>(json['fechaInicio']),
+      fechaFin: serializer.fromJson<DateTime?>(json['fechaFin']),
+      fechaCreacion: serializer.fromJson<DateTime?>(json['fechaCreacion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'codigo': serializer.toJson<String>(codigo),
+      'carrera': serializer.toJson<String>(carrera),
+      'turno': serializer.toJson<String?>(turno),
+      'ciclo': serializer.toJson<String?>(ciclo),
+      'estado': serializer.toJson<int>(
+        $ClassGroupsTable.$converterestado.toJson(estado),
+      ),
+      'fechaInicio': serializer.toJson<DateTime?>(fechaInicio),
+      'fechaFin': serializer.toJson<DateTime?>(fechaFin),
+      'fechaCreacion': serializer.toJson<DateTime?>(fechaCreacion),
+    };
+  }
+
+  ClassGroup copyWith({
+    int? id,
+    String? codigo,
+    String? carrera,
+    Value<String?> turno = const Value.absent(),
+    Value<String?> ciclo = const Value.absent(),
+    EstadoGrupo? estado,
+    Value<DateTime?> fechaInicio = const Value.absent(),
+    Value<DateTime?> fechaFin = const Value.absent(),
+    Value<DateTime?> fechaCreacion = const Value.absent(),
+  }) => ClassGroup(
+    id: id ?? this.id,
+    codigo: codigo ?? this.codigo,
+    carrera: carrera ?? this.carrera,
+    turno: turno.present ? turno.value : this.turno,
+    ciclo: ciclo.present ? ciclo.value : this.ciclo,
+    estado: estado ?? this.estado,
+    fechaInicio: fechaInicio.present ? fechaInicio.value : this.fechaInicio,
+    fechaFin: fechaFin.present ? fechaFin.value : this.fechaFin,
+    fechaCreacion: fechaCreacion.present
+        ? fechaCreacion.value
+        : this.fechaCreacion,
+  );
+  ClassGroup copyWithCompanion(ClassGroupsCompanion data) {
+    return ClassGroup(
+      id: data.id.present ? data.id.value : this.id,
+      codigo: data.codigo.present ? data.codigo.value : this.codigo,
+      carrera: data.carrera.present ? data.carrera.value : this.carrera,
+      turno: data.turno.present ? data.turno.value : this.turno,
+      ciclo: data.ciclo.present ? data.ciclo.value : this.ciclo,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      fechaInicio: data.fechaInicio.present
+          ? data.fechaInicio.value
+          : this.fechaInicio,
+      fechaFin: data.fechaFin.present ? data.fechaFin.value : this.fechaFin,
+      fechaCreacion: data.fechaCreacion.present
+          ? data.fechaCreacion.value
+          : this.fechaCreacion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClassGroup(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('carrera: $carrera, ')
+          ..write('turno: $turno, ')
+          ..write('ciclo: $ciclo, ')
+          ..write('estado: $estado, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('fechaCreacion: $fechaCreacion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    codigo,
+    carrera,
+    turno,
+    ciclo,
+    estado,
+    fechaInicio,
+    fechaFin,
+    fechaCreacion,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ClassGroup &&
+          other.id == this.id &&
+          other.codigo == this.codigo &&
+          other.carrera == this.carrera &&
+          other.turno == this.turno &&
+          other.ciclo == this.ciclo &&
+          other.estado == this.estado &&
+          other.fechaInicio == this.fechaInicio &&
+          other.fechaFin == this.fechaFin &&
+          other.fechaCreacion == this.fechaCreacion);
+}
+
+class ClassGroupsCompanion extends UpdateCompanion<ClassGroup> {
+  final Value<int> id;
+  final Value<String> codigo;
+  final Value<String> carrera;
+  final Value<String?> turno;
+  final Value<String?> ciclo;
+  final Value<EstadoGrupo> estado;
+  final Value<DateTime?> fechaInicio;
+  final Value<DateTime?> fechaFin;
+  final Value<DateTime?> fechaCreacion;
+  const ClassGroupsCompanion({
+    this.id = const Value.absent(),
+    this.codigo = const Value.absent(),
+    this.carrera = const Value.absent(),
+    this.turno = const Value.absent(),
+    this.ciclo = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.fechaInicio = const Value.absent(),
+    this.fechaFin = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
+  });
+  ClassGroupsCompanion.insert({
+    this.id = const Value.absent(),
+    required String codigo,
+    required String carrera,
+    this.turno = const Value.absent(),
+    this.ciclo = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.fechaInicio = const Value.absent(),
+    this.fechaFin = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
+  }) : codigo = Value(codigo),
+       carrera = Value(carrera);
+  static Insertable<ClassGroup> custom({
+    Expression<int>? id,
+    Expression<String>? codigo,
+    Expression<String>? carrera,
+    Expression<String>? turno,
+    Expression<String>? ciclo,
+    Expression<int>? estado,
+    Expression<DateTime>? fechaInicio,
+    Expression<DateTime>? fechaFin,
+    Expression<DateTime>? fechaCreacion,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (codigo != null) 'codigo': codigo,
+      if (carrera != null) 'carrera': carrera,
+      if (turno != null) 'turno': turno,
+      if (ciclo != null) 'ciclo': ciclo,
+      if (estado != null) 'estado': estado,
+      if (fechaInicio != null) 'fecha_inicio': fechaInicio,
+      if (fechaFin != null) 'fecha_fin': fechaFin,
+      if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
+    });
+  }
+
+  ClassGroupsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? codigo,
+    Value<String>? carrera,
+    Value<String?>? turno,
+    Value<String?>? ciclo,
+    Value<EstadoGrupo>? estado,
+    Value<DateTime?>? fechaInicio,
+    Value<DateTime?>? fechaFin,
+    Value<DateTime?>? fechaCreacion,
+  }) {
+    return ClassGroupsCompanion(
+      id: id ?? this.id,
+      codigo: codigo ?? this.codigo,
+      carrera: carrera ?? this.carrera,
+      turno: turno ?? this.turno,
+      ciclo: ciclo ?? this.ciclo,
+      estado: estado ?? this.estado,
+      fechaInicio: fechaInicio ?? this.fechaInicio,
+      fechaFin: fechaFin ?? this.fechaFin,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (codigo.present) {
+      map['codigo'] = Variable<String>(codigo.value);
+    }
+    if (carrera.present) {
+      map['carrera'] = Variable<String>(carrera.value);
+    }
+    if (turno.present) {
+      map['turno'] = Variable<String>(turno.value);
+    }
+    if (ciclo.present) {
+      map['ciclo'] = Variable<String>(ciclo.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<int>(
+        $ClassGroupsTable.$converterestado.toSql(estado.value),
+      );
+    }
+    if (fechaInicio.present) {
+      map['fecha_inicio'] = Variable<DateTime>(fechaInicio.value);
+    }
+    if (fechaFin.present) {
+      map['fecha_fin'] = Variable<DateTime>(fechaFin.value);
+    }
+    if (fechaCreacion.present) {
+      map['fecha_creacion'] = Variable<DateTime>(fechaCreacion.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ClassGroupsCompanion(')
+          ..write('id: $id, ')
+          ..write('codigo: $codigo, ')
+          ..write('carrera: $carrera, ')
+          ..write('turno: $turno, ')
+          ..write('ciclo: $ciclo, ')
+          ..write('estado: $estado, ')
+          ..write('fechaInicio: $fechaInicio, ')
+          ..write('fechaFin: $fechaFin, ')
+          ..write('fechaCreacion: $fechaCreacion')
+          ..write(')'))
+        .toString();
+  }
+}
+
 class $ModulesTable extends Modules with TableInfo<$ModulesTable, Module> {
   @override
   final GeneratedDatabase attachedDatabase;
@@ -3692,6 +4263,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CareersTable careers = $CareersTable(this);
+  late final $ClassGroupsTable classGroups = $ClassGroupsTable(this);
   late final $ModulesTable modules = $ModulesTable(this);
   late final $UnitsTable units = $UnitsTable(this);
   late final $ActivitiesTable activities = $ActivitiesTable(this);
@@ -3700,6 +4272,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CalendarioBitacorasTable(this);
   late final $StudentsTable students = $StudentsTable(this);
   late final CareerDao careerDao = CareerDao(this as AppDatabase);
+  late final ClassGroupDao classGroupDao = ClassGroupDao(this as AppDatabase);
   late final ModuleDao moduleDao = ModuleDao(this as AppDatabase);
   late final UnitDao unitDao = UnitDao(this as AppDatabase);
   late final ActivityDao activityDao = ActivityDao(this as AppDatabase);
@@ -3711,6 +4284,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     careers,
+    classGroups,
     modules,
     units,
     activities,
@@ -3734,6 +4308,29 @@ typedef $$CareersTableUpdateCompanionBuilder =
       Value<TipoCarrera> tipoCarrera,
       Value<DateTime?> fechaCreacion,
     });
+
+final class $$CareersTableReferences
+    extends BaseReferences<_$AppDatabase, $CareersTable, Career> {
+  $$CareersTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$ClassGroupsTable, List<ClassGroup>>
+  _classGroupsRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.classGroups,
+    aliasName: $_aliasNameGenerator(db.careers.nombre, db.classGroups.carrera),
+  );
+
+  $$ClassGroupsTableProcessedTableManager get classGroupsRefs {
+    final manager = $$ClassGroupsTableTableManager($_db, $_db.classGroups)
+        .filter(
+          (f) => f.carrera.nombre.sqlEquals($_itemColumn<String>('nombre')!),
+        );
+
+    final cache = $_typedResult.readTableOrNull(_classGroupsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$CareersTableFilterComposer
     extends Composer<_$AppDatabase, $CareersTable> {
@@ -3764,6 +4361,31 @@ class $$CareersTableFilterComposer
     column: $table.fechaCreacion,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> classGroupsRefs(
+    Expression<bool> Function($$ClassGroupsTableFilterComposer f) f,
+  ) {
+    final $$ClassGroupsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.nombre,
+      referencedTable: $db.classGroups,
+      getReferencedColumn: (t) => t.carrera,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClassGroupsTableFilterComposer(
+            $db: $db,
+            $table: $db.classGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CareersTableOrderingComposer
@@ -3821,6 +4443,31 @@ class $$CareersTableAnnotationComposer
     column: $table.fechaCreacion,
     builder: (column) => column,
   );
+
+  Expression<T> classGroupsRefs<T extends Object>(
+    Expression<T> Function($$ClassGroupsTableAnnotationComposer a) f,
+  ) {
+    final $$ClassGroupsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.nombre,
+      referencedTable: $db.classGroups,
+      getReferencedColumn: (t) => t.carrera,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ClassGroupsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.classGroups,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CareersTableTableManager
@@ -3834,9 +4481,9 @@ class $$CareersTableTableManager
           $$CareersTableAnnotationComposer,
           $$CareersTableCreateCompanionBuilder,
           $$CareersTableUpdateCompanionBuilder,
-          (Career, BaseReferences<_$AppDatabase, $CareersTable, Career>),
+          (Career, $$CareersTableReferences),
           Career,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool classGroupsRefs})
         > {
   $$CareersTableTableManager(_$AppDatabase db, $CareersTable table)
     : super(
@@ -3874,9 +4521,44 @@ class $$CareersTableTableManager
                 fechaCreacion: fechaCreacion,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$CareersTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({classGroupsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (classGroupsRefs) db.classGroups],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (classGroupsRefs)
+                    await $_getPrefetchedData<
+                      Career,
+                      $CareersTable,
+                      ClassGroup
+                    >(
+                      currentTable: table,
+                      referencedTable: $$CareersTableReferences
+                          ._classGroupsRefsTable(db),
+                      managerFromTypedResult: (p0) => $$CareersTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).classGroupsRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where(
+                            (e) => e.carrera == item.nombre,
+                          ),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -3891,9 +4573,403 @@ typedef $$CareersTableProcessedTableManager =
       $$CareersTableAnnotationComposer,
       $$CareersTableCreateCompanionBuilder,
       $$CareersTableUpdateCompanionBuilder,
-      (Career, BaseReferences<_$AppDatabase, $CareersTable, Career>),
+      (Career, $$CareersTableReferences),
       Career,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool classGroupsRefs})
+    >;
+typedef $$ClassGroupsTableCreateCompanionBuilder =
+    ClassGroupsCompanion Function({
+      Value<int> id,
+      required String codigo,
+      required String carrera,
+      Value<String?> turno,
+      Value<String?> ciclo,
+      Value<EstadoGrupo> estado,
+      Value<DateTime?> fechaInicio,
+      Value<DateTime?> fechaFin,
+      Value<DateTime?> fechaCreacion,
+    });
+typedef $$ClassGroupsTableUpdateCompanionBuilder =
+    ClassGroupsCompanion Function({
+      Value<int> id,
+      Value<String> codigo,
+      Value<String> carrera,
+      Value<String?> turno,
+      Value<String?> ciclo,
+      Value<EstadoGrupo> estado,
+      Value<DateTime?> fechaInicio,
+      Value<DateTime?> fechaFin,
+      Value<DateTime?> fechaCreacion,
+    });
+
+final class $$ClassGroupsTableReferences
+    extends BaseReferences<_$AppDatabase, $ClassGroupsTable, ClassGroup> {
+  $$ClassGroupsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CareersTable _carreraTable(_$AppDatabase db) =>
+      db.careers.createAlias(
+        $_aliasNameGenerator(db.classGroups.carrera, db.careers.nombre),
+      );
+
+  $$CareersTableProcessedTableManager get carrera {
+    final $_column = $_itemColumn<String>('carrera')!;
+
+    final manager = $$CareersTableTableManager(
+      $_db,
+      $_db.careers,
+    ).filter((f) => f.nombre.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_carreraTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ClassGroupsTableFilterComposer
+    extends Composer<_$AppDatabase, $ClassGroupsTable> {
+  $$ClassGroupsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get turno => $composableBuilder(
+    column: $table.turno,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ciclo => $composableBuilder(
+    column: $table.ciclo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<EstadoGrupo, EstadoGrupo, int> get estado =>
+      $composableBuilder(
+        column: $table.estado,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CareersTableFilterComposer get carrera {
+    final $$CareersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.carrera,
+      referencedTable: $db.careers,
+      getReferencedColumn: (t) => t.nombre,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CareersTableFilterComposer(
+            $db: $db,
+            $table: $db.careers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassGroupsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ClassGroupsTable> {
+  $$ClassGroupsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get codigo => $composableBuilder(
+    column: $table.codigo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get turno => $composableBuilder(
+    column: $table.turno,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ciclo => $composableBuilder(
+    column: $table.ciclo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaFin => $composableBuilder(
+    column: $table.fechaFin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CareersTableOrderingComposer get carrera {
+    final $$CareersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.carrera,
+      referencedTable: $db.careers,
+      getReferencedColumn: (t) => t.nombre,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CareersTableOrderingComposer(
+            $db: $db,
+            $table: $db.careers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassGroupsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ClassGroupsTable> {
+  $$ClassGroupsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get codigo =>
+      $composableBuilder(column: $table.codigo, builder: (column) => column);
+
+  GeneratedColumn<String> get turno =>
+      $composableBuilder(column: $table.turno, builder: (column) => column);
+
+  GeneratedColumn<String> get ciclo =>
+      $composableBuilder(column: $table.ciclo, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EstadoGrupo, int> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaInicio => $composableBuilder(
+    column: $table.fechaInicio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaFin =>
+      $composableBuilder(column: $table.fechaFin, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => column,
+  );
+
+  $$CareersTableAnnotationComposer get carrera {
+    final $$CareersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.carrera,
+      referencedTable: $db.careers,
+      getReferencedColumn: (t) => t.nombre,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CareersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.careers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ClassGroupsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ClassGroupsTable,
+          ClassGroup,
+          $$ClassGroupsTableFilterComposer,
+          $$ClassGroupsTableOrderingComposer,
+          $$ClassGroupsTableAnnotationComposer,
+          $$ClassGroupsTableCreateCompanionBuilder,
+          $$ClassGroupsTableUpdateCompanionBuilder,
+          (ClassGroup, $$ClassGroupsTableReferences),
+          ClassGroup,
+          PrefetchHooks Function({bool carrera})
+        > {
+  $$ClassGroupsTableTableManager(_$AppDatabase db, $ClassGroupsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ClassGroupsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ClassGroupsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ClassGroupsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> codigo = const Value.absent(),
+                Value<String> carrera = const Value.absent(),
+                Value<String?> turno = const Value.absent(),
+                Value<String?> ciclo = const Value.absent(),
+                Value<EstadoGrupo> estado = const Value.absent(),
+                Value<DateTime?> fechaInicio = const Value.absent(),
+                Value<DateTime?> fechaFin = const Value.absent(),
+                Value<DateTime?> fechaCreacion = const Value.absent(),
+              }) => ClassGroupsCompanion(
+                id: id,
+                codigo: codigo,
+                carrera: carrera,
+                turno: turno,
+                ciclo: ciclo,
+                estado: estado,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                fechaCreacion: fechaCreacion,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String codigo,
+                required String carrera,
+                Value<String?> turno = const Value.absent(),
+                Value<String?> ciclo = const Value.absent(),
+                Value<EstadoGrupo> estado = const Value.absent(),
+                Value<DateTime?> fechaInicio = const Value.absent(),
+                Value<DateTime?> fechaFin = const Value.absent(),
+                Value<DateTime?> fechaCreacion = const Value.absent(),
+              }) => ClassGroupsCompanion.insert(
+                id: id,
+                codigo: codigo,
+                carrera: carrera,
+                turno: turno,
+                ciclo: ciclo,
+                estado: estado,
+                fechaInicio: fechaInicio,
+                fechaFin: fechaFin,
+                fechaCreacion: fechaCreacion,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ClassGroupsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({carrera = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (carrera) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.carrera,
+                                referencedTable: $$ClassGroupsTableReferences
+                                    ._carreraTable(db),
+                                referencedColumn: $$ClassGroupsTableReferences
+                                    ._carreraTable(db)
+                                    .nombre,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ClassGroupsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ClassGroupsTable,
+      ClassGroup,
+      $$ClassGroupsTableFilterComposer,
+      $$ClassGroupsTableOrderingComposer,
+      $$ClassGroupsTableAnnotationComposer,
+      $$ClassGroupsTableCreateCompanionBuilder,
+      $$ClassGroupsTableUpdateCompanionBuilder,
+      (ClassGroup, $$ClassGroupsTableReferences),
+      ClassGroup,
+      PrefetchHooks Function({bool carrera})
     >;
 typedef $$ModulesTableCreateCompanionBuilder =
     ModulesCompanion Function({
@@ -6395,6 +7471,8 @@ class $AppDatabaseManager {
   $AppDatabaseManager(this._db);
   $$CareersTableTableManager get careers =>
       $$CareersTableTableManager(_db, _db.careers);
+  $$ClassGroupsTableTableManager get classGroups =>
+      $$ClassGroupsTableTableManager(_db, _db.classGroups);
   $$ModulesTableTableManager get modules =>
       $$ModulesTableTableManager(_db, _db.modules);
   $$UnitsTableTableManager get units =>

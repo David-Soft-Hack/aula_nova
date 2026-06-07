@@ -10,7 +10,7 @@ import 'widgets/bitacora_grid.dart';
 import 'widgets/bitacoras_layout.dart';
 import 'widgets/add_bitacora_stepper.dart';
 import 'widgets/manage_bitacora_dialog.dart';
-import 'widgets/bitacora_delete_dialog.dart';
+import '../shared/requirement_dialog.dart';
 
 class BitacorasScreen extends ConsumerStatefulWidget {
   const BitacorasScreen({super.key});
@@ -147,7 +147,11 @@ class _BitacorasScreenState extends ConsumerState<BitacorasScreen>
     if (!context.mounted) return;
 
     if (modules.isEmpty) {
-      showDialog(context: context, builder: (_) => const NoModulesDialog());
+      RequirementDialog.show(
+        context,
+        title: 'Módulo Requerido',
+        message: 'No puedes configurar una bitácora porque aún no has registrado ningún Módulo Formativo.\n\nPor favor, ve a la sección de "Módulos Formativos" y sube o agrega un módulo primero.',
+      );
       return;
     }
 

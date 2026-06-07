@@ -46,6 +46,29 @@ class CareerDao extends DatabaseAccessor<AppDatabase> with _$CareerDaoMixin {
   Future deleteCareer(Insertable<Career> career) => delete(careers).delete(career);
 }
 
+@DriftAccessor(tables: [ClassGroups])
+class ClassGroupDao extends DatabaseAccessor<AppDatabase> with _$ClassGroupDaoMixin {
+  ClassGroupDao(super.db);
+
+  Future<List<ClassGroup>> getAllGroups() => select(classGroups).get();
+  Stream<List<ClassGroup>> watchAllGroups() => select(classGroups).watch();
+  Future insertGroup(Insertable<ClassGroup> group) => into(classGroups).insert(group);
+  Future updateGroup(Insertable<ClassGroup> group) => update(classGroups).replace(group);
+  Future deleteGroup(Insertable<ClassGroup> group) => delete(classGroups).delete(group);
+  
+  Future<ClassGroup?> getGroupByCodigo(String codigo) =>
+      (select(classGroups)..where((g) => g.codigo.equals(codigo))).getSingleOrNull();
+      
+  Future<List<ClassGroup>> searchGroups(String query) {
+    final likeQuery = '%${query.trim()}%';
+    return (select(classGroups)
+          ..where((g) =>
+              g.codigo.like(likeQuery) |
+              g.carrera.like(likeQuery)))
+        .get();
+  }
+}
+
 @DriftAccessor(tables: [Students])
 class StudentDao extends DatabaseAccessor<AppDatabase> with _$StudentDaoMixin {
   StudentDao(super.db);

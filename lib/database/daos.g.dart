@@ -27,6 +27,21 @@ class CareerDaoManager {
       $$CareersTableTableManager(_db.attachedDatabase, _db.careers);
 }
 
+mixin _$ClassGroupDaoMixin on DatabaseAccessor<AppDatabase> {
+  $CareersTable get careers => attachedDatabase.careers;
+  $ClassGroupsTable get classGroups => attachedDatabase.classGroups;
+  ClassGroupDaoManager get managers => ClassGroupDaoManager(this);
+}
+
+class ClassGroupDaoManager {
+  final _$ClassGroupDaoMixin _db;
+  ClassGroupDaoManager(this._db);
+  $$CareersTableTableManager get careers =>
+      $$CareersTableTableManager(_db.attachedDatabase, _db.careers);
+  $$ClassGroupsTableTableManager get classGroups =>
+      $$ClassGroupsTableTableManager(_db.attachedDatabase, _db.classGroups);
+}
+
 mixin _$StudentDaoMixin on DatabaseAccessor<AppDatabase> {
   $StudentsTable get students => attachedDatabase.students;
   StudentDaoManager get managers => StudentDaoManager(this);

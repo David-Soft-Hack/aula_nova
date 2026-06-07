@@ -6,6 +6,7 @@ import '../modules/modules_screen.dart';
 import '../bitacoras/bitacoras_screen.dart';
 import '../careers/careers_screen.dart';
 import '../students/students_screen.dart';
+import '../groups/groups_screen.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/secondary_menu_sheet.dart';
@@ -27,6 +28,7 @@ final _kScreens = <Widget>[
     subtitle: 'Registro rápido de asistencia diaria',
   ),
   const CareersScreen(),
+  const GroupsScreen(),
 ];
 
 /// Layout principal móvil para la navegación inferior.
@@ -55,12 +57,6 @@ class _AppLayoutState extends State<AppLayout> {
       builder: (context) => SecondaryMenuSheet(
         items: [
           SecondaryMenuItem(
-            icon: LucideIcons.calendar,
-            title: 'Calendario',
-            color: Colors.amber.shade600,
-            onTap: () { Navigator.pop(context); _navigateTo(3); },
-          ),
-          SecondaryMenuItem(
             icon: LucideIcons.users,
             title: 'Estudiantes',
             color: Colors.green.shade600,
@@ -77,6 +73,12 @@ class _AppLayoutState extends State<AppLayout> {
             title: 'Programas',
             color: Colors.indigo.shade600,
             onTap: () { Navigator.pop(context); _navigateTo(6); },
+          ),
+          SecondaryMenuItem(
+            icon: LucideIcons.library,
+            title: 'Grupos',
+            color: Colors.deepOrange.shade600,
+            onTap: () { Navigator.pop(context); _navigateTo(7); },
           ),
           SecondaryMenuItem(
             icon: LucideIcons.settings,

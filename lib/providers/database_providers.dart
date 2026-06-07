@@ -15,3 +15,5 @@ final bitacoraDaoProvider = Provider<BitacoraDao>((ref) => ref.watch(appDatabase
 final careerDaoProvider = Provider<CareerDao>((ref) => ref.watch(appDatabaseProvider).careerDao);
 
 final studentDaoProvider = Provider<StudentDao>((ref) => ref.watch(appDatabaseProvider).studentDao);
+
+final classGroupDaoProvider = Provider<ClassGroupDao>((ref) => ref.watch(appDatabaseProvider).classGroupDao);

@@ -12,6 +12,7 @@ part 'app_database.g.dart';
 @DriftDatabase(
   tables: [
     Careers,
+    ClassGroups,
     Modules,
     Units,
     Activities,
@@ -19,13 +20,13 @@ part 'app_database.g.dart';
     CalendarioBitacoras,
     Students,
   ],
-  daos: [CareerDao, ModuleDao, UnitDao, ActivityDao, BitacoraDao, StudentDao],
+  daos: [CareerDao, ClassGroupDao, ModuleDao, UnitDao, ActivityDao, BitacoraDao, StudentDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
@@ -45,6 +46,9 @@ class AppDatabase extends _$AppDatabase {
       // v6: StudentStatus gained suspendido/finalizado/desertado.
       // Stored as INTEGER, no DDL changes required.
       if (from < 6) {}
+      if (from < 8) {
+        await m.create(classGroups);
+      }
     },
     beforeOpen: (details) async {
       // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.

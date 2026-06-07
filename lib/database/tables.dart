@@ -5,6 +5,8 @@ import 'package:drift/drift.dart';
 // --- Enums ---
 enum TipoCarrera { tecnica, curso }
 enum EstadoBitacora { activo, finalizado, sinCalendario }
+enum EstadoGrupo { activo, finalizado, suspendido }
+enum StudentStatus { activo, inactivo, graduado, suspendido, finalizado, desertado }
 
 // --- Tables ---
 
@@ -14,6 +16,19 @@ class Careers extends Table {
   IntColumn get tipoCarrera => intEnum<TipoCarrera>()();
   DateTimeColumn get fechaCreacion => dateTime().nullable()();
 }
+
+class ClassGroups extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get codigo => text().unique()();
+  TextColumn get carrera => text().references(Careers, #nombre)();
+  TextColumn get turno => text().nullable()();
+  TextColumn get ciclo => text().nullable()();
+  IntColumn get estado => intEnum<EstadoGrupo>().withDefault(const Constant(0))();
+  DateTimeColumn get fechaInicio => dateTime().nullable()();
+  DateTimeColumn get fechaFin => dateTime().nullable()();
+  DateTimeColumn get fechaCreacion => dateTime().nullable()();
+}
+
 
 class Modules extends Table {
   TextColumn get codModule => text()();
@@ -93,7 +108,6 @@ class CalendarioBitacoras extends Table {
   TextColumn get rutaDocumento => text().nullable()();
 }
 
-enum StudentStatus { activo, inactivo, graduado, suspendido, finalizado, desertado }
 
 
 class Students extends Table {

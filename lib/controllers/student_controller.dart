@@ -4,17 +4,17 @@ import '../database/app_database.dart';
 import '../database/daos.dart';
 import '../database/tables.dart';
 import 'career_controller.dart';
-import 'bitacora_controller.dart';
+import 'class_group_controller.dart';
 
 class StudentController {
   final StudentDao studentDao;
   final CareerController careerController;
-  final BitacoraController bitacoraController;
+  final ClassGroupController classGroupController;
 
   StudentController({
     required this.studentDao,
     required this.careerController,
-    required this.bitacoraController,
+    required this.classGroupController,
   });
 
   Future<List<Student>> getAllStudents() async {
@@ -77,7 +77,8 @@ class StudentController {
 
   Future<List<String>> getAllGroups() async {
     try {
-      return await bitacoraController.getAllGroups();
+      final groups = await classGroupController.getAllGroups();
+      return groups.map((g) => g.codigo).toList();
     } catch (e) {
       debugPrint('Error fetching groups: $e');
       return [];

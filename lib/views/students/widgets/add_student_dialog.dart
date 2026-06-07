@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../database/tables.dart';
 import '../../../providers/student_providers.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/requirement_dialog.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
@@ -52,6 +53,7 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
       final controller = ref.read(studentControllerProvider);
       final carreras = await controller.getAllCareers();
       final grupos = await controller.getAllGroups();
+      
       setState(() {
         _carreras = carreras;
         _grupos = grupos;

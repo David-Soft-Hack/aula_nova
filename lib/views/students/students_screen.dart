@@ -5,6 +5,8 @@ import '../../config/theme/app_theme.dart';
 import '../../database/app_database.dart';
 import '../../models/student.dart';
 import '../../providers/student_providers.dart';
+import '../../providers/class_group_providers.dart';
+import '../shared/requirement_dialog.dart';
 import 'widgets/add_student_dialog.dart';
 import 'widgets/edit_student_dialog.dart';
 import 'widgets/student_card.dart';
@@ -19,7 +21,19 @@ class StudentsScreen extends ConsumerStatefulWidget {
 class _StudentsScreenState extends ConsumerState<StudentsScreen> {
   String _searchQuery = '';
 
-  void _showAddStudentDialog() {
+  Future<void> _showAddStudentDialog() async {
+    final groups = await ref.read(classGroupControllerProvider).getAllGroups();
+    if (!mounted) return;
+
+    if (groups.isEmpty) {
+      RequirementDialog.show(
+        context,
+        title: 'Grupo Requerido',
+        message: 'No puedes registrar un estudiante porque aún no has creado ningún Grupo de Clase.\n\nPor favor, ve a la sección de "Grupos" y crea al menos un grupo primero.',
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (context) => const AddStudentDialog(),
