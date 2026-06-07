@@ -3,16 +3,18 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
 import '../database/tables.dart';
+import 'career_controller.dart';
+import 'bitacora_controller.dart';
 
 class StudentController {
   final StudentDao studentDao;
-  final CareerDao careerDao;
-  final BitacoraDao bitacoraDao;
+  final CareerController careerController;
+  final BitacoraController bitacoraController;
 
   StudentController({
     required this.studentDao,
-    required this.careerDao,
-    required this.bitacoraDao,
+    required this.careerController,
+    required this.bitacoraController,
   });
 
   Future<List<Student>> getAllStudents() async {
@@ -70,23 +72,12 @@ class StudentController {
     return await studentDao.searchStudents(query);
   }
 
-  Future<List<String>> getAllCareers() async {
-    final careers = await careerDao.getAllCareers();
-    return careers.map((career) => career.nombre).toList();
-  }
+  Future<List<String>> getAllCareers() =>
+      careerController.getAllCareerNames();
 
   Future<List<String>> getAllGroups() async {
     try {
-      final bitacoras = await bitacoraDao.getAllBitacoras();
-      final grupos = <String>{};
-
-      for (final bitacora in bitacoras) {
-        if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
-          grupos.add(bitacora.codigoGrupo!);
-        }
-      }
-
-      return grupos.toList();
+      return await bitacoraController.getAllGroups();
     } catch (e) {
       debugPrint('Error fetching groups: $e');
       return [];

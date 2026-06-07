@@ -2,9 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../models/app_models.dart';
 import '../../../providers/module_providers.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/career_providers.dart';
 import '../../../services/excel_extractor_service.dart';
 import '../../../services/module_extractor.dart';
@@ -237,87 +235,17 @@ class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog>
           ? 'MOD-${DateTime.now().millisecondsSinceEpoch.toString().substring(8)}'
           : _codCtrl.text.trim();
 
-      // Check if a module with this code already exists in the database
-      final existing = await ref.read(moduleDaoProvider).getModuleByCod(
-        moduleCode,
-      );
-      if (!localContext.mounted) return;
-      if (existing != null) {
-        setState(() {
-          _isProcessing = false;
-        });
-        ScaffoldMessenger.of(localContext).showSnackBar(
-          SnackBar(
-            content: Text(
-              'El módulo con código "$moduleCode" ya existe en la base de datos.',
-            ),
-            backgroundColor: Colors.red.shade600,
-          ),
-        );
-        return;
-      }
-
       final totalHa = int.tryParse(_haCtrl.text) ?? 0;
       final totalHr = int.tryParse(_hrCtrl.text) ?? (totalHa * 0.8).floor();
 
-      final moduleData = Module(
+      await ref.read(moduleControllerProvider).createModuleFromMaps(
         codModule: moduleCode,
-        nombre: _nombreCtrl.text.isEmpty ? 'Nuevo Módulo' : _nombreCtrl.text,
+        nombre: _nombreCtrl.text,
+        carrera: _carrera,
         totalHoraAcademic: totalHa,
         totalHoraReloj: totalHr,
-        carrera: _carrera,
-        fechaCreacion: DateTime.now(),
-      );
-
-      final List<Unit> unitsData = [];
-      final List<Activity> activitiesData = [];
-
-      for (int i = 0; i < _units.length; i++) {
-        final u = _units[i];
-        final unitCode = '$moduleCode-U${i + 1}';
-
-        unitsData.add(
-          Unit(
-            codUnit: unitCode,
-            nombre: u['nombre'].toString().isEmpty
-                ? 'Unidad ${i + 1}'
-                : u['nombre'].toString(),
-            totalHoraAcademic: u['ha'] as int? ?? 0,
-            totalHoraReloj: u['hr'] as int? ?? 0,
-            ponderacion: u['ponderacion'] as double? ?? 0.0,
-            idModule: moduleCode,
-          ),
-        );
-
-        final actsForUnit = _activities
-            .where((a) => a['unitIndex'] == i)
-            .toList();
-        for (int j = 0; j < actsForUnit.length; j++) {
-          final act = actsForUnit[j];
-          final rawCustomCode = act['codigo']?.toString().trim() ?? '';
-          final customCode = rawCustomCode.isEmpty
-              ? 'A${j + 1}'
-              : rawCustomCode;
-          final actCode = '$unitCode-$customCode';
-
-          activitiesData.add(
-            Activity(
-              codActivity: actCode,
-              descripcion: act['descripcion'].toString().isEmpty
-                  ? 'Actividad ${j + 1}'
-                  : act['descripcion'].toString(),
-              totalHoraAcademic: act['ha'] as int? ?? 0,
-              totalHoraReloj: act['hr'] as int? ?? 0,
-              idUnit: unitCode,
-            ),
-          );
-        }
-      }
-
-      await ref.read(moduleControllerProvider).createModuleWithDetails(
-        module: moduleData,
-        units: unitsData,
-        activities: activitiesData,
+        units: _units,
+        activities: _activities,
       );
 
       if (!localContext.mounted) return;
@@ -562,10 +490,11 @@ class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog>
                           _isProcessing = true;
                         });
                         try {
-                          final existing = await ref.read(moduleDaoProvider)
-                              .getModuleByCod(moduleCode);
+                          final exists = await ref.read(
+                            moduleControllerProvider,
+                          ).checkModuleExists(moduleCode);
                           if (!localContext.mounted) return;
-                          if (existing != null) {
+                          if (exists) {
                             setState(() {
                               _isProcessing = false;
                             });

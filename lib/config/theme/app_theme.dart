@@ -68,9 +68,44 @@ class AppTheme {
         seedColor: academic600,
         brightness: Brightness.dark,
         primary: academic500,
+        surface: const Color(0xFF1E293B),
+        onSurface: const Color(0xFFF1F5F9),
       ),
+      scaffoldBackgroundColor: const Color(0xFF0F172A),
       fontFamily: GoogleFonts.inter().fontFamily,
-      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme),
+      textTheme: GoogleFonts.interTextTheme(ThemeData.dark().textTheme).copyWith(
+        displayLarge: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        displayMedium: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        displaySmall: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        headlineLarge: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        headlineMedium: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        headlineSmall: GoogleFonts.outfit(fontWeight: FontWeight.w900, color: const Color(0xFFF1F5F9), letterSpacing: -0.5),
+        titleLarge: GoogleFonts.outfit(fontWeight: FontWeight.w700, color: const Color(0xFFF1F5F9)),
+        titleMedium: GoogleFonts.outfit(fontWeight: FontWeight.w600, color: const Color(0xFFF1F5F9)),
+        titleSmall: GoogleFonts.outfit(fontWeight: FontWeight.w500, color: const Color(0xFFF1F5F9)),
+        bodyLarge: GoogleFonts.inter(fontWeight: FontWeight.w400, color: const Color(0xFFF1F5F9)),
+        bodyMedium: GoogleFonts.inter(fontWeight: FontWeight.w400, color: const Color(0xFFF1F5F9)),
+      ),
+      appBarTheme: AppBarTheme(
+        backgroundColor: const Color(0xFF1E293B).withValues(alpha: 0.9),
+        elevation: 0,
+        centerTitle: false,
+        iconTheme: const IconThemeData(color: Color(0xFFF1F5F9)),
+        titleTextStyle: GoogleFonts.outfit(
+          color: const Color(0xFFF1F5F9),
+          fontSize: 20,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
+      cardTheme: const CardThemeData(
+        color: Color(0xFF1E293B),
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(16)),
+          side: BorderSide(color: Color(0x33FFFFFF)),
+        ),
+        shadowColor: Color(0x0DFFFFFF),
+      ),
     );
   }
 }

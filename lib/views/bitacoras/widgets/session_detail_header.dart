@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
+import '../../../../utils/code_utils.dart';
 
 class SessionDetailHeader extends StatelessWidget {
   final CalendarioBitacora session;
@@ -16,22 +17,7 @@ class SessionDetailHeader extends StatelessWidget {
     required this.usarHorasReloj,
   });
 
-  String _getRelativeUnitCode(String? fullCode) {
-    if (fullCode == null || fullCode.isEmpty) return '—';
-    String part = fullCode;
-    if (fullCode.contains('-')) part = fullCode.split('-').last.trim();
-    if (part.startsWith('UD')) return part;
-    if (part.startsWith('U')) return 'UD${part.substring(1)}';
-    return part;
-  }
 
-  String _getRelativeActivityCode(String? fullCode) {
-    if (fullCode == null || fullCode.isEmpty) return '—';
-    final isCont = fullCode.contains('(Cont.)');
-    String cleanCode = fullCode.replaceAll(' (Cont.)', '').trim();
-    if (cleanCode.contains('-')) cleanCode = cleanCode.split('-').last.trim();
-    return isCont ? '$cleanCode (Cont.)' : cleanCode;
-  }
 
   Widget _infoRow(IconData icon, String label) {
     return Row(
@@ -54,8 +40,8 @@ class SessionDetailHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final dateStr = DateFormat('EEEE, dd MMMM yyyy', 'es')
         .format(session.fechaProgramada ?? DateTime.now());
-    final displayUnit = _getRelativeUnitCode(session.codUnidad);
-    final displayAct = _getRelativeActivityCode(session.codActividad);
+    final displayUnit = getRelativeUnitCode(session.codUnidad);
+    final displayAct = getRelativeActivityCode(session.codActividad);
     final horaLabel = usarHorasReloj
         ? '${session.horaImpartir ?? 0} HR (Reloj)'
         : '${session.horaImpartir ?? 0} HA (Académica)';

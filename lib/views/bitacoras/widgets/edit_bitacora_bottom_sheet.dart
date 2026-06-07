@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
+import '../../shared/bottom_sheet_handle.dart';
 
 class EditBitacoraBottomSheet extends StatefulWidget {
   final Bitacora bitacora;
@@ -54,17 +55,7 @@ class _EditBitacoraBottomSheetState extends State<EditBitacoraBottomSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Drag handle indicator
-            Center(
-              child: Container(
-                width: 44,
-                height: 5,
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade300,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-            ),
+            const BottomSheetHandle(),
             const SizedBox(height: 24),
             const Text(
               'Editar Configuración de Bitácora',

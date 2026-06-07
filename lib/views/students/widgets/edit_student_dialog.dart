@@ -5,6 +5,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../providers/student_providers.dart';
+import '../../shared/app_snackbar.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
@@ -13,10 +14,7 @@ import 'form_action_buttons.dart';
 class EditStudentDialog extends ConsumerStatefulWidget {
   final Student student;
 
-  const EditStudentDialog({
-    super.key,
-    required this.student,
-  });
+  const EditStudentDialog({super.key, required this.student});
 
   @override
   ConsumerState<EditStudentDialog> createState() => _EditStudentDialogState();
@@ -63,8 +61,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
         _grupos = grupos;
       });
     } catch (e) {
-      // ignore: avoid_print
-      print('Error loading careers/groups: $e');
+      debugPrint('Error loading careers/groups: $e');
     } finally {
       setState(() => _isLoadingData = false);
     }
@@ -122,8 +119,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    AppSnackbar.showWarning(context, message);
   }
 
   Future<void> _selectFechaIngreso() async {
@@ -205,8 +201,7 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
               ),
 
               FormActionButtons(
-                currentStep: 0,
-                isSaving: _isSaving,
+                isLoading: _isSaving,
                 onBack: () => Navigator.pop(context),
                 onNext: _save,
                 backLabel: 'Cancelar',

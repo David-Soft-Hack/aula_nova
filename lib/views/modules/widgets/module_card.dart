@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
+import '../../shared/app_badge.dart';
 
 /// Tarjeta de módulo con información de horas, unidades y carrera.
 class ModuleCard extends StatelessWidget {
@@ -62,24 +63,12 @@ class ModuleCard extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppTheme.academic50,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          module.codModule.toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 9,
-                            fontWeight: FontWeight.w900,
-                            color: AppTheme.academic600,
-                            letterSpacing: 1.0,
-                          ),
-                        ),
+                      AppBadge(
+                        label: module.codModule,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        borderRadius: 8,
                       ),
                       IconButton(
                         style: IconButton.styleFrom(
@@ -408,20 +397,11 @@ class _UnitsIndicator extends ConsumerWidget {
                 ),
               )
             else
-              Container(
+              AppBadge(
+                label: '${units.length} ${units.length == 1 ? 'UD' : 'UDs'}',
+                fontSize: 8.5,
+                fontWeight: FontWeight.w900,
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppTheme.academic50,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Text(
-                  '${units.length} ${units.length == 1 ? 'UD' : 'UDs'}',
-                  style: const TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.w900,
-                    color: AppTheme.academic600,
-                  ),
-                ),
               ),
           ],
         );

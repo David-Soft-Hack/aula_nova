@@ -8,65 +8,11 @@ part 'daos.g.dart';
 class ModuleDao extends DatabaseAccessor<AppDatabase> with _$ModuleDaoMixin {
   ModuleDao(super.db);
 
-  Future<void> _healHours() async {
-    try {
-      await db.customStatement('''
-        UPDATE modules 
-        SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-        WHERE total_hora_academic < total_hora_reloj;
-      ''');
-      await db.customStatement('''
-        UPDATE modules 
-        SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-      await db.customStatement('''
-        UPDATE modules 
-        SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-
-      await db.customStatement('''
-        UPDATE units 
-        SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-        WHERE total_hora_academic < total_hora_reloj;
-      ''');
-      await db.customStatement('''
-        UPDATE units 
-        SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-      await db.customStatement('''
-        UPDATE units 
-        SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-
-      await db.customStatement('''
-        UPDATE activities 
-        SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-        WHERE total_hora_academic < total_hora_reloj;
-      ''');
-      await db.customStatement('''
-        UPDATE activities 
-        SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-      await db.customStatement('''
-        UPDATE activities 
-        SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-        WHERE total_hora_academic < 0;
-      ''');
-    } catch (_) {}
-  }
-
   Future<List<Module>> getAllModules() async {
-    await _healHours();
     return select(modules).get();
   }
 
   Stream<List<Module>> watchAllModules() {
-    _healHours();
     return select(modules).watch();
   }
 
@@ -85,7 +31,6 @@ class ModuleDao extends DatabaseAccessor<AppDatabase> with _$ModuleDaoMixin {
   }
 
   Stream<List<Module>> watchModulesByCareer(String careerName) {
-    _healHours();
     return (select(modules)..where((t) => t.carrera.equals(careerName))).watch();
   }
 }
@@ -151,6 +96,8 @@ class ActivityDao extends DatabaseAccessor<AppDatabase> with _$ActivityDaoMixin 
   Future insertActivity(Insertable<Activity> activity) => into(activities).insert(activity);
   Future updateActivity(Insertable<Activity> activity) => update(activities).replace(activity);
   Future deleteActivity(Insertable<Activity> activity) => delete(activities).delete(activity);
+  Future<void> deleteActivityByCode(String codActivity) =>
+      (delete(activities)..where((t) => t.codActivity.equals(codActivity))).go();
   Future<List<Activity>> getActivitiesByUnit(String idUnit) =>
       (select(activities)..where((t) => t.idUnit.equals(idUnit))).get();
   Future<List<Activity>> getAllActivities() => select(activities).get();
@@ -207,7 +154,6 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   }
   
   Stream<List<BitacoraWithModule>> watchBitacorasWithModule() {
-    autoCompletePastSessions();
     final query = select(bitacoras).join([
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ]);
@@ -227,7 +173,6 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       batch((batch) => batch.insertAll(calendarioBitacoras, entries));
 
   Stream<List<CalendarioBitacora>> watchCalendarioForBitacora(int idBitacora) {
-    autoCompletePastSessions();
     return (select(calendarioBitacoras)..where((t) => t.idBitacora.equals(idBitacora))).watch();
   }
 
@@ -241,33 +186,27 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   Future<int> deleteCalendarioForBitacora(int idBitacora) =>
       (delete(calendarioBitacoras)..where((t) => t.idBitacora.equals(idBitacora))).go();
 
-  // Delete a bitacora and its associated calendar entries
   Future<void> deleteBitacora(int idBitacora) async {
-    // 1. Obtain the bitacora to read its group code
-    final bitacora = await (select(bitacoras)
-          ..where((t) => t.id.equals(idBitacora)))
-        .getSingleOrNull();
+    await db.transaction(() async {
+      final bitacora = await (select(bitacoras)
+            ..where((t) => t.id.equals(idBitacora)))
+          .getSingleOrNull();
 
-    if (bitacora != null &&
-        bitacora.codigoGrupo != null &&
-        bitacora.codigoGrupo!.isNotEmpty) {
-      // 2. Determine if the calendar was fully completed
-      final sessions = await getCalendarioForBitacora(idBitacora);
-      final allCompleted =
-          sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido);
+      if (bitacora != null &&
+          bitacora.codigoGrupo != null &&
+          bitacora.codigoGrupo!.isNotEmpty) {
+        final sessions = await getCalendarioForBitacora(idBitacora);
+        final allCompleted =
+            sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido);
 
-      // 3. Transition only ACTIVE students:
-      //    - Calendar finished → finalizado
-      //    - Calendar not finished → suspendido
-      //    - Desertado students are never modified
-      final newStatus =
-          allCompleted ? StudentStatus.finalizado : StudentStatus.suspendido;
-      await _updateActiveStudentsForGroup(bitacora.codigoGrupo!, newStatus);
-    }
+        final newStatus =
+            allCompleted ? StudentStatus.finalizado : StudentStatus.suspendido;
+        await _updateActiveStudentsForGroup(bitacora.codigoGrupo!, newStatus);
+      }
 
-    // 4. Delete calendar entries then the bitacora
-    await deleteCalendarioForBitacora(idBitacora);
-    await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
+      await deleteCalendarioForBitacora(idBitacora);
+      await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
+    });
   }
 
   /// Transitions only [StudentStatus.activo] students in [grupo] to [newStatus].
@@ -288,8 +227,13 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);
 
+  Future<List<Bitacora>> getBitacorasByModule(String moduleCode) =>
+      (select(bitacoras)..where((t) => t.idModule.equals(moduleCode))).get();
+
+  Future<void> deleteBitacorasByModule(String moduleCode) =>
+      (delete(bitacoras)..where((t) => t.idModule.equals(moduleCode))).go();
+
   Stream<List<TodaySessionData>> watchTodaySessions() {
-    autoCompletePastSessions();
     final todayStart = DateTime.now();
     final todayEnd = DateTime(todayStart.year, todayStart.month, todayStart.day, 23, 59, 59);
 
@@ -314,7 +258,6 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   }
 
   Stream<List<TodaySessionData>> watchUpcomingSessions({int days = 7}) {
-    autoCompletePastSessions();
     final today = DateTime.now();
     final start = DateTime(today.year, today.month, today.day, 0, 0, 0).add(const Duration(days: 1));
     final end = DateTime(today.year, today.month, today.day, 23, 59, 59).add(Duration(days: days));

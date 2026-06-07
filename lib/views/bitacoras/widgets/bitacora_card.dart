@@ -5,6 +5,8 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/daos.dart';
 import '../../../providers/bitacora_providers.dart';
+import '../../shared/app_card.dart';
+import '../../shared/app_badge.dart';
 import 'bitacora_delete_dialog.dart';
 
 class BitacoraCard extends ConsumerWidget {
@@ -28,29 +30,21 @@ class BitacoraCard extends ConsumerWidget {
         final completedSessions = sessions.where((s) => s.estadoImpartido).length;
         final progress = totalSessions == 0 ? 0.0 : (completedSessions / totalSessions);
 
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.01),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => onManage(sessions),
-              borderRadius: BorderRadius.circular(16),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
+        return AppCard(
+          borderRadius: 16,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          onTap: () => onManage(sessions),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.01),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     // Fila superior: Grupo, Carrera y Botón eliminar
                     Row(
@@ -60,23 +54,9 @@ class BitacoraCard extends ConsumerWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 3,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppTheme.academic50,
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  'GRUPO ${bitacora.codigoGrupo ?? "N/A"}',
-                                  style: const TextStyle(
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppTheme.academic700,
-                                  ),
-                                ),
+                              AppBadge(
+                                label: 'GRUPO ${bitacora.codigoGrupo ?? "N/A"}',
+                                color: AppTheme.academic700,
                               ),
                               const SizedBox(height: 4),
                               Text(
@@ -164,13 +144,10 @@ class BitacoraCard extends ConsumerWidget {
                           AppTheme.academic500,
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ),
-          ),
-        );
+      );
       },
     );
   }

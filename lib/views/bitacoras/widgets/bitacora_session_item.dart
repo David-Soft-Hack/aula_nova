@@ -3,6 +3,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
+import '../../../../utils/code_utils.dart';
 import 'session_detail_bottom_sheet.dart';
 
 class BitacoraSessionItem extends StatelessWidget {
@@ -21,30 +22,7 @@ class BitacoraSessionItem extends StatelessWidget {
     required this.onSessionUpdated,
   });
 
-  // Extract relative unit code (e.g., "MF-U1" -> "UD1")
-  String _getRelativeUnitCode(String fullCode) {
-    String part = fullCode;
-    if (fullCode.contains('-')) {
-      part = fullCode.split('-').last.trim();
-    }
-    if (part.startsWith('UD')) {
-      return part;
-    }
-    if (part.startsWith('U')) {
-      return 'UD${part.substring(1)}';
-    }
-    return part;
-  }
 
-  // Extract relative activity code (e.g., "MF-U1-A1 (Cont.)" -> "A1 (Cont.)")
-  String _getRelativeActivityCode(String fullCode) {
-    final isCont = fullCode.contains('(Cont.)');
-    String cleanCode = fullCode.replaceAll(' (Cont.)', '').trim();
-    if (cleanCode.contains('-')) {
-      cleanCode = cleanCode.split('-').last.trim();
-    }
-    return isCont ? '$cleanCode (Cont.)' : cleanCode;
-  }
 
   void _openDetail(BuildContext context) {
     showModalBottomSheet(
@@ -67,8 +45,8 @@ class BitacoraSessionItem extends StatelessWidget {
       'EEEE, dd MMMM',
       'es',
     ).format(session.fechaProgramada ?? DateTime.now());
-    final displayUnit = _getRelativeUnitCode(session.codUnidad ?? '');
-    final displayAct = _getRelativeActivityCode(session.codActividad ?? '');
+    final displayUnit = getRelativeUnitCode(session.codUnidad);
+    final displayAct = getRelativeActivityCode(session.codActividad);
     final hasDocument = session.rutaDocumento != null &&
         session.rutaDocumento!.isNotEmpty;
 

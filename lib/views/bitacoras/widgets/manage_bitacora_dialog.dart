@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:drift/drift.dart' hide Column, Table;
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../database/tables.dart';
 import '../../../database/daos.dart';
+import '../../../database/tables.dart';
 import '../../../providers/database_providers.dart';
-import '../../../services/dosificacion_service.dart';
+import '../../../providers/bitacora_providers.dart';
+import '../../shared/app_snackbar.dart';
 import 'bitacora_resumen_header.dart';
 import 'bitacora_session_item.dart';
 import 'edit_bitacora_bottom_sheet.dart';
@@ -45,11 +45,7 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
       await ref.read(bitacoraDaoProvider).updateCalendarioEntry(updated);
       if (mounted) setState(() => _sessions[index] = updated);
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al actualizar clase: $e')),
-        );
-      }
+      if (mounted) AppSnackbar.showError(context, 'Error al actualizar clase: $e');
     }
   }
 
@@ -73,65 +69,30 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
 
   Future<void> _handleBitacoraEdit(int freq, bool usarReloj) async {
     setState(() => _isUpdating = true);
-    final updated = _bitacora.copyWith(
-      frecuenciaClase: freq,
-      usarHorasReloj: usarReloj,
-    );
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
-      await ref.read(bitacoraDaoProvider).updateBitacora(updated);
-
-      final module = widget.bitacoraWithModule.module;
-      final db = ref.read(appDatabaseProvider);
-      final units = await ref.read(unitDaoProvider).getUnitsByModule(
-        module.codModule,
-      );
-      final unitIds = units.map((u) => u.codUnit).toList();
-      final activities = await (db.select(
-        db.activities,
-      )..where((t) => t.idUnit.isIn(unitIds))).get();
-
-      final reDosified = DosificacionService.dosificar(
-        module: module,
-        units: units,
-        activities: activities,
-        fechaInicio: _bitacora.fechaInicio,
-        diasClase: (_bitacora.diasClase).cast<String>(),
-        horasSesion: freq,
-        fechasFeriadas: (_bitacora.fechasFeriadas).cast<String>(),
+      final newSessions = await ref.read(bitacoraControllerProvider)
+          .reDosifyBitacora(
+        bitacoraId: _bitacora.id,
+        frecuenciaClase: freq,
         usarHorasReloj: usarReloj,
+        module: widget.bitacoraWithModule.module,
+        fechaInicio: _bitacora.fechaInicio,
+        diasClase: _bitacora.diasClase.cast<String>(),
+        fechasFeriadas: _bitacora.fechasFeriadas.cast<String>(),
       );
-
-      await ref.read(bitacoraDaoProvider).deleteCalendarioForBitacora(
-        _bitacora.id,
-      );
-      await ref.read(bitacoraDaoProvider).createCalendarioEntries(
-        reDosified
-            .map((s) => s.copyWith(idBitacora: Value(_bitacora.id)))
-            .toList(),
-      );
-
-      final newSessions = await ref.read(bitacoraDaoProvider)
-          .getCalendarioForBitacora(_bitacora.id);
 
       if (!mounted) return;
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(content: Text('Sesiones re-dosificadas con éxito 🎉')),
-      );
+      AppSnackbar.showSuccess(context, 'Sesiones re-dosificadas con éxito');
       setState(() {
-        _bitacora = updated;
+        _bitacora = _bitacora.copyWith(
+          frecuenciaClase: freq,
+          usarHorasReloj: usarReloj,
+        );
         _sessions = newSessions;
       });
     } catch (e) {
-      if (mounted) {
-        scaffoldMessenger.showSnackBar(
-          SnackBar(
-            content: Text('Error al actualizar bitácora: $e'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
+      if (mounted) AppSnackbar.showError(context, 'Error al actualizar bitácora: $e');
     } finally {
       if (mounted) setState(() => _isUpdating = false);
     }

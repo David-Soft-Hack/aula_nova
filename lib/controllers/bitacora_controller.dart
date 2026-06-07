@@ -62,25 +62,41 @@ class BitacoraController {
 
     if (schedule.isEmpty) return -1;
 
-    final bitacoraId = await bitacoraDao.createBitacora(BitacorasCompanion(
-      frecuenciaClase: Value(frecuenciaClase),
-      fechaInicio: Value(fechaInicio),
-      usarHorasReloj: Value(usarHorasReloj),
-      fechasFeriadas: Value(fechasFeriadas),
-      diasClase: Value(diasClase),
-      codigoGrupo: Value(codigoGrupo),
-      carrera: Value(carrera),
-      tipoCarrera: Value(tipoCarrera),
-      estado: Value(EstadoBitacora.activo),
-      idModule: Value(module.codModule),
-    ));
+    final bitacoraId = await db.transaction(() async {
+      final id = await bitacoraDao.createBitacora(BitacorasCompanion(
+        frecuenciaClase: Value(frecuenciaClase),
+        fechaInicio: Value(fechaInicio),
+        usarHorasReloj: Value(usarHorasReloj),
+        fechasFeriadas: Value(fechasFeriadas),
+        diasClase: Value(diasClase),
+        codigoGrupo: Value(codigoGrupo),
+        carrera: Value(carrera),
+        tipoCarrera: Value(tipoCarrera),
+        estado: Value(EstadoBitacora.activo),
+        idModule: Value(module.codModule),
+      ));
 
-    final entries = schedule.map((e) => e.copyWith(
-      idBitacora: Value(bitacoraId),
-    ));
+      final entries = schedule.map((e) => e.copyWith(
+        idBitacora: Value(id),
+      ));
 
-    await bitacoraDao.createCalendarioEntries(entries.toList());
+      await bitacoraDao.createCalendarioEntries(entries.toList());
+      return id;
+    });
     return bitacoraId;
+  }
+
+  Future<int> createBitacoraFromPreview({
+    required BitacorasCompanion bitacora,
+    required List<CalendarioBitacorasCompanion> sessions,
+  }) async {
+    return db.transaction(() async {
+      final id = await bitacoraDao.createBitacora(bitacora);
+      await bitacoraDao.createCalendarioEntries(
+        sessions.map((s) => s.copyWith(idBitacora: Value(id))).toList(),
+      );
+      return id;
+    });
   }
 
   Future<void> finalizeBitacora(int idBitacora) async {
@@ -97,6 +113,59 @@ class BitacoraController {
 
   Future<void> updateBitacora(Bitacora bitacora) =>
       bitacoraDao.updateBitacora(bitacora);
+
+  Future<List<String>> getAllGroups() async {
+    final bitacoras = await bitacoraDao.getAllBitacoras();
+    final grupos = <String>{};
+    for (final bitacora in bitacoras) {
+      if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
+        grupos.add(bitacora.codigoGrupo!);
+      }
+    }
+    return grupos.toList();
+  }
+
+  Future<List<CalendarioBitacora>> reDosifyBitacora({
+    required int bitacoraId,
+    required int frecuenciaClase,
+    required bool usarHorasReloj,
+    required Module module,
+    required DateTime fechaInicio,
+    required List<String> diasClase,
+    required List<String> fechasFeriadas,
+  }) async {
+    await bitacoraDao.updateBitacora(BitacorasCompanion(
+      frecuenciaClase: Value(frecuenciaClase),
+      usarHorasReloj: Value(usarHorasReloj),
+    ));
+
+    final units = await unitDao.getUnitsByModule(module.codModule);
+    final allActivities = <Activity>[];
+    for (final unit in units) {
+      final acts = await activityDao.getActivitiesByUnit(unit.codUnit);
+      allActivities.addAll(acts);
+    }
+
+    final schedule = DosificacionService.dosificar(
+      module: module,
+      units: units,
+      activities: allActivities,
+      fechaInicio: fechaInicio,
+      diasClase: diasClase,
+      horasSesion: frecuenciaClase,
+      fechasFeriadas: fechasFeriadas,
+      usarHorasReloj: usarHorasReloj,
+    );
+
+    await db.transaction(() async {
+      await bitacoraDao.deleteCalendarioForBitacora(bitacoraId);
+      await bitacoraDao.createCalendarioEntries(
+        schedule.map((s) => s.copyWith(idBitacora: Value(bitacoraId))).toList(),
+      );
+    });
+
+    return bitacoraDao.getCalendarioForBitacora(bitacoraId);
+  }
 
   Future<List<CalendarioBitacora>> getCalendario(int idBitacora) =>
       bitacoraDao.getCalendarioForBitacora(idBitacora);

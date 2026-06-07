@@ -4,6 +4,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
+import '../../shared/confirm_delete_dialog.dart';
+import '../../shared/app_snackbar.dart';
 
 /// Muestra un diálogo de confirmación para eliminar una bitácora.
 /// Retorna true si el usuario confirmó, false si canceló.
@@ -13,53 +15,18 @@ Future<void> confirmDeleteBitacora(
 ) async {
   final confirm = await showDialog<bool>(
     context: context,
-    builder: (c) => AlertDialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: const Row(
-        children: [
-          Icon(LucideIcons.alertTriangle, color: Colors.red),
-          SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              '¿Eliminar Bitácora?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-      content: const Text(
-        'Esta acción eliminará la bitácora y todas sus sesiones asociadas.\n\n'
-        'Los estudiantes activos del grupo de clase pasarán a estado '
-        'Suspendido (o Finalizado si el calendario estaba completo).\n\n'
-        'Esta acción no se puede deshacer.',
-      ),
-
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(c, false),
-          child: const Text('Cancelar'),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.red.shade600,
-            foregroundColor: Colors.white,
-          ),
-          onPressed: () => Navigator.pop(c, true),
-          child: const Text('Eliminar'),
-        ),
-      ],
+    builder: (_) => const ConfirmDeleteDialog(
+      title: '¿Eliminar Bitácora?',
+      message: 'Esta acción eliminará la bitácora y todas sus sesiones asociadas.\n\n'
+          'Los estudiantes activos del grupo de clase pasarán a estado '
+          'Suspendido (o Finalizado si el calendario estaba completo).\n\n'
+          'Esta acción no se puede deshacer.',
     ),
   );
 
   if (confirm == true && context.mounted) {
-    final messenger = ScaffoldMessenger.of(context);
     await ProviderScope.containerOf(context).read(bitacoraDaoProvider).deleteBitacora(bitacora.id);
-    messenger.showSnackBar(
-      const SnackBar(
-        content: Text('Bitácora eliminada'),
-        backgroundColor: Colors.redAccent,
-      ),
-    );
+    if (context.mounted) AppSnackbar.showError(context, 'Bitácora eliminada');
   }
 }
 

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../database/tables.dart';
 import '../../../providers/student_providers.dart';
+import '../../shared/app_snackbar.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
@@ -101,9 +102,7 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(message)));
+    AppSnackbar.showWarning(context, message);
   }
 
   Future<void> _save() async {
@@ -113,7 +112,11 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
       final controller = ref.read(studentControllerProvider);
       final exists = await controller.existsStudentByCodigo(codigo);
       if (exists) {
-        _showMessage('Ya existe un estudiante con ese código.');
+        AppSnackbar.showError(
+          context,
+          'Código duplicado',
+          description: 'Ya existe un estudiante con el código "$codigo".',
+        );
         return;
       }
       await controller.addStudent(
@@ -243,10 +246,11 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
               ),
 
               FormActionButtons(
-                currentStep: _currentStep,
-                isSaving: _isSaving,
+                isLoading: _isSaving,
                 onBack: _handleBack,
                 onNext: _handleNextOrSave,
+                backLabel: _currentStep == 1 ? 'Atrás' : 'Cancelar',
+                nextLabel: _currentStep == 0 ? 'Siguiente' : 'Guardar',
               ),
             ],
           ),

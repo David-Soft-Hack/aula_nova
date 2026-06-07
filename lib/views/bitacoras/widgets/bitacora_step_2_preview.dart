@@ -3,6 +3,8 @@ import 'package:intl/intl.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
+import '../../../../utils/code_utils.dart';
+import '../../shared/app_badge.dart';
 
 class BitacoraStep2Preview extends StatelessWidget {
   final List<CalendarioBitacorasCompanion> generatedPreview;
@@ -16,30 +18,7 @@ class BitacoraStep2Preview extends StatelessWidget {
     required this.onSessionToggle,
   });
 
-  // Extract relative unit code (e.g., "MF-U1" -> "UD1")
-  String _getRelativeUnitCode(String fullCode) {
-    String part = fullCode;
-    if (fullCode.contains('-')) {
-      part = fullCode.split('-').last.trim();
-    }
-    if (part.startsWith('UD')) {
-      return part;
-    }
-    if (part.startsWith('U')) {
-      return 'UD${part.substring(1)}';
-    }
-    return part;
-  }
 
-  // Extract relative activity code (e.g., "MF-U1-A1 (Cont.)" -> "A1 (Cont.)")
-  String _getRelativeActivityCode(String fullCode) {
-    final isCont = fullCode.contains('(Cont.)');
-    String cleanCode = fullCode.replaceAll(' (Cont.)', '').trim();
-    if (cleanCode.contains('-')) {
-      cleanCode = cleanCode.split('-').last.trim();
-    }
-    return isCont ? '$cleanCode (Cont.)' : cleanCode;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,8 +97,8 @@ class BitacoraStep2Preview extends StatelessWidget {
             final rawUnitCode = session.codUnidad.value ?? '';
             final rawActCode = session.codActividad.value ?? '';
 
-            final unitCode = _getRelativeUnitCode(rawUnitCode);
-            final actCode = _getRelativeActivityCode(rawActCode);
+            final unitCode = getRelativeUnitCode(rawUnitCode);
+            final actCode = getRelativeActivityCode(rawActCode);
             final hours = session.horaImpartir.value ?? 0;
             final date = session.fechaProgramada.value ?? DateTime.now();
             final dateStr = DateFormat('dd/MM/yyyy').format(date);
@@ -150,21 +129,10 @@ class BitacoraStep2Preview extends StatelessWidget {
                 ),
                 title: Row(
                   children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppTheme.academic50,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Text(
-                        unitCode,
-                        style: const TextStyle(
-                          color: AppTheme.academic700,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Outfit',
-                        ),
-                      ),
+                    AppBadge(
+                      label: unitCode,
+                      color: AppTheme.academic700,
+                      fontSize: 11,
                     ),
                     const SizedBox(width: 8),
                     Expanded(

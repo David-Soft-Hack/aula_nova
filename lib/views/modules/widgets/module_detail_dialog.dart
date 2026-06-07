@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
+import '../../../providers/module_providers.dart';
 import '../../../providers/database_providers.dart';
 import 'activity_list_view.dart';
 import 'unit_side_panel.dart';
@@ -32,28 +33,23 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
   }
 
   void _loadDetails() async {
-    final db = ref.read(appDatabaseProvider);
     final uList = await ref.read(unitDaoProvider).getUnitsByModule(
       widget.module.codModule,
     );
+    setState(() {
+      _units = uList;
+      _isLoading = false;
+    });
     if (uList.isNotEmpty) {
-      final actQuery = db.select(
-        db.activities,
-      );
-      final aList = await actQuery.get();
-
+      final allActs = <Activity>[];
+      for (final unit in uList) {
+        final acts = await ref.read(activityDaoProvider)
+            .getActivitiesByUnit(unit.codUnit);
+        allActs.addAll(acts);
+      }
       setState(() {
-        _units = uList;
-        _activities = aList;
+        _activities = allActs;
         _selectedUnitId = uList.first.codUnit;
-        _isLoading = false;
-      });
-    } else {
-      setState(() {
-        _units = [];
-        _activities = [];
-        _selectedUnitId = null;
-        _isLoading = false;
       });
     }
   }
@@ -62,7 +58,7 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
     final idx = _units.length + 1;
     final unitCode = '${widget.module.codModule}-U$idx';
 
-    await ref.read(unitDaoProvider).insertUnit(
+    await ref.read(moduleControllerProvider).insertUnit(
       UnitsCompanion(
         codUnit: Value(unitCode),
         nombre: Value('Unidad Didáctica $idx: Fundamentos'),
@@ -77,9 +73,7 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
   }
 
   void _deleteUnit(Unit unit) async {
-    await (ref.read(appDatabaseProvider).delete(
-      ref.read(appDatabaseProvider).units,
-    )..where((t) => t.codUnit.equals(unit.codUnit))).go();
+    await ref.read(moduleControllerProvider).deleteUnit(unit.codUnit);
     _loadDetails();
   }
 
@@ -101,27 +95,23 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
         .toList();
     final actCode = '$_selectedUnitId-A${unitActs.length + 1}';
 
-    await ref.read(appDatabaseProvider)
-        .into(ref.read(appDatabaseProvider).activities)
-        .insert(
-          ActivitiesCompanion(
-            codActivity: Value(actCode),
-            descripcion: Value(
-              'A${unitActs.length + 1}: Nueva actividad práctica',
-            ),
-            totalHoraAcademic: const Value(4),
-            totalHoraReloj: const Value(3),
-            idUnit: Value(_selectedUnitId!),
-          ),
-        );
+    await ref.read(moduleControllerProvider).insertActivity(
+      ActivitiesCompanion(
+        codActivity: Value(actCode),
+        descripcion: Value(
+          'A${unitActs.length + 1}: Nueva actividad práctica',
+        ),
+        totalHoraAcademic: const Value(4),
+        totalHoraReloj: const Value(3),
+        idUnit: Value(_selectedUnitId!),
+      ),
+    );
 
     _loadDetails();
   }
 
   void _deleteActivity(Activity act) async {
-    await (ref.read(appDatabaseProvider).delete(
-      ref.read(appDatabaseProvider).activities,
-    )..where((t) => t.codActivity.equals(act.codActivity))).go();
+    await ref.read(moduleControllerProvider).deleteActivity(act.codActivity);
     _loadDetails();
   }
 

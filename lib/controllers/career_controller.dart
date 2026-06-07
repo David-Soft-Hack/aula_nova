@@ -9,6 +9,10 @@ class CareerController {
   CareerController({required this.careerDao});
 
   Future<List<Career>> getAllCareers() => careerDao.getAllCareers();
+  Future<List<String>> getAllCareerNames() async {
+    final careers = await careerDao.getAllCareers();
+    return careers.map((c) => c.nombre).toList();
+  }
 
   Stream<List<Career>> watchAllCareers() => careerDao.watchAllCareers();
 

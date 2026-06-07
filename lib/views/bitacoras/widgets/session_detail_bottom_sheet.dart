@@ -7,6 +7,8 @@ import 'package:drift/drift.dart' hide Column, Table;
 import 'dart:io';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
+import '../../shared/bottom_sheet_handle.dart';
+import '../../shared/app_snackbar.dart';
 import 'session_detail_header.dart';
 import 'session_evaluativa_section.dart';
 import 'session_document_section.dart';
@@ -101,14 +103,7 @@ class _SessionDetailBottomSheetState extends State<SessionDetailBottomSheet>
     if (_rutaDocumento == null) return;
     final file = File(_rutaDocumento!);
     if (!file.existsSync()) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('El archivo no existe o fue movido.'),
-            backgroundColor: Colors.redAccent,
-          ),
-        );
-      }
+      if (mounted) AppSnackbar.showError(context, 'El archivo no existe o fue movido.');
       return;
     }
     await OpenFilex.open(_rutaDocumento!);
@@ -122,7 +117,6 @@ class _SessionDetailBottomSheetState extends State<SessionDetailBottomSheet>
   }
 
   Future<void> _handleSave() async {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     double? puntaje;
@@ -141,22 +135,10 @@ class _SessionDetailBottomSheetState extends State<SessionDetailBottomSheet>
       await widget.onSave(updated);
       if (!mounted) return;
       navigator.pop();
-      scaffoldMessenger.showSnackBar(
-        const SnackBar(
-          content: Text('Sesión actualizada con éxito ✅'),
-          backgroundColor: Colors.green,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackbar.showSuccess(context, 'Sesión actualizada con éxito');
     } catch (e) {
       if (!mounted) return;
-      scaffoldMessenger.showSnackBar(
-        SnackBar(
-          content: Text('Error al guardar: $e'),
-          backgroundColor: Colors.redAccent,
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+      AppSnackbar.showError(context, 'Error al guardar: $e');
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -242,21 +224,10 @@ class _SessionDetailBottomSheetState extends State<SessionDetailBottomSheet>
     );
   }
 
-  Widget _buildHandle() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Center(
-        child: Container(
-          width: 40,
-          height: 4,
-          decoration: BoxDecoration(
-            color: Colors.grey.shade300,
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
-    );
-  }
+  Widget _buildHandle() => const Padding(
+    padding: EdgeInsets.symmetric(vertical: 12),
+    child: BottomSheetHandle(),
+  );
 
   Widget _buildPuntajeField() {
     return Column(

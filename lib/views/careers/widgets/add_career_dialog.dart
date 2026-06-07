@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/tables.dart' show TipoCarrera;
 import '../../../providers/career_providers.dart';
+import '../../shared/app_snackbar.dart';
 import 'career_type_selector.dart';
 
 class AddCareerDialog extends ConsumerStatefulWidget {
@@ -38,28 +39,7 @@ class _AddCareerDialogState extends ConsumerState<AddCareerDialog> {
       setState(() {
         _isSaving = false;
       });
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(LucideIcons.alertTriangle, color: Colors.white, size: 20),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'El programa o carrera "$nombre" ya existe.',
-                    style: const TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
-      }
+      if (mounted) AppSnackbar.showError(context, 'El programa o carrera "$nombre" ya existe.');
       return;
     }
 

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:drift/drift.dart';
 
 // --- Enums ---
@@ -115,11 +117,16 @@ class ListConverter extends TypeConverter<List<String>, String> {
   @override
   List<String> fromSql(String fromDb) {
     if (fromDb.isEmpty) return [];
-    return fromDb.split(',');
+    try {
+      final decoded = jsonDecode(fromDb);
+      return List<String>.from(decoded);
+    } catch (_) {
+      return fromDb.split(',');
+    }
   }
 
   @override
   String toSql(List<String> value) {
-    return value.join(',');
+    return jsonEncode(value);
   }
 }

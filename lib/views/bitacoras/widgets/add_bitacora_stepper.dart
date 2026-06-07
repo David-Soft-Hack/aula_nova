@@ -6,6 +6,7 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../providers/database_providers.dart';
+import '../../../providers/bitacora_providers.dart';
 import '../../../services/dosificacion_service.dart';
 import 'bitacora_step_1_form.dart';
 import 'bitacora_step_2_preview.dart';
@@ -187,16 +188,9 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         turno: Value(_selectedShift),
       );
 
-      final bitacoraId = await ref.read(bitacoraDaoProvider).createBitacora(
-        bitacoraCompanion,
-      );
-
-      final sessionsToSave = _generatedPreview.map((s) {
-        return s.copyWith(idBitacora: Value(bitacoraId));
-      }).toList();
-
-      await ref.read(bitacoraDaoProvider).createCalendarioEntries(
-        sessionsToSave,
+      await ref.read(bitacoraControllerProvider).createBitacoraFromPreview(
+        bitacora: bitacoraCompanion,
+        sessions: _generatedPreview,
       );
 
       if (mounted) {

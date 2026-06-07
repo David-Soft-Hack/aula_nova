@@ -6,6 +6,7 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/career_providers.dart';
+import '../../shared/app_badge.dart';
 
 /// Diálogo altamente optimizado, seguro y con diseño premium M3 para editar un Módulo Formativo.
 class EditModuleDialog extends ConsumerStatefulWidget {
@@ -301,25 +302,11 @@ class _EditModuleDialogState extends ConsumerState<EditModuleDialog> {
                                       ),
                                     ),
                                     const SizedBox(height: 3),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                        vertical: 3,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.academic50,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        widget.module.codModule.toUpperCase(),
-                                        style: const TextStyle(
-                                          fontFamily: 'Inter',
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w900,
-                                          color: AppTheme.academic600,
-                                          letterSpacing: 1.0,
-                                        ),
-                                      ),
+                                    AppBadge(
+                                      label: widget.module.codModule,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w900,
+                                      letterSpacing: 1.0,
                                     ),
                                   ],
                                 ),

@@ -2,61 +2,69 @@ import 'package:flutter/material.dart';
 import '../../../config/theme/app_theme.dart';
 
 class FormActionButtons extends StatelessWidget {
-  final int currentStep;
-  final bool isSaving;
-  final VoidCallback onBack;
-  final VoidCallback onNext;
+  final bool isLoading;
+  final VoidCallback? onBack;
+  final VoidCallback? onNext;
   final String? backLabel;
   final String? nextLabel;
+  final Color? primaryColor;
+  final Color? backForegroundColor;
+  final double borderRadius;
+  final bool hideBack;
 
   const FormActionButtons({
     super.key,
-    required this.currentStep,
-    required this.isSaving,
-    required this.onBack,
-    required this.onNext,
+    this.isLoading = false,
+    this.onBack,
+    this.onNext,
     this.backLabel,
     this.nextLabel,
+    this.primaryColor,
+    this.backForegroundColor,
+    this.borderRadius = 12,
+    this.hideBack = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Expanded(
-          child: OutlinedButton(
-            onPressed: isSaving ? null : onBack,
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AppTheme.slate900,
-              side: BorderSide(color: Colors.grey.shade200),
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        if (!hideBack) ...[
+          Expanded(
+            child: OutlinedButton(
+              onPressed: isLoading ? null : onBack,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: backForegroundColor ?? AppTheme.slate900,
+                side: BorderSide(color: Colors.grey.shade200),
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(borderRadius),
+                ),
               ),
-            ),
-            child: Text(
-              backLabel ?? (currentStep == 1 ? 'Atrás' : 'Cancelar'),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
+              child: Text(
+                backLabel ?? 'Cancelar',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
+          const SizedBox(width: 12),
+        ],
         Expanded(
           child: ElevatedButton(
-            onPressed: isSaving ? null : onNext,
+            onPressed: isLoading ? null : onNext,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.academic600,
+              backgroundColor: primaryColor ?? AppTheme.academic600,
               foregroundColor: Colors.white,
               elevation: 0,
               padding: const EdgeInsets.symmetric(vertical: 14),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
             ),
-            child: isSaving
+            child: isLoading
                 ? const SizedBox(
                     width: 20,
                     height: 20,
@@ -66,7 +74,7 @@ class FormActionButtons extends StatelessWidget {
                     ),
                   )
                 : Text(
-                    nextLabel ?? (currentStep == 0 ? 'Siguiente' : 'Guardar'),
+                    nextLabel ?? 'Siguiente',
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 14,

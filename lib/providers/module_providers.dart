@@ -9,6 +9,7 @@ final moduleControllerProvider = Provider<ModuleController>((ref) {
     moduleDao: ref.watch(moduleDaoProvider),
     unitDao: ref.watch(unitDaoProvider),
     activityDao: ref.watch(activityDaoProvider),
+    bitacoraDao: ref.watch(bitacoraDaoProvider),
   );
 });
 

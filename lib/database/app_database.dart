@@ -98,6 +98,8 @@ class AppDatabase extends _$AppDatabase {
             SET total_hora_academic = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
+
+      await bitacoraDao.autoCompletePastSessions();
     },
   );
 
