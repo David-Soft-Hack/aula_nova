@@ -7,6 +7,8 @@ import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/career_providers.dart';
 import '../../shared/app_badge.dart';
+import '../../shared/app_input_decoration.dart';
+import '../../shared/app_snackbar.dart';
 
 /// Diálogo altamente optimizado, seguro y con diseño premium M3 para editar un Módulo Formativo.
 class EditModuleDialog extends ConsumerStatefulWidget {
@@ -82,51 +84,17 @@ class _EditModuleDialogState extends ConsumerState<EditModuleDialog> {
     super.dispose();
   }
 
-  /// Construye decoraciones de input premium y consistentes.
   InputDecoration _buildInputDecoration({
     required String hintText,
     required IconData prefixIcon,
   }) {
-    return InputDecoration(
+    return AppInputDecoration.build(
       hintText: hintText,
-      prefixIcon: Icon(prefixIcon, size: 20),
-      prefixIconColor: WidgetStateColor.resolveWith((states) {
-        if (states.contains(WidgetState.focused)) {
-          return AppTheme.academic600;
-        }
-        if (states.contains(WidgetState.error)) {
-          return Colors.red.shade600;
-        }
-        return Colors.grey.shade400;
-      }),
-      filled: true,
-      fillColor: Colors.grey.shade50,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      errorStyle: const TextStyle(
-        fontFamily: 'Inter',
-        fontSize: 12,
-        fontWeight: FontWeight.w500,
-      ),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.red.shade400),
-      ),
-      focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.red.shade600, width: 1.5),
-      ),
+      prefixIcon: prefixIcon,
+      borderRadius: 14,
+      prefixIconColor: Colors.grey.shade400,
+      showErrors: true,
+      errorStyle: const TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w500),
     );
   }
 
@@ -148,69 +116,13 @@ class _EditModuleDialogState extends ConsumerState<EditModuleDialog> {
       await ref.read(moduleDaoProvider).updateModule(updatedModule);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  LucideIcons.checkCircle2,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    '¡Módulo "${updatedModule.nombre}" actualizado con éxito!',
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.green.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        AppSnackbar.showSuccess(context, '¡Módulo "${updatedModule.nombre}" actualizado con éxito!');
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Row(
-              children: [
-                const Icon(
-                  LucideIcons.alertTriangle,
-                  color: Colors.white,
-                  size: 20,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'Error al actualizar: $e',
-                    style: const TextStyle(
-                      fontFamily: 'Inter',
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            backgroundColor: Colors.red.shade600,
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            margin: const EdgeInsets.all(16),
-          ),
-        );
+        AppSnackbar.showError(context, 'Error al actualizar: $e');
       }
     }
   }

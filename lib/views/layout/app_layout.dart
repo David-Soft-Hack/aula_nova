@@ -7,6 +7,8 @@ import '../bitacoras/bitacoras_screen.dart';
 import '../careers/careers_screen.dart';
 import '../students/students_screen.dart';
 import '../groups/groups_screen.dart';
+import '../attendance/attendance_screen.dart';
+import '../shared/app_snackbar.dart';
 import 'widgets/bottom_nav_bar.dart';
 import 'widgets/app_drawer.dart';
 import 'widgets/secondary_menu_sheet.dart';
@@ -22,11 +24,7 @@ final _kScreens = <Widget>[
     subtitle: 'Seguimiento de fechas y evaluaciones',
   ),
   const StudentsScreen(),
-  const _PlaceholderScreen(
-    icon: LucideIcons.checkSquare,
-    title: 'Control de Asistencia',
-    subtitle: 'Registro rápido de asistencia diaria',
-  ),
+  const AttendanceScreen(),
   const CareersScreen(),
   const GroupsScreen(),
 ];
@@ -113,7 +111,7 @@ class _AppLayoutState extends State<AppLayout> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    AppSnackbar.showInfo(context, message);
   }
 
   @override

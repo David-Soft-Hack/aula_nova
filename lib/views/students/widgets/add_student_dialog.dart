@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../database/tables.dart';
 import '../../../providers/student_providers.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/full_screen_dialog_layout.dart';
 import '../../shared/requirement_dialog.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
@@ -53,7 +54,15 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
       final controller = ref.read(studentControllerProvider);
       final carreras = await controller.getAllCareers();
       final grupos = await controller.getAllGroups();
-      
+      if (grupos.isEmpty && mounted) {
+        RequirementDialog.show(
+          context,
+          title: 'Grupo Requerido',
+          message: 'No puedes registrar un estudiante porque aún no has creado ningún Grupo de Clase.\n\nPor favor, ve a la sección de "Grupos" y crea al menos un grupo primero.',
+        );
+        Navigator.pop(context);
+        return;
+      }
       setState(() {
         _carreras = carreras;
         _grupos = grupos;
@@ -172,17 +181,12 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
   Widget build(BuildContext context) {
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return Dialog.fullscreen(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: isKeyboardVisible ? 16.0 : 24.0,
-            vertical: isKeyboardVisible ? 12.0 : 24.0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return FullScreenDialogLayout(
+      padding: EdgeInsets.symmetric(
+        horizontal: isKeyboardVisible ? 16.0 : 24.0,
+        vertical: isKeyboardVisible ? 12.0 : 24.0,
+      ),
+      children: [
               DialogHeader(
                 title: 'Nuevo Estudiante',
                 stepBadge: 'Paso ${_currentStep + 1} de 2',
@@ -255,9 +259,6 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
                 nextLabel: _currentStep == 0 ? 'Siguiente' : 'Guardar',
               ),
             ],
-          ),
-        ),
-      ),
     );
   }
 }

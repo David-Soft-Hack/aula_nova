@@ -4259,6 +4259,427 @@ class StudentsCompanion extends UpdateCompanion<Student> {
   }
 }
 
+class $AttendancesTable extends Attendances
+    with TableInfo<$AttendancesTable, Attendance> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $AttendancesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _idSessionMeta = const VerificationMeta(
+    'idSession',
+  );
+  @override
+  late final GeneratedColumn<int> idSession = GeneratedColumn<int>(
+    'id_session',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES calendario_bitacoras (id)',
+    ),
+  );
+  static const VerificationMeta _idStudentMeta = const VerificationMeta(
+    'idStudent',
+  );
+  @override
+  late final GeneratedColumn<int> idStudent = GeneratedColumn<int>(
+    'id_student',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES students (id)',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<EstadoAsistencia, int> estado =
+      GeneratedColumn<int>(
+        'estado',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      ).withConverter<EstadoAsistencia>($AttendancesTable.$converterestado);
+  static const VerificationMeta _observacionMeta = const VerificationMeta(
+    'observacion',
+  );
+  @override
+  late final GeneratedColumn<String> observacion = GeneratedColumn<String>(
+    'observacion',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fechaCreacionMeta = const VerificationMeta(
+    'fechaCreacion',
+  );
+  @override
+  late final GeneratedColumn<DateTime> fechaCreacion =
+      GeneratedColumn<DateTime>(
+        'fecha_creacion',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+        defaultValue: currentDateAndTime,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    idSession,
+    idStudent,
+    estado,
+    observacion,
+    fechaCreacion,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'attendances';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<Attendance> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('id_session')) {
+      context.handle(
+        _idSessionMeta,
+        idSession.isAcceptableOrUnknown(data['id_session']!, _idSessionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idSessionMeta);
+    }
+    if (data.containsKey('id_student')) {
+      context.handle(
+        _idStudentMeta,
+        idStudent.isAcceptableOrUnknown(data['id_student']!, _idStudentMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_idStudentMeta);
+    }
+    if (data.containsKey('observacion')) {
+      context.handle(
+        _observacionMeta,
+        observacion.isAcceptableOrUnknown(
+          data['observacion']!,
+          _observacionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fecha_creacion')) {
+      context.handle(
+        _fechaCreacionMeta,
+        fechaCreacion.isAcceptableOrUnknown(
+          data['fecha_creacion']!,
+          _fechaCreacionMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  Attendance map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return Attendance(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      idSession: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id_session'],
+      )!,
+      idStudent: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id_student'],
+      )!,
+      estado: $AttendancesTable.$converterestado.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.int,
+          data['${effectivePrefix}estado'],
+        )!,
+      ),
+      observacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}observacion'],
+      ),
+      fechaCreacion: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}fecha_creacion'],
+      )!,
+    );
+  }
+
+  @override
+  $AttendancesTable createAlias(String alias) {
+    return $AttendancesTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<EstadoAsistencia, int, int> $converterestado =
+      const EnumIndexConverter<EstadoAsistencia>(EstadoAsistencia.values);
+}
+
+class Attendance extends DataClass implements Insertable<Attendance> {
+  final int id;
+  final int idSession;
+  final int idStudent;
+  final EstadoAsistencia estado;
+  final String? observacion;
+  final DateTime fechaCreacion;
+  const Attendance({
+    required this.id,
+    required this.idSession,
+    required this.idStudent,
+    required this.estado,
+    this.observacion,
+    required this.fechaCreacion,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['id_session'] = Variable<int>(idSession);
+    map['id_student'] = Variable<int>(idStudent);
+    {
+      map['estado'] = Variable<int>(
+        $AttendancesTable.$converterestado.toSql(estado),
+      );
+    }
+    if (!nullToAbsent || observacion != null) {
+      map['observacion'] = Variable<String>(observacion);
+    }
+    map['fecha_creacion'] = Variable<DateTime>(fechaCreacion);
+    return map;
+  }
+
+  AttendancesCompanion toCompanion(bool nullToAbsent) {
+    return AttendancesCompanion(
+      id: Value(id),
+      idSession: Value(idSession),
+      idStudent: Value(idStudent),
+      estado: Value(estado),
+      observacion: observacion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(observacion),
+      fechaCreacion: Value(fechaCreacion),
+    );
+  }
+
+  factory Attendance.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return Attendance(
+      id: serializer.fromJson<int>(json['id']),
+      idSession: serializer.fromJson<int>(json['idSession']),
+      idStudent: serializer.fromJson<int>(json['idStudent']),
+      estado: $AttendancesTable.$converterestado.fromJson(
+        serializer.fromJson<int>(json['estado']),
+      ),
+      observacion: serializer.fromJson<String?>(json['observacion']),
+      fechaCreacion: serializer.fromJson<DateTime>(json['fechaCreacion']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'idSession': serializer.toJson<int>(idSession),
+      'idStudent': serializer.toJson<int>(idStudent),
+      'estado': serializer.toJson<int>(
+        $AttendancesTable.$converterestado.toJson(estado),
+      ),
+      'observacion': serializer.toJson<String?>(observacion),
+      'fechaCreacion': serializer.toJson<DateTime>(fechaCreacion),
+    };
+  }
+
+  Attendance copyWith({
+    int? id,
+    int? idSession,
+    int? idStudent,
+    EstadoAsistencia? estado,
+    Value<String?> observacion = const Value.absent(),
+    DateTime? fechaCreacion,
+  }) => Attendance(
+    id: id ?? this.id,
+    idSession: idSession ?? this.idSession,
+    idStudent: idStudent ?? this.idStudent,
+    estado: estado ?? this.estado,
+    observacion: observacion.present ? observacion.value : this.observacion,
+    fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+  );
+  Attendance copyWithCompanion(AttendancesCompanion data) {
+    return Attendance(
+      id: data.id.present ? data.id.value : this.id,
+      idSession: data.idSession.present ? data.idSession.value : this.idSession,
+      idStudent: data.idStudent.present ? data.idStudent.value : this.idStudent,
+      estado: data.estado.present ? data.estado.value : this.estado,
+      observacion: data.observacion.present
+          ? data.observacion.value
+          : this.observacion,
+      fechaCreacion: data.fechaCreacion.present
+          ? data.fechaCreacion.value
+          : this.fechaCreacion,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('Attendance(')
+          ..write('id: $id, ')
+          ..write('idSession: $idSession, ')
+          ..write('idStudent: $idStudent, ')
+          ..write('estado: $estado, ')
+          ..write('observacion: $observacion, ')
+          ..write('fechaCreacion: $fechaCreacion')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, idSession, idStudent, estado, observacion, fechaCreacion);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is Attendance &&
+          other.id == this.id &&
+          other.idSession == this.idSession &&
+          other.idStudent == this.idStudent &&
+          other.estado == this.estado &&
+          other.observacion == this.observacion &&
+          other.fechaCreacion == this.fechaCreacion);
+}
+
+class AttendancesCompanion extends UpdateCompanion<Attendance> {
+  final Value<int> id;
+  final Value<int> idSession;
+  final Value<int> idStudent;
+  final Value<EstadoAsistencia> estado;
+  final Value<String?> observacion;
+  final Value<DateTime> fechaCreacion;
+  const AttendancesCompanion({
+    this.id = const Value.absent(),
+    this.idSession = const Value.absent(),
+    this.idStudent = const Value.absent(),
+    this.estado = const Value.absent(),
+    this.observacion = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
+  });
+  AttendancesCompanion.insert({
+    this.id = const Value.absent(),
+    required int idSession,
+    required int idStudent,
+    required EstadoAsistencia estado,
+    this.observacion = const Value.absent(),
+    this.fechaCreacion = const Value.absent(),
+  }) : idSession = Value(idSession),
+       idStudent = Value(idStudent),
+       estado = Value(estado);
+  static Insertable<Attendance> custom({
+    Expression<int>? id,
+    Expression<int>? idSession,
+    Expression<int>? idStudent,
+    Expression<int>? estado,
+    Expression<String>? observacion,
+    Expression<DateTime>? fechaCreacion,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (idSession != null) 'id_session': idSession,
+      if (idStudent != null) 'id_student': idStudent,
+      if (estado != null) 'estado': estado,
+      if (observacion != null) 'observacion': observacion,
+      if (fechaCreacion != null) 'fecha_creacion': fechaCreacion,
+    });
+  }
+
+  AttendancesCompanion copyWith({
+    Value<int>? id,
+    Value<int>? idSession,
+    Value<int>? idStudent,
+    Value<EstadoAsistencia>? estado,
+    Value<String?>? observacion,
+    Value<DateTime>? fechaCreacion,
+  }) {
+    return AttendancesCompanion(
+      id: id ?? this.id,
+      idSession: idSession ?? this.idSession,
+      idStudent: idStudent ?? this.idStudent,
+      estado: estado ?? this.estado,
+      observacion: observacion ?? this.observacion,
+      fechaCreacion: fechaCreacion ?? this.fechaCreacion,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (idSession.present) {
+      map['id_session'] = Variable<int>(idSession.value);
+    }
+    if (idStudent.present) {
+      map['id_student'] = Variable<int>(idStudent.value);
+    }
+    if (estado.present) {
+      map['estado'] = Variable<int>(
+        $AttendancesTable.$converterestado.toSql(estado.value),
+      );
+    }
+    if (observacion.present) {
+      map['observacion'] = Variable<String>(observacion.value);
+    }
+    if (fechaCreacion.present) {
+      map['fecha_creacion'] = Variable<DateTime>(fechaCreacion.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('AttendancesCompanion(')
+          ..write('id: $id, ')
+          ..write('idSession: $idSession, ')
+          ..write('idStudent: $idStudent, ')
+          ..write('estado: $estado, ')
+          ..write('observacion: $observacion, ')
+          ..write('fechaCreacion: $fechaCreacion')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4271,6 +4692,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $CalendarioBitacorasTable calendarioBitacoras =
       $CalendarioBitacorasTable(this);
   late final $StudentsTable students = $StudentsTable(this);
+  late final $AttendancesTable attendances = $AttendancesTable(this);
   late final CareerDao careerDao = CareerDao(this as AppDatabase);
   late final ClassGroupDao classGroupDao = ClassGroupDao(this as AppDatabase);
   late final ModuleDao moduleDao = ModuleDao(this as AppDatabase);
@@ -4278,6 +4700,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final ActivityDao activityDao = ActivityDao(this as AppDatabase);
   late final BitacoraDao bitacoraDao = BitacoraDao(this as AppDatabase);
   late final StudentDao studentDao = StudentDao(this as AppDatabase);
+  late final AttendanceDao attendanceDao = AttendanceDao(this as AppDatabase);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4291,6 +4714,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     bitacoras,
     calendarioBitacoras,
     students,
+    attendances,
   ];
 }
 
@@ -6777,6 +7201,27 @@ final class $$CalendarioBitacorasTableReferences
       manager.$state.copyWith(prefetchedData: [item]),
     );
   }
+
+  static MultiTypedResultKey<$AttendancesTable, List<Attendance>>
+  _attendancesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.attendances,
+    aliasName: $_aliasNameGenerator(
+      db.calendarioBitacoras.id,
+      db.attendances.idSession,
+    ),
+  );
+
+  $$AttendancesTableProcessedTableManager get attendancesRefs {
+    final manager = $$AttendancesTableTableManager(
+      $_db,
+      $_db.attendances,
+    ).filter((f) => f.idSession.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_attendancesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$CalendarioBitacorasTableFilterComposer
@@ -6854,6 +7299,31 @@ class $$CalendarioBitacorasTableFilterComposer
           ),
     );
     return composer;
+  }
+
+  Expression<bool> attendancesRefs(
+    Expression<bool> Function($$AttendancesTableFilterComposer f) f,
+  ) {
+    final $$AttendancesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attendances,
+      getReferencedColumn: (t) => t.idSession,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttendancesTableFilterComposer(
+            $db: $db,
+            $table: $db.attendances,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
   }
 }
 
@@ -7005,6 +7475,31 @@ class $$CalendarioBitacorasTableAnnotationComposer
     );
     return composer;
   }
+
+  Expression<T> attendancesRefs<T extends Object>(
+    Expression<T> Function($$AttendancesTableAnnotationComposer a) f,
+  ) {
+    final $$AttendancesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attendances,
+      getReferencedColumn: (t) => t.idSession,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttendancesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.attendances,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$CalendarioBitacorasTableTableManager
@@ -7020,7 +7515,7 @@ class $$CalendarioBitacorasTableTableManager
           $$CalendarioBitacorasTableUpdateCompanionBuilder,
           (CalendarioBitacora, $$CalendarioBitacorasTableReferences),
           CalendarioBitacora,
-          PrefetchHooks Function({bool idBitacora})
+          PrefetchHooks Function({bool idBitacora, bool attendancesRefs})
         > {
   $$CalendarioBitacorasTableTableManager(
     _$AppDatabase db,
@@ -7097,49 +7592,74 @@ class $$CalendarioBitacorasTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({idBitacora = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [],
-              addJoins:
-                  <
-                    T extends TableManagerState<
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic,
-                      dynamic
-                    >
-                  >(state) {
-                    if (idBitacora) {
-                      state =
-                          state.withJoin(
-                                currentTable: table,
-                                currentColumn: table.idBitacora,
-                                referencedTable:
-                                    $$CalendarioBitacorasTableReferences
-                                        ._idBitacoraTable(db),
-                                referencedColumn:
-                                    $$CalendarioBitacorasTableReferences
-                                        ._idBitacoraTable(db)
-                                        .id,
-                              )
-                              as T;
-                    }
+          prefetchHooksCallback:
+              ({idBitacora = false, attendancesRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (attendancesRefs) db.attendances,
+                  ],
+                  addJoins:
+                      <
+                        T extends TableManagerState<
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic,
+                          dynamic
+                        >
+                      >(state) {
+                        if (idBitacora) {
+                          state =
+                              state.withJoin(
+                                    currentTable: table,
+                                    currentColumn: table.idBitacora,
+                                    referencedTable:
+                                        $$CalendarioBitacorasTableReferences
+                                            ._idBitacoraTable(db),
+                                    referencedColumn:
+                                        $$CalendarioBitacorasTableReferences
+                                            ._idBitacoraTable(db)
+                                            .id,
+                                  )
+                                  as T;
+                        }
 
-                    return state;
+                        return state;
+                      },
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (attendancesRefs)
+                        await $_getPrefetchedData<
+                          CalendarioBitacora,
+                          $CalendarioBitacorasTable,
+                          Attendance
+                        >(
+                          currentTable: table,
+                          referencedTable: $$CalendarioBitacorasTableReferences
+                              ._attendancesRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$CalendarioBitacorasTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).attendancesRefs,
+                          referencedItemsForCurrentItem:
+                              (item, referencedItems) => referencedItems.where(
+                                (e) => e.idSession == item.id,
+                              ),
+                          typedResults: items,
+                        ),
+                    ];
                   },
-              getPrefetchedDataCallback: (items) async {
-                return [];
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -7156,7 +7676,7 @@ typedef $$CalendarioBitacorasTableProcessedTableManager =
       $$CalendarioBitacorasTableUpdateCompanionBuilder,
       (CalendarioBitacora, $$CalendarioBitacorasTableReferences),
       CalendarioBitacora,
-      PrefetchHooks Function({bool idBitacora})
+      PrefetchHooks Function({bool idBitacora, bool attendancesRefs})
     >;
 typedef $$StudentsTableCreateCompanionBuilder =
     StudentsCompanion Function({
@@ -7186,6 +7706,29 @@ typedef $$StudentsTableUpdateCompanionBuilder =
       Value<DateTime?> fechaIngreso,
       Value<DateTime?> fechaCreacion,
     });
+
+final class $$StudentsTableReferences
+    extends BaseReferences<_$AppDatabase, $StudentsTable, Student> {
+  $$StudentsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$AttendancesTable, List<Attendance>>
+  _attendancesRefsTable(_$AppDatabase db) => MultiTypedResultKey.fromTable(
+    db.attendances,
+    aliasName: $_aliasNameGenerator(db.students.id, db.attendances.idStudent),
+  );
+
+  $$AttendancesTableProcessedTableManager get attendancesRefs {
+    final manager = $$AttendancesTableTableManager(
+      $_db,
+      $_db.attendances,
+    ).filter((f) => f.idStudent.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_attendancesRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
 
 class $$StudentsTableFilterComposer
     extends Composer<_$AppDatabase, $StudentsTable> {
@@ -7251,6 +7794,31 @@ class $$StudentsTableFilterComposer
     column: $table.fechaCreacion,
     builder: (column) => ColumnFilters(column),
   );
+
+  Expression<bool> attendancesRefs(
+    Expression<bool> Function($$AttendancesTableFilterComposer f) f,
+  ) {
+    final $$AttendancesTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attendances,
+      getReferencedColumn: (t) => t.idStudent,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttendancesTableFilterComposer(
+            $db: $db,
+            $table: $db.attendances,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StudentsTableOrderingComposer
@@ -7363,6 +7931,31 @@ class $$StudentsTableAnnotationComposer
     column: $table.fechaCreacion,
     builder: (column) => column,
   );
+
+  Expression<T> attendancesRefs<T extends Object>(
+    Expression<T> Function($$AttendancesTableAnnotationComposer a) f,
+  ) {
+    final $$AttendancesTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.attendances,
+      getReferencedColumn: (t) => t.idStudent,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$AttendancesTableAnnotationComposer(
+            $db: $db,
+            $table: $db.attendances,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$StudentsTableTableManager
@@ -7376,9 +7969,9 @@ class $$StudentsTableTableManager
           $$StudentsTableAnnotationComposer,
           $$StudentsTableCreateCompanionBuilder,
           $$StudentsTableUpdateCompanionBuilder,
-          (Student, BaseReferences<_$AppDatabase, $StudentsTable, Student>),
+          (Student, $$StudentsTableReferences),
           Student,
-          PrefetchHooks Function()
+          PrefetchHooks Function({bool attendancesRefs})
         > {
   $$StudentsTableTableManager(_$AppDatabase db, $StudentsTable table)
     : super(
@@ -7444,9 +8037,42 @@ class $$StudentsTableTableManager
                 fechaCreacion: fechaCreacion,
               ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$StudentsTableReferences(db, table, e),
+                ),
+              )
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({attendancesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [if (attendancesRefs) db.attendances],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (attendancesRefs)
+                    await $_getPrefetchedData<
+                      Student,
+                      $StudentsTable,
+                      Attendance
+                    >(
+                      currentTable: table,
+                      referencedTable: $$StudentsTableReferences
+                          ._attendancesRefsTable(db),
+                      managerFromTypedResult: (p0) => $$StudentsTableReferences(
+                        db,
+                        table,
+                        p0,
+                      ).attendancesRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.idStudent == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
         ),
       );
 }
@@ -7461,9 +8087,439 @@ typedef $$StudentsTableProcessedTableManager =
       $$StudentsTableAnnotationComposer,
       $$StudentsTableCreateCompanionBuilder,
       $$StudentsTableUpdateCompanionBuilder,
-      (Student, BaseReferences<_$AppDatabase, $StudentsTable, Student>),
+      (Student, $$StudentsTableReferences),
       Student,
-      PrefetchHooks Function()
+      PrefetchHooks Function({bool attendancesRefs})
+    >;
+typedef $$AttendancesTableCreateCompanionBuilder =
+    AttendancesCompanion Function({
+      Value<int> id,
+      required int idSession,
+      required int idStudent,
+      required EstadoAsistencia estado,
+      Value<String?> observacion,
+      Value<DateTime> fechaCreacion,
+    });
+typedef $$AttendancesTableUpdateCompanionBuilder =
+    AttendancesCompanion Function({
+      Value<int> id,
+      Value<int> idSession,
+      Value<int> idStudent,
+      Value<EstadoAsistencia> estado,
+      Value<String?> observacion,
+      Value<DateTime> fechaCreacion,
+    });
+
+final class $$AttendancesTableReferences
+    extends BaseReferences<_$AppDatabase, $AttendancesTable, Attendance> {
+  $$AttendancesTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $CalendarioBitacorasTable _idSessionTable(_$AppDatabase db) =>
+      db.calendarioBitacoras.createAlias(
+        $_aliasNameGenerator(
+          db.attendances.idSession,
+          db.calendarioBitacoras.id,
+        ),
+      );
+
+  $$CalendarioBitacorasTableProcessedTableManager get idSession {
+    final $_column = $_itemColumn<int>('id_session')!;
+
+    final manager = $$CalendarioBitacorasTableTableManager(
+      $_db,
+      $_db.calendarioBitacoras,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idSessionTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+
+  static $StudentsTable _idStudentTable(_$AppDatabase db) =>
+      db.students.createAlias(
+        $_aliasNameGenerator(db.attendances.idStudent, db.students.id),
+      );
+
+  $$StudentsTableProcessedTableManager get idStudent {
+    final $_column = $_itemColumn<int>('id_student')!;
+
+    final manager = $$StudentsTableTableManager(
+      $_db,
+      $_db.students,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_idStudentTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$AttendancesTableFilterComposer
+    extends Composer<_$AppDatabase, $AttendancesTable> {
+  $$AttendancesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<EstadoAsistencia, EstadoAsistencia, int>
+  get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get observacion => $composableBuilder(
+    column: $table.observacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$CalendarioBitacorasTableFilterComposer get idSession {
+    final $$CalendarioBitacorasTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idSession,
+      referencedTable: $db.calendarioBitacoras,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$CalendarioBitacorasTableFilterComposer(
+            $db: $db,
+            $table: $db.calendarioBitacoras,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+
+  $$StudentsTableFilterComposer get idStudent {
+    final $$StudentsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idStudent,
+      referencedTable: $db.students,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudentsTableFilterComposer(
+            $db: $db,
+            $table: $db.students,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AttendancesTableOrderingComposer
+    extends Composer<_$AppDatabase, $AttendancesTable> {
+  $$AttendancesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get estado => $composableBuilder(
+    column: $table.estado,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get observacion => $composableBuilder(
+    column: $table.observacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$CalendarioBitacorasTableOrderingComposer get idSession {
+    final $$CalendarioBitacorasTableOrderingComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idSession,
+          referencedTable: $db.calendarioBitacoras,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CalendarioBitacorasTableOrderingComposer(
+                $db: $db,
+                $table: $db.calendarioBitacoras,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$StudentsTableOrderingComposer get idStudent {
+    final $$StudentsTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idStudent,
+      referencedTable: $db.students,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudentsTableOrderingComposer(
+            $db: $db,
+            $table: $db.students,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AttendancesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $AttendancesTable> {
+  $$AttendancesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<EstadoAsistencia, int> get estado =>
+      $composableBuilder(column: $table.estado, builder: (column) => column);
+
+  GeneratedColumn<String> get observacion => $composableBuilder(
+    column: $table.observacion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get fechaCreacion => $composableBuilder(
+    column: $table.fechaCreacion,
+    builder: (column) => column,
+  );
+
+  $$CalendarioBitacorasTableAnnotationComposer get idSession {
+    final $$CalendarioBitacorasTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.idSession,
+          referencedTable: $db.calendarioBitacoras,
+          getReferencedColumn: (t) => t.id,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$CalendarioBitacorasTableAnnotationComposer(
+                $db: $db,
+                $table: $db.calendarioBitacoras,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return composer;
+  }
+
+  $$StudentsTableAnnotationComposer get idStudent {
+    final $$StudentsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.idStudent,
+      referencedTable: $db.students,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$StudentsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.students,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$AttendancesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $AttendancesTable,
+          Attendance,
+          $$AttendancesTableFilterComposer,
+          $$AttendancesTableOrderingComposer,
+          $$AttendancesTableAnnotationComposer,
+          $$AttendancesTableCreateCompanionBuilder,
+          $$AttendancesTableUpdateCompanionBuilder,
+          (Attendance, $$AttendancesTableReferences),
+          Attendance,
+          PrefetchHooks Function({bool idSession, bool idStudent})
+        > {
+  $$AttendancesTableTableManager(_$AppDatabase db, $AttendancesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$AttendancesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$AttendancesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$AttendancesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<int> idSession = const Value.absent(),
+                Value<int> idStudent = const Value.absent(),
+                Value<EstadoAsistencia> estado = const Value.absent(),
+                Value<String?> observacion = const Value.absent(),
+                Value<DateTime> fechaCreacion = const Value.absent(),
+              }) => AttendancesCompanion(
+                id: id,
+                idSession: idSession,
+                idStudent: idStudent,
+                estado: estado,
+                observacion: observacion,
+                fechaCreacion: fechaCreacion,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required int idSession,
+                required int idStudent,
+                required EstadoAsistencia estado,
+                Value<String?> observacion = const Value.absent(),
+                Value<DateTime> fechaCreacion = const Value.absent(),
+              }) => AttendancesCompanion.insert(
+                id: id,
+                idSession: idSession,
+                idStudent: idStudent,
+                estado: estado,
+                observacion: observacion,
+                fechaCreacion: fechaCreacion,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$AttendancesTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({idSession = false, idStudent = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (idSession) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.idSession,
+                                referencedTable: $$AttendancesTableReferences
+                                    ._idSessionTable(db),
+                                referencedColumn: $$AttendancesTableReferences
+                                    ._idSessionTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+                    if (idStudent) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.idStudent,
+                                referencedTable: $$AttendancesTableReferences
+                                    ._idStudentTable(db),
+                                referencedColumn: $$AttendancesTableReferences
+                                    ._idStudentTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$AttendancesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $AttendancesTable,
+      Attendance,
+      $$AttendancesTableFilterComposer,
+      $$AttendancesTableOrderingComposer,
+      $$AttendancesTableAnnotationComposer,
+      $$AttendancesTableCreateCompanionBuilder,
+      $$AttendancesTableUpdateCompanionBuilder,
+      (Attendance, $$AttendancesTableReferences),
+      Attendance,
+      PrefetchHooks Function({bool idSession, bool idStudent})
     >;
 
 class $AppDatabaseManager {
@@ -7485,4 +8541,6 @@ class $AppDatabaseManager {
       $$CalendarioBitacorasTableTableManager(_db, _db.calendarioBitacoras);
   $$StudentsTableTableManager get students =>
       $$StudentsTableTableManager(_db, _db.students);
+  $$AttendancesTableTableManager get attendances =>
+      $$AttendancesTableTableManager(_db, _db.attendances);
 }

@@ -10,6 +10,7 @@ import '../../../models/app_models.dart';
 import '../../../providers/database_providers.dart';
 import '../../../services/module_extractor.dart';
 import '../../../services/excel_template_generator.dart';
+import '../../shared/app_snackbar.dart';
 
 class ModuleExcelHandler {
   static Future<void> pickAndImportExcel({
@@ -142,14 +143,7 @@ class ModuleExcelHandler {
 
         if (!context.mounted) return;
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              '¡Datos importados con éxito desde Excel: $fileName! 📊',
-            ),
-            backgroundColor: Colors.green.shade600,
-          ),
-        );
+        AppSnackbar.showSuccess(context, '¡Datos importados con éxito desde Excel: $fileName!');
       }
     } catch (e) {
       if (!context.mounted) return;
@@ -160,13 +154,7 @@ class ModuleExcelHandler {
         errorMessage = e.message;
       }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red.shade600,
-          duration: const Duration(seconds: 4),
-        ),
-      );
+      AppSnackbar.showError(context, errorMessage);
     }
   }
 
@@ -323,28 +311,19 @@ class ModuleExcelHandler {
                           ),
                         ),
                         onPressed: () async {
-                          final messenger = ScaffoldMessenger.of(sheetContext);
                           Navigator.pop(sheetContext);
                           try {
                             final result = await OpenFilex.open(savePath);
                             if (result.type != ResultType.done) {
-                              messenger.showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    'No se encontró una aplicación compatible para abrir Excel. Motivo: ${result.message}',
-                                  ),
-                                  backgroundColor: Colors.amber.shade700,
-                                ),
+                              AppSnackbar.showWarning(
+                                context,
+                                'No se encontró una aplicación compatible para abrir Excel. Motivo: ${result.message}',
                               );
                             }
                           } catch (e) {
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'No se pudo abrir el archivo: $e',
-                                ),
-                                backgroundColor: Colors.red.shade600,
-                              ),
+                            AppSnackbar.showError(
+                              context,
+                              'No se pudo abrir el archivo: $e',
                             );
                           }
                         },
@@ -364,12 +343,7 @@ class ModuleExcelHandler {
       debugPrint(stackTrace.toString());
       onProcessingChanged(false);
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al descargar formato: $e'),
-          backgroundColor: Colors.red.shade600,
-        ),
-      );
+      AppSnackbar.showError(context, 'Error al descargar formato: $e');
     }
   }
 }

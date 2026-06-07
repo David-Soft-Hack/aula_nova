@@ -19,16 +19,29 @@ part 'app_database.g.dart';
     Bitacoras,
     CalendarioBitacoras,
     Students,
+    Attendances,
   ],
-  daos: [CareerDao, ClassGroupDao, ModuleDao, UnitDao, ActivityDao, BitacoraDao, StudentDao],
+  daos: [
+    CareerDao,
+    ClassGroupDao,
+    ModuleDao,
+    UnitDao,
+    ActivityDao,
+    BitacoraDao,
+    StudentDao,
+    AttendanceDao,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
     onUpgrade: (m, from, to) async {
       if (from < 2) {
         await m.drop(calendarioBitacoras);
@@ -48,6 +61,9 @@ class AppDatabase extends _$AppDatabase {
       if (from < 6) {}
       if (from < 8) {
         await m.create(classGroups);
+      }
+      if (from < 9) {
+        await m.create(attendances);
       }
     },
     beforeOpen: (details) async {

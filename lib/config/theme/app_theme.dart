@@ -9,6 +9,7 @@ class AppTheme {
   static const Color academic500 = Color(0xFF3B82F6);
   static const Color academic600 = Color(0xFF2563EB); // Primary
   static const Color academic700 = Color(0xFF1D4ED8);
+  static const Color academic800 = Color(0xFF1E40AF);
 
   static const Color slate50 = Color(0xFFF8FAFC); // Background
   static const Color slate900 = Color(0xFF0F172A); // Text

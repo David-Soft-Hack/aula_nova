@@ -8,6 +8,7 @@ import '../../../database/tables.dart';
 import '../../../providers/database_providers.dart';
 import '../../../providers/bitacora_providers.dart';
 import '../../../services/dosificacion_service.dart';
+import '../../shared/app_snackbar.dart';
 import 'bitacora_step_1_form.dart';
 import 'bitacora_step_2_preview.dart';
 
@@ -152,9 +153,7 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         setState(() {
           _generating = false;
         });
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error al dosificar: $e')));
+        AppSnackbar.showError(context, 'Error al dosificar: $e');
       }
     }
   }
@@ -195,17 +194,11 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Bitácora y calendario creados con éxito 🎉'),
-          ),
-        );
+        AppSnackbar.showSuccess(context, 'Bitácora y calendario creados con éxito');
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error al guardar bitácora: $e')),
-        );
+        AppSnackbar.showError(context, 'Error al guardar bitácora: $e');
       }
     }
   }

@@ -5,6 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
+import '../../shared/app_input_decoration.dart';
+import '../../shared/app_snackbar.dart';
 
 class EditActivityDialog extends ConsumerStatefulWidget {
   final Activity activity;
@@ -40,34 +42,14 @@ class _EditActivityDialogState extends ConsumerState<EditActivityDialog> {
   }
 
   InputDecoration _buildInputDecoration({required String hintText, required IconData prefixIcon}) {
-    return InputDecoration(
+    return AppInputDecoration.build(
       hintText: hintText,
-      prefixIcon: Icon(prefixIcon, size: 20),
-      prefixIconColor: WidgetStateColor.resolveWith((states) {
-        if (states.contains(WidgetState.focused)) return Colors.teal.shade600;
-        if (states.contains(WidgetState.error)) return Colors.red.shade600;
-        return Colors.grey.shade400;
-      }),
-      filled: true,
-      fillColor: Colors.grey.shade50,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      prefixIcon: prefixIcon,
+      borderRadius: 14,
+      prefixIconColor: Colors.grey.shade400,
+      focusedBorderColor: Colors.teal.shade600,
+      showErrors: true,
       errorStyle: const TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w500),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.teal.shade600, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.red.shade400),
-      ),
     );
   }
 
@@ -87,23 +69,13 @@ class _EditActivityDialogState extends ConsumerState<EditActivityDialog> {
       await ref.read(activityDaoProvider).updateActivity(updatedActivity);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Actividad actualizada con éxito'),
-            backgroundColor: Colors.green.shade600,
-          ),
-        );
+        AppSnackbar.showSuccess(context, 'Actividad actualizada con éxito');
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al actualizar: $e'),
-            backgroundColor: Colors.red.shade600,
-          ),
-        );
+        AppSnackbar.showError(context, 'Error al actualizar: $e');
       }
     }
   }

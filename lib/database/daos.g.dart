@@ -108,3 +108,31 @@ class BitacoraDaoManager {
         _db.calendarioBitacoras,
       );
 }
+
+mixin _$AttendanceDaoMixin on DatabaseAccessor<AppDatabase> {
+  $ModulesTable get modules => attachedDatabase.modules;
+  $BitacorasTable get bitacoras => attachedDatabase.bitacoras;
+  $CalendarioBitacorasTable get calendarioBitacoras =>
+      attachedDatabase.calendarioBitacoras;
+  $StudentsTable get students => attachedDatabase.students;
+  $AttendancesTable get attendances => attachedDatabase.attendances;
+  AttendanceDaoManager get managers => AttendanceDaoManager(this);
+}
+
+class AttendanceDaoManager {
+  final _$AttendanceDaoMixin _db;
+  AttendanceDaoManager(this._db);
+  $$ModulesTableTableManager get modules =>
+      $$ModulesTableTableManager(_db.attachedDatabase, _db.modules);
+  $$BitacorasTableTableManager get bitacoras =>
+      $$BitacorasTableTableManager(_db.attachedDatabase, _db.bitacoras);
+  $$CalendarioBitacorasTableTableManager get calendarioBitacoras =>
+      $$CalendarioBitacorasTableTableManager(
+        _db.attachedDatabase,
+        _db.calendarioBitacoras,
+      );
+  $$StudentsTableTableManager get students =>
+      $$StudentsTableTableManager(_db.attachedDatabase, _db.students);
+  $$AttendancesTableTableManager get attendances =>
+      $$AttendancesTableTableManager(_db.attachedDatabase, _db.attendances);
+}

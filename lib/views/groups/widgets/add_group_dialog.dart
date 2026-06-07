@@ -6,7 +6,9 @@ import '../../../database/tables.dart';
 import '../../../providers/class_group_providers.dart';
 import '../../../providers/career_providers.dart';
 import '../../../providers/database_providers.dart';
+import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/full_screen_dialog_layout.dart';
 import '../../shared/requirement_dialog.dart';
 
 class AddGroupDialog extends ConsumerStatefulWidget {
@@ -73,6 +75,18 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
       return;
     }
 
+    final careers = await ref.read(careerDaoProvider).getAllCareers();
+    if (careers.isEmpty) {
+      if (mounted) {
+        RequirementDialog.show(
+          context,
+          title: 'Programa Requerido',
+          message: 'No puedes crear un grupo de clase porque aún no has registrado ningún Programa o Carrera.\n\nPor favor, ve a la sección de "Programas" y agrega al menos un programa o carrera primero.',
+        );
+      }
+      return;
+    }
+
     setState(() => _isSaving = true);
     try {
       final controller = ref.read(classGroupControllerProvider);
@@ -108,14 +122,8 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog.fullscreen(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return FullScreenDialogLayout(
+      children: [
               _buildHeader(context),
               const SizedBox(height: 24),
               Expanded(
@@ -190,9 +198,6 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
                 ],
               ),
             ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -251,23 +256,12 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          decoration: InputDecoration(
+          decoration: AppInputDecoration.build(
             hintText: hint,
-            prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 20),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.academic600, width: 2),
-            ),
+            prefixIcon: icon,
+            borderColor: Colors.grey.shade300,
+            borderWidth: 2,
+            prefixIconColor: Colors.grey.shade400,
           ),
         ),
       ],

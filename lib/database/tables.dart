@@ -7,6 +7,7 @@ enum TipoCarrera { tecnica, curso }
 enum EstadoBitacora { activo, finalizado, sinCalendario }
 enum EstadoGrupo { activo, finalizado, suspendido }
 enum StudentStatus { activo, inactivo, graduado, suspendido, finalizado, desertado }
+enum EstadoAsistencia { presente, ausente, tardanza, justificado }
 
 // --- Tables ---
 
@@ -122,6 +123,15 @@ class Students extends Table {
   IntColumn get estado => intEnum<StudentStatus>().withDefault(const Constant(0))();
   DateTimeColumn get fechaIngreso => dateTime().nullable()();
   DateTimeColumn get fechaCreacion => dateTime().nullable()();
+}
+
+class Attendances extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get idSession => integer().references(CalendarioBitacoras, #id)();
+  IntColumn get idStudent => integer().references(Students, #id)();
+  IntColumn get estado => intEnum<EstadoAsistencia>()();
+  TextColumn get observacion => text().nullable()();
+  DateTimeColumn get fechaCreacion => dateTime().withDefault(currentDateAndTime)();
 }
 
 // --- Converters ---

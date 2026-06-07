@@ -7,7 +7,9 @@ import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../providers/class_group_providers.dart';
 import '../../../providers/career_providers.dart';
+import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/full_screen_dialog_layout.dart';
 
 class EditGroupDialog extends ConsumerStatefulWidget {
   final ClassGroup group;
@@ -128,14 +130,8 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog.fullscreen(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return FullScreenDialogLayout(
+      children: [
               _buildHeader(context),
               const SizedBox(height: 24),
               Expanded(
@@ -226,9 +222,6 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
                 ],
               ),
             ],
-          ),
-        ),
-      ),
     );
   }
 
@@ -287,23 +280,12 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
         const SizedBox(height: 8),
         TextFormField(
           controller: controller,
-          decoration: InputDecoration(
+          decoration: AppInputDecoration.build(
             hintText: hint,
-            prefixIcon: Icon(icon, color: Colors.grey.shade400, size: 20),
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade300),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: AppTheme.academic600, width: 2),
-            ),
+            prefixIcon: icon,
+            borderColor: Colors.grey.shade300,
+            borderWidth: 2,
+            prefixIconColor: Colors.grey.shade400,
           ),
         ),
       ],

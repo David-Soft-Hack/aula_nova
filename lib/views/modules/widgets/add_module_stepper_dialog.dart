@@ -12,6 +12,7 @@ import 'module_step_2_units.dart';
 import 'module_step_3_activities.dart';
 import 'module_excel_handler.dart';
 import '../../../config/theme/app_theme.dart';
+import '../../shared/app_snackbar.dart';
 
 class AddModuleStepperDialog extends ConsumerStatefulWidget {
   const AddModuleStepperDialog({super.key});
@@ -262,9 +263,7 @@ class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog>
       setState(() {
         _isProcessing = false;
       });
-      ScaffoldMessenger.of(
-        localContext,
-      ).showSnackBar(SnackBar(content: Text('Error al crear planeación: $e')));
+      AppSnackbar.showError(localContext, 'Error al crear planeación: $e');
     }
   }
 
@@ -498,13 +497,9 @@ class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog>
                             setState(() {
                               _isProcessing = false;
                             });
-                            ScaffoldMessenger.of(localContext).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'El módulo con código "$moduleCode" ya existe en la base de datos.',
-                                ),
-                                backgroundColor: Colors.red.shade600,
-                              ),
+                            AppSnackbar.showError(
+                              localContext,
+                              'El módulo con código "$moduleCode" ya existe en la base de datos.',
                             );
                             return;
                           }
@@ -565,9 +560,7 @@ class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog>
             ];
             _syncControllersFromData();
           });
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Datos importados descartados.')),
-          );
+          AppSnackbar.showInfo(context, 'Datos importados descartados.');
         },
         onPickExcel: _pickAndImportExcel,
         onDownloadTemplate: _downloadExcelTemplate,

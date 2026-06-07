@@ -5,6 +5,7 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/tables.dart' show TipoCarrera;
 import '../../../providers/career_providers.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/full_screen_dialog_layout.dart';
 import 'career_type_selector.dart';
 
 class AddCareerDialog extends ConsumerStatefulWidget {
@@ -51,14 +52,8 @@ class _AddCareerDialogState extends ConsumerState<AddCareerDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Dialog.fullscreen(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return FullScreenDialogLayout(
+      children: [
               // Header
               Container(
                 padding: const EdgeInsets.all(16),
@@ -254,10 +249,7 @@ class _AddCareerDialogState extends ConsumerState<AddCareerDialog> {
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
-      ),
+        ],
     );
   }
 

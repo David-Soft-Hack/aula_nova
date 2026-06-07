@@ -328,3 +328,24 @@ class TodaySessionData {
     required this.turno,
   });
 }
+
+@DriftAccessor(tables: [Attendances])
+class AttendanceDao extends DatabaseAccessor<AppDatabase> with _$AttendanceDaoMixin {
+  AttendanceDao(super.db);
+
+  Future<List<Attendance>> getAttendancesBySession(int sessionId) {
+    return (select(attendances)..where((t) => t.idSession.equals(sessionId))).get();
+  }
+
+  Future<void> saveAttendances(List<AttendancesCompanion> records) async {
+    await batch((batch) {
+      for (final record in records) {
+        batch.insert(attendances, record, mode: InsertMode.insertOrReplace);
+      }
+    });
+  }
+
+  Future<void> upsertAttendance(AttendancesCompanion record) {
+    return into(attendances).insertOnConflictUpdate(record);
+  }
+}

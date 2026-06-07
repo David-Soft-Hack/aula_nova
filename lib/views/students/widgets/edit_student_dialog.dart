@@ -6,6 +6,7 @@ import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../providers/student_providers.dart';
 import '../../shared/app_snackbar.dart';
+import '../../shared/full_screen_dialog_layout.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
@@ -136,17 +137,12 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
   Widget build(BuildContext context) {
     final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return Dialog.fullscreen(
-      backgroundColor: Colors.white,
-      child: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: isKeyboardVisible ? 16.0 : 24.0,
-            vertical: isKeyboardVisible ? 12.0 : 24.0,
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+    return FullScreenDialogLayout(
+      padding: EdgeInsets.symmetric(
+        horizontal: isKeyboardVisible ? 16.0 : 24.0,
+        vertical: isKeyboardVisible ? 12.0 : 24.0,
+      ),
+      children: [
               DialogHeader(
                 title: 'Editar Estudiante',
                 icon: LucideIcons.edit3,
@@ -208,9 +204,6 @@ class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
                 nextLabel: 'Actualizar',
               ),
             ],
-          ),
-        ),
-      ),
     );
   }
 }

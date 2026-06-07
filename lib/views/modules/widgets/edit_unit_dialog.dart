@@ -5,6 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/database_providers.dart';
+import '../../shared/app_input_decoration.dart';
+import '../../shared/app_snackbar.dart';
 
 class EditUnitDialog extends ConsumerStatefulWidget {
   final Unit unit;
@@ -43,34 +45,13 @@ class _EditUnitDialogState extends ConsumerState<EditUnitDialog> {
   }
 
   InputDecoration _buildInputDecoration({required String hintText, required IconData prefixIcon}) {
-    return InputDecoration(
+    return AppInputDecoration.build(
       hintText: hintText,
-      prefixIcon: Icon(prefixIcon, size: 20),
-      prefixIconColor: WidgetStateColor.resolveWith((states) {
-        if (states.contains(WidgetState.focused)) return AppTheme.academic600;
-        if (states.contains(WidgetState.error)) return Colors.red.shade600;
-        return Colors.grey.shade400;
-      }),
-      filled: true,
-      fillColor: Colors.grey.shade50,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      prefixIcon: prefixIcon,
+      borderRadius: 14,
+      prefixIconColor: Colors.grey.shade400,
+      showErrors: true,
       errorStyle: const TextStyle(fontFamily: 'Inter', fontSize: 12, fontWeight: FontWeight.w500),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide.none,
-      ),
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: AppTheme.academic600, width: 1.5),
-      ),
-      errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.red.shade400),
-      ),
     );
   }
 
@@ -91,23 +72,13 @@ class _EditUnitDialogState extends ConsumerState<EditUnitDialog> {
       await ref.read(unitDaoProvider).updateUnit(updatedUnit);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Unidad actualizada con éxito'),
-            backgroundColor: Colors.green.shade600,
-          ),
-        );
+        AppSnackbar.showSuccess(context, 'Unidad actualizada con éxito');
         Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Error al actualizar: $e'),
-            backgroundColor: Colors.red.shade600,
-          ),
-        );
+        AppSnackbar.showError(context, 'Error al actualizar: $e');
       }
     }
   }
