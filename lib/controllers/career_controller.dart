@@ -1,23 +1,32 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/tables.dart';
-import '../database/daos.dart';
+import '../interfaces/controllers/i_career_controller.dart';
+import '../interfaces/repositories/i_career_repository.dart';
 
-class CareerController {
-  final CareerDao careerDao;
+class CareerController implements ICareerController {
+  final ICareerRepository _repository;
 
-  CareerController({required this.careerDao});
+  CareerController({required ICareerRepository careerRepository}) : _repository = careerRepository;
 
-  Future<List<Career>> getAllCareers() => careerDao.getAllCareers();
+  @override
+  ICareerRepository get careerRepository => _repository;
+
+  @override
+  Future<List<Career>> getAllCareers() => _repository.getAllCareers();
+
+  @override
   Future<List<String>> getAllCareerNames() async {
-    final careers = await careerDao.getAllCareers();
+    final careers = await _repository.getAllCareers();
     return careers.map((c) => c.nombre).toList();
   }
 
-  Stream<List<Career>> watchAllCareers() => careerDao.watchAllCareers();
+  @override
+  Stream<List<Career>> watchAllCareers() => _repository.watchAllCareers();
 
+  @override
   Future<Career?> getCareerByName(String nombre) async {
-    final careers = await careerDao.getAllCareers();
+    final careers = await _repository.getAllCareers();
     final normalized = nombre.trim().toLowerCase();
     try {
       return careers.firstWhere((c) => c.nombre.trim().toLowerCase() == normalized);
@@ -26,24 +35,28 @@ class CareerController {
     }
   }
 
+  @override
   Future<bool> existsCareer(String nombre) async {
     return await getCareerByName(nombre) != null;
   }
 
+  @override
   Future<void> addCareer(String nombre, TipoCarrera tipo) async {
     final career = CareersCompanion(
       nombre: Value(nombre),
       tipoCarrera: Value(tipo),
       fechaCreacion: Value(DateTime.now()),
     );
-    await careerDao.insertCareer(career);
+    await _repository.insertCareer(career);
   }
 
+  @override
   Future<void> updateCareer(Career career) async {
-    await careerDao.updateCareer(career);
+    await _repository.updateCareer(career);
   }
 
+  @override
   Future<void> deleteCareer(Career career) async {
-    await careerDao.deleteCareer(career);
+    await _repository.deleteCareer(career);
   }
 }

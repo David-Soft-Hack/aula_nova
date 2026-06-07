@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/module_providers.dart';
 import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
 
@@ -69,7 +69,7 @@ class _EditUnitDialogState extends ConsumerState<EditUnitDialog> {
         idModule: widget.unit.idModule,
       );
 
-      await ref.read(unitDaoProvider).updateUnit(updatedUnit);
+      await ref.read(moduleControllerProvider).updateUnit(updatedUnit);
 
       if (mounted) {
         AppSnackbar.showSuccess(context, 'Unidad actualizada con éxito');

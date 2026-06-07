@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/module_providers.dart';
 import '../../shared/app_badge.dart';
 
 /// Tarjeta de módulo con información de horas, unidades y carrera.
@@ -294,7 +294,7 @@ class _UnitsIndicator extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder<List<Unit>>(
-      future: ref.read(unitDaoProvider).getUnitsByModule(module.codModule),
+      future: ref.read(moduleControllerProvider).getUnitsByModule(module.codModule),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Row(

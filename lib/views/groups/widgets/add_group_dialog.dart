@@ -5,7 +5,6 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/tables.dart';
 import '../../../providers/class_group_providers.dart';
 import '../../../providers/career_providers.dart';
-import '../../../providers/database_providers.dart';
 import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
 import '../../shared/full_screen_dialog_layout.dart';
@@ -75,7 +74,7 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
       return;
     }
 
-    final careers = await ref.read(careerDaoProvider).getAllCareers();
+    final careers = await ref.read(careerControllerProvider).getAllCareers();
     if (careers.isEmpty) {
       if (mounted) {
         RequirementDialog.show(
@@ -91,6 +90,7 @@ class _AddGroupDialogState extends ConsumerState<AddGroupDialog> {
     try {
       final controller = ref.read(classGroupControllerProvider);
       final exists = await controller.existsGroupByCodigo(codigo);
+      if (!mounted) return;
       if (exists) {
         AppSnackbar.showError(
           context,

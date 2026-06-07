@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/module_providers.dart';
 import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
 
@@ -66,7 +66,7 @@ class _EditActivityDialogState extends ConsumerState<EditActivityDialog> {
         idUnit: widget.activity.idUnit,
       );
 
-      await ref.read(activityDaoProvider).updateActivity(updatedActivity);
+      await ref.read(moduleControllerProvider).updateActivity(updatedActivity);
 
       if (mounted) {
         AppSnackbar.showSuccess(context, 'Actividad actualizada con éxito');

@@ -1,11 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/class_group_controller.dart';
 import '../database/app_database.dart';
+import '../controllers/class_group_controller.dart';
+import '../repositories/class_group_repository.dart';
+import '../interfaces/controllers/i_class_group_controller.dart';
 import 'database_providers.dart';
 
-final classGroupControllerProvider = Provider<ClassGroupController>((ref) {
+final classGroupRepositoryProvider = Provider<ClassGroupRepository>((ref) {
+  return ClassGroupRepository(ref.watch(classGroupDaoProvider));
+});
+
+final classGroupControllerProvider = Provider<IClassGroupController>((ref) {
   return ClassGroupController(
-    classGroupDao: ref.watch(classGroupDaoProvider),
+    classGroupRepository: ref.watch(classGroupRepositoryProvider),
   );
 });
 

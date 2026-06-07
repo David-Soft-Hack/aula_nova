@@ -1,7 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import '../database/app_database.dart';
-
 /// Un servicio especializado y optimizado encargado de generar la plantilla de
 /// Excel premium del módulo de forma programática y 100% offline.
 class ExcelTemplateGenerator {

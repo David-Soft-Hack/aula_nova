@@ -1,17 +1,42 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/bitacora_controller.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
+import '../services/student_status_service.dart';
+import '../services/dosificacion_service.dart';
+import '../repositories/bitacora_repository.dart';
+import '../repositories/module_repository.dart';
+import '../controllers/bitacora_controller.dart';
+import '../interfaces/controllers/i_bitacora_controller.dart';
 import 'database_providers.dart';
 
-final bitacoraControllerProvider = Provider<BitacoraController>((ref) {
+final dosificacionServiceProvider = Provider<DosificacionService>((ref) => DosificacionService());
+
+final studentStatusServiceProvider = Provider<StudentStatusService>((ref) {
+  return StudentStatusService(
+    db: ref.watch(appDatabaseProvider),
+    studentDao: ref.watch(studentDaoProvider),
+  );
+});
+
+final bitacoraRepositoryProvider = Provider<BitacoraRepository>((ref) {
+  return BitacoraRepository(ref.watch(bitacoraDaoProvider));
+});
+
+final moduleRepositoryForBitacoraProvider = Provider<ModuleRepository>((ref) {
+  return ModuleRepository(
+    ref.watch(moduleDaoProvider),
+    ref.watch(unitDaoProvider),
+    ref.watch(activityDaoProvider),
+  );
+});
+
+final bitacoraControllerProvider = Provider<IBitacoraController>((ref) {
   return BitacoraController(
     db: ref.watch(appDatabaseProvider),
-    bitacoraDao: ref.watch(bitacoraDaoProvider),
-    moduleDao: ref.watch(moduleDaoProvider),
-    careerDao: ref.watch(careerDaoProvider),
-    unitDao: ref.watch(unitDaoProvider),
-    activityDao: ref.watch(activityDaoProvider),
+    bitacoraRepository: ref.watch(bitacoraRepositoryProvider),
+    moduleRepository: ref.watch(moduleRepositoryForBitacoraProvider),
+    studentStatusService: ref.watch(studentStatusServiceProvider),
+    dosificacionService: ref.watch(dosificacionServiceProvider),
   );
 });
 

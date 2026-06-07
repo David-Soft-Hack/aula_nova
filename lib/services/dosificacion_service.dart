@@ -1,10 +1,12 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
+import '../interfaces/services/i_dosificacion_service.dart';
 
 /// Servicio responsable de ejecutar el algoritmo de dosificación de clases.
 /// Decopla la lógica matemática/académica de la capa de interfaz de usuario (SOLID - SRP).
-class DosificacionService {
-  static List<CalendarioBitacorasCompanion> dosificar({
+class DosificacionService implements IDosificacionService {
+  @override
+  List<CalendarioBitacorasCompanion> dosificar({
     required Module module,
     required List<Unit> units,
     required List<Activity> activities,

@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
 import '../../database/app_database.dart';
+import '../../providers/career_providers.dart';
 import '../../providers/module_providers.dart';
-import '../../providers/database_providers.dart';
 import 'widgets/module_card.dart';
 import 'widgets/modules_layout.dart';
 import 'widgets/add_module_stepper_dialog.dart';
@@ -78,7 +78,7 @@ class ModulesScreen extends ConsumerWidget {
   }
 
   Future<void> _showAddModuleModal(BuildContext context, WidgetRef ref) async {
-    final careers = await ref.read(careerDaoProvider).getAllCareers();
+    final careers = await ref.read(careerControllerProvider).getAllCareers();
     if (!context.mounted) return;
 
     if (careers.isEmpty) {

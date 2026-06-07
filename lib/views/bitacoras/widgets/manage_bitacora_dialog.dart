@@ -5,7 +5,6 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/daos.dart';
 import '../../../database/tables.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/bitacora_providers.dart';
 import '../../shared/app_snackbar.dart';
 import 'bitacora_resumen_header.dart';
@@ -42,7 +41,7 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
   void _toggleSessionCompleted(int index, bool val) async {
     final updated = _sessions[index].copyWith(estadoImpartido: val);
     try {
-      await ref.read(bitacoraDaoProvider).updateCalendarioEntry(updated);
+      await ref.read(bitacoraControllerProvider).updateCalendarioEntry(updated);
       if (mounted) setState(() => _sessions[index] = updated);
     } catch (e) {
       if (mounted) AppSnackbar.showError(context, 'Error al actualizar clase: $e');
@@ -50,7 +49,7 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
   }
 
   Future<void> _onSessionUpdated(int index, CalendarioBitacora updated) async {
-    await ref.read(bitacoraDaoProvider).updateCalendarioEntry(updated);
+    await ref.read(bitacoraControllerProvider).updateCalendarioEntry(updated);
     if (mounted) setState(() => _sessions[index] = updated);
   }
 

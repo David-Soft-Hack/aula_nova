@@ -1,34 +1,46 @@
+import '../interfaces/controllers/i_dashboard_controller.dart';
+import '../interfaces/repositories/i_module_repository.dart';
+import '../interfaces/repositories/i_bitacora_repository.dart';
+import '../interfaces/repositories/i_student_repository.dart';
 import '../database/daos.dart';
 import '../database/tables.dart';
 
-class DashboardController {
-  final ModuleDao moduleDao;
-  final BitacoraDao bitacoraDao;
-  final StudentDao studentDao;
+class DashboardController implements IDashboardController {
+  final IModuleRepository _moduleRepository;
+  final IBitacoraRepository _bitacoraRepository;
+  final IStudentRepository _studentRepository;
 
   DashboardController({
-    required this.moduleDao,
-    required this.bitacoraDao,
-    required this.studentDao,
-  });
+    required IModuleRepository moduleRepository,
+    required IBitacoraRepository bitacoraRepository,
+    required IStudentRepository studentRepository,
+  })  : _moduleRepository = moduleRepository,
+        _bitacoraRepository = bitacoraRepository,
+        _studentRepository = studentRepository;
 
+  @override
   Stream<int> get totalModules =>
-      moduleDao.watchAllModules().map((list) => list.length);
+      _moduleRepository.watchAllModules().map((list) => list.length);
 
-  Stream<int> get activeBitacoras => bitacoraDao
+  @override
+  Stream<int> get activeBitacoras => _bitacoraRepository
       .watchBitacorasWithModule()
       .map((list) => list.where((item) => item.bitacora.estado == EstadoBitacora.activo).length);
 
+  @override
   Stream<int> get activeStudents =>
-      studentDao.watchAllStudents().map((list) => list.where((s) => s.estado == StudentStatus.activo).length);
+      _studentRepository.watchAllStudents().map((list) => list.where((s) => s.estado == StudentStatus.activo).length);
 
-  Stream<int> get totalHours => moduleDao
+  @override
+  Stream<int> get totalHours => _moduleRepository
       .watchAllModules()
       .map((list) => list.fold(0, (sum, m) => sum + (m.totalHoraAcademic)));
 
+  @override
   Stream<List<TodaySessionData>> get todaySessions =>
-      bitacoraDao.watchTodaySessions();
+      _bitacoraRepository.watchTodaySessions();
 
+  @override
   Stream<List<TodaySessionData>> get upcomingSessions =>
-      bitacoraDao.watchUpcomingSessions(days: 7);
+      _bitacoraRepository.watchUpcomingSessions(days: 7);
 }

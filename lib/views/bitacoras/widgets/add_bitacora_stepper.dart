@@ -5,9 +5,7 @@ import 'package:drift/drift.dart' show Value;
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/bitacora_providers.dart';
-import '../../../services/dosificacion_service.dart';
 import '../../shared/app_snackbar.dart';
 import 'bitacora_step_1_form.dart';
 import 'bitacora_step_2_preview.dart';
@@ -113,16 +111,6 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
     });
 
     try {
-      final db = ref.read(appDatabaseProvider);
-      final units = await ref.read(unitDaoProvider).getUnitsByModule(
-        _selectedModule!.codModule,
-      );
-      final unitIds = units.map((u) => u.codUnit).toList();
-
-      final activities = await (db.select(
-        db.activities,
-      )..where((t) => t.idUnit.isIn(unitIds))).get();
-
       final holidayStrings = _fechasFeriadas.map((d) {
         final year = d.year.toString();
         final month = d.month.toString().padLeft(2, '0');
@@ -130,10 +118,8 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         return '$year-$month-$day';
       }).toList();
 
-      final preview = DosificacionService.dosificar(
+      final preview = await ref.read(bitacoraControllerProvider).previewSchedule(
         module: _selectedModule!,
-        units: units,
-        activities: activities,
         fechaInicio: _startDate,
         diasClase: _diasSeleccionados,
         horasSesion: _horasSesion,

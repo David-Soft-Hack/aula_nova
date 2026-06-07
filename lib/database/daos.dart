@@ -139,39 +139,27 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   Future<void> autoCompletePastSessions() async {
     final now = DateTime.now();
     
-    // 1. Mark past/today sessions as completed
     await (update(calendarioBitacoras)
           ..where((t) => t.fechaProgramada.isSmallerOrEqualValue(now) & t.estadoImpartido.equals(false)))
         .write(const CalendarioBitacorasCompanion(
       estadoImpartido: Value(true),
     ));
 
-    // 2. Fetch active bitacoras
     final activeBitacoras = await (select(bitacoras)
           ..where((t) => t.estado.equals(EstadoBitacora.activo.index)))
         .get();
 
     for (final bitacora in activeBitacoras) {
-      // Fetch all sessions for this bitacora
       final sessions = await (select(calendarioBitacoras)
             ..where((t) => t.idBitacora.equals(bitacora.id)))
           .get();
 
       if (sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido)) {
-        // If all sessions are completed, finalize the bitacora
         await (update(bitacoras)..where((t) => t.id.equals(bitacora.id)))
             .write(BitacorasCompanion(
           estado: const Value(EstadoBitacora.finalizado),
           fechaFinal: Value(now),
         ));
-
-        // Transition active students in the group to 'finalizado'
-        if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
-          await _updateActiveStudentsForGroup(
-            bitacora.codigoGrupo!,
-            StudentStatus.finalizado,
-          );
-        }
       }
     }
   }
@@ -211,41 +199,9 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
 
   Future<void> deleteBitacora(int idBitacora) async {
     await db.transaction(() async {
-      final bitacora = await (select(bitacoras)
-            ..where((t) => t.id.equals(idBitacora)))
-          .getSingleOrNull();
-
-      if (bitacora != null &&
-          bitacora.codigoGrupo != null &&
-          bitacora.codigoGrupo!.isNotEmpty) {
-        final sessions = await getCalendarioForBitacora(idBitacora);
-        final allCompleted =
-            sessions.isNotEmpty && sessions.every((s) => s.estadoImpartido);
-
-        final newStatus =
-            allCompleted ? StudentStatus.finalizado : StudentStatus.suspendido;
-        await _updateActiveStudentsForGroup(bitacora.codigoGrupo!, newStatus);
-      }
-
       await deleteCalendarioForBitacora(idBitacora);
       await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
     });
-  }
-
-  /// Transitions only [StudentStatus.activo] students in [grupo] to [newStatus].
-  /// Students with any other status (inactivo, graduado, suspendido,
-  /// finalizado, desertado) are NOT modified.
-  Future<void> _updateActiveStudentsForGroup(
-    String grupo,
-    StudentStatus newStatus,
-  ) async {
-    await (db.update(db.students)
-          ..where(
-            (s) =>
-                s.grupo.equals(grupo) &
-                s.estado.equals(StudentStatus.activo.index),
-          ))
-        .write(StudentsCompanion(estado: Value(newStatus)));
   }
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);

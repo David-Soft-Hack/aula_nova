@@ -4,7 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
 import '../../database/app_database.dart';
 import '../../database/tables.dart' show TipoCarrera;
-import '../../providers/database_providers.dart';
+import '../../providers/module_providers.dart';
 import '../modules/widgets/module_card.dart';
 import '../modules/widgets/module_options_sheet.dart';
 import '../modules/widgets/edit_module_dialog.dart';
@@ -21,7 +21,7 @@ class CareerDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isTecnica = career.tipoCarrera == TipoCarrera.tecnica;
-    final modulesAsync = ref.watch(moduleDaoProvider).watchModulesByCareer(career.nombre);
+    final modulesAsync = ref.watch(moduleControllerProvider).watchModulesByCareer(career.nombre);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,

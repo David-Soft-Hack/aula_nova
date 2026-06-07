@@ -1,26 +1,31 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
-import '../database/daos.dart';
 import '../database/tables.dart';
+import '../interfaces/controllers/i_class_group_controller.dart';
+import '../interfaces/repositories/i_class_group_repository.dart';
 
-class ClassGroupController {
-  final ClassGroupDao classGroupDao;
+class ClassGroupController implements IClassGroupController {
+  final IClassGroupRepository _repository;
 
-  ClassGroupController({required this.classGroupDao});
+  ClassGroupController({required IClassGroupRepository classGroupRepository}) : _repository = classGroupRepository;
 
+  @override
   Future<List<ClassGroup>> getAllGroups() async {
-    return await classGroupDao.getAllGroups();
+    return await _repository.getAllGroups();
   }
 
+  @override
   Stream<List<ClassGroup>> watchAllGroups() {
-    return classGroupDao.watchAllGroups();
+    return _repository.watchAllGroups();
   }
 
+  @override
   Future<bool> existsGroupByCodigo(String codigo) async {
-    final current = await classGroupDao.getGroupByCodigo(codigo);
+    final current = await _repository.getGroupByCodigo(codigo);
     return current != null;
   }
 
+  @override
   Future<void> addGroup({
     required String codigo,
     required String carrera,
@@ -40,21 +45,24 @@ class ClassGroupController {
       fechaFin: Value(fechaFin),
       fechaCreacion: Value(DateTime.now()),
     );
-    await classGroupDao.insertGroup(newGroup);
+    await _repository.insertGroup(newGroup);
   }
 
+  @override
   Future<void> updateGroup(ClassGroup group) async {
-    await classGroupDao.updateGroup(group);
+    await _repository.updateGroup(group);
   }
 
+  @override
   Future<void> deleteGroup(ClassGroup group) async {
-    await classGroupDao.deleteGroup(group);
+    await _repository.deleteGroup(group);
   }
 
+  @override
   Future<List<ClassGroup>> searchGroups(String query) async {
     if (query.isEmpty) {
       return await getAllGroups();
     }
-    return await classGroupDao.searchGroups(query);
+    return await _repository.searchGroups(query);
   }
 }

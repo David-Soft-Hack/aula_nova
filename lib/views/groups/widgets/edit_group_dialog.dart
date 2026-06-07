@@ -96,6 +96,7 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
       // Solo verificamos duplicado si el código cambió
       if (codigo != widget.group.codigo) {
         final exists = await controller.existsGroupByCodigo(codigo);
+        if (!mounted) return;
         if (exists) {
           AppSnackbar.showError(
             context,

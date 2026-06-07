@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../providers/database_providers.dart';
 import '../../../providers/career_providers.dart';
+import '../../../providers/module_providers.dart';
 import '../../shared/app_badge.dart';
 import '../../shared/app_input_decoration.dart';
 import '../../shared/app_snackbar.dart';
@@ -113,7 +113,7 @@ class _EditModuleDialogState extends ConsumerState<EditModuleDialog> {
         fechaCreacion: widget.module.fechaCreacion,
       );
 
-      await ref.read(moduleDaoProvider).updateModule(updatedModule);
+      await ref.read(moduleControllerProvider).updateModule(updatedModule);
 
       if (mounted) {
         AppSnackbar.showSuccess(context, '¡Módulo "${updatedModule.nombre}" actualizado con éxito!');

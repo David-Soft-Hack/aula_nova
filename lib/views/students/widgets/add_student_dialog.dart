@@ -122,6 +122,7 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
     try {
       final controller = ref.read(studentControllerProvider);
       final exists = await controller.existsStudentByCodigo(codigo);
+      if (!mounted) return;
       if (exists) {
         AppSnackbar.showError(
           context,

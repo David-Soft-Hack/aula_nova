@@ -5,9 +5,8 @@ import 'package:lucide_icons/lucide_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
-import '../../../controllers/career_controller.dart';
 import '../../../models/app_models.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/career_providers.dart';
 import '../../../services/module_extractor.dart';
 import '../../../services/excel_template_generator.dart';
 import '../../shared/app_snackbar.dart';
@@ -107,7 +106,7 @@ class ModuleExcelHandler {
 
         if (normalizedCareer.isNotEmpty && !careerExists) {
           // Si el programa no existe en la base de datos, se agrega automáticamente
-          await CareerController(careerDao: ProviderScope.containerOf(context).read(careerDaoProvider)).addCareer(
+          await ProviderScope.containerOf(context).read(careerControllerProvider).addCareer(
             normalizedCareer,
             TipoCarrera.tecnica,
           );
@@ -170,7 +169,7 @@ class ModuleExcelHandler {
         '[EXCEL DOWNLOAD] Iniciando generación de plantilla premium...',
       );
 
-      final careers = await ProviderScope.containerOf(context).read(careerDaoProvider).getAllCareers();
+      final careers = await ProviderScope.containerOf(context).read(careerControllerProvider).getAllCareers();
       debugPrint(
         '[EXCEL DOWNLOAD] Carreras recuperadas de SQLite: ${careers.length} registradas.',
       );
@@ -310,10 +309,11 @@ class ModuleExcelHandler {
                             borderRadius: BorderRadius.circular(16),
                           ),
                         ),
-                        onPressed: () async {
+                          onPressed: () async {
                           Navigator.pop(sheetContext);
                           try {
                             final result = await OpenFilex.open(savePath);
+                            if (!context.mounted) return;
                             if (result.type != ResultType.done) {
                               AppSnackbar.showWarning(
                                 context,
@@ -321,6 +321,7 @@ class ModuleExcelHandler {
                               );
                             }
                           } catch (e) {
+                            if (!context.mounted) return;
                             AppSnackbar.showError(
                               context,
                               'No se pudo abrir el archivo: $e',

@@ -1,35 +1,42 @@
 import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
-import '../database/daos.dart';
 import '../database/tables.dart';
-import 'career_controller.dart';
-import 'class_group_controller.dart';
+import '../interfaces/controllers/i_student_controller.dart';
+import '../interfaces/controllers/i_career_controller.dart';
+import '../interfaces/controllers/i_class_group_controller.dart';
+import '../interfaces/repositories/i_student_repository.dart';
 
-class StudentController {
-  final StudentDao studentDao;
-  final CareerController careerController;
-  final ClassGroupController classGroupController;
+class StudentController implements IStudentController {
+  final IStudentRepository _repository;
+  final ICareerController _careerController;
+  final IClassGroupController _classGroupController;
 
   StudentController({
-    required this.studentDao,
-    required this.careerController,
-    required this.classGroupController,
-  });
+    required IStudentRepository studentRepository,
+    required ICareerController careerController,
+    required IClassGroupController classGroupController,
+  })  : _repository = studentRepository,
+        _careerController = careerController,
+        _classGroupController = classGroupController;
 
+  @override
   Future<List<Student>> getAllStudents() async {
-    return await studentDao.getAllStudents();
+    return await _repository.getAllStudents();
   }
 
+  @override
   Stream<List<Student>> watchAllStudents() {
-    return studentDao.watchAllStudents();
+    return _repository.watchAllStudents();
   }
 
+  @override
   Future<bool> existsStudentByCodigo(String codigo) async {
-    final current = await studentDao.getStudentByCodigo(codigo);
+    final current = await _repository.getStudentByCodigo(codigo);
     return current != null;
   }
 
+  @override
   Future<void> addStudent({
     required String codigo,
     required String nombres,
@@ -54,30 +61,35 @@ class StudentController {
       fechaCreacion: Value(DateTime.now()),
     );
 
-    await studentDao.insertStudent(student);
+    await _repository.insertStudent(student);
   }
 
+  @override
   Future<void> updateStudent(Student student) async {
-    await studentDao.updateStudent(student);
+    await _repository.updateStudent(student);
   }
 
+  @override
   Future<void> deleteStudent(Student student) async {
-    await studentDao.deleteStudent(student);
+    await _repository.deleteStudent(student);
   }
 
+  @override
   Future<List<Student>> searchStudents(String query) async {
     if (query.trim().isEmpty) {
       return await getAllStudents();
     }
-    return await studentDao.searchStudents(query);
+    return await _repository.searchStudents(query);
   }
 
+  @override
   Future<List<String>> getAllCareers() =>
-      careerController.getAllCareerNames();
+      _careerController.getAllCareerNames();
 
+  @override
   Future<List<String>> getAllGroups() async {
     try {
-      final groups = await classGroupController.getAllGroups();
+      final groups = await _classGroupController.getAllGroups();
       return groups.map((g) => g.codigo).toList();
     } catch (e) {
       debugPrint('Error fetching groups: $e');
@@ -85,6 +97,7 @@ class StudentController {
     }
   }
 
+  @override
   Future<String> generateNextStudentCodigo(String grupoCodigo) async {
     try {
       final all = await getAllStudents();

@@ -5,7 +5,6 @@ import '../../database/app_database.dart';
 import '../../database/tables.dart';
 import '../../database/daos.dart';
 import '../../providers/bitacora_providers.dart';
-import '../../providers/database_providers.dart';
 import 'widgets/bitacora_grid.dart';
 import 'widgets/bitacoras_layout.dart';
 import 'widgets/add_bitacora_stepper.dart';
@@ -143,7 +142,7 @@ class _BitacorasScreenState extends ConsumerState<BitacorasScreen>
   }
 
   Future<void> _showAddBitacoraModal(BuildContext context) async {
-    final modules = await ref.read(moduleDaoProvider).getAllModules();
+    final modules = await ref.read(bitacoraControllerProvider).getAllModules();
     if (!context.mounted) return;
 
     if (modules.isEmpty) {

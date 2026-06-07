@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
+import '../../../providers/career_providers.dart';
 import '../../../providers/class_group_providers.dart';
-import '../../../providers/database_providers.dart';
 import '../shared/requirement_dialog.dart';
 import 'widgets/add_group_dialog.dart';
 import 'widgets/edit_group_dialog.dart';
@@ -19,7 +19,7 @@ class GroupsScreen extends ConsumerStatefulWidget {
 
 class _GroupsScreenState extends ConsumerState<GroupsScreen> {
   Future<void> _showAddGroupDialog() async {
-    final careers = await ref.read(careerDaoProvider).getAllCareers();
+    final careers = await ref.read(careerControllerProvider).getAllCareers();
     if (!mounted) return;
 
     if (careers.isEmpty) {

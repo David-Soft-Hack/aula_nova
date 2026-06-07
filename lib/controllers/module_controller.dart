@@ -1,29 +1,34 @@
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
+import '../interfaces/controllers/i_module_controller.dart';
+import '../interfaces/repositories/i_module_repository.dart';
+import '../services/module_factory.dart';
 
-class ModuleController {
-  final AppDatabase db;
-  final ModuleDao moduleDao;
-  final UnitDao unitDao;
-  final ActivityDao activityDao;
-  final BitacoraDao bitacoraDao;
+class ModuleController implements IModuleController {
+  final AppDatabase _db;
+  final IModuleRepository _repository;
+  final ModuleFactory _moduleFactory;
+  final BitacoraDao _bitacoraDao;
 
   ModuleController({
-    required this.db,
-    required this.moduleDao,
-    required this.unitDao,
-    required this.activityDao,
-    required this.bitacoraDao,
-  });
+    required AppDatabase db,
+    required IModuleRepository moduleRepository,
+    required ModuleFactory moduleFactory,
+    required BitacoraDao bitacoraDao,
+  })  : _db = db,
+        _repository = moduleRepository,
+        _moduleFactory = moduleFactory,
+        _bitacoraDao = bitacoraDao;
 
+  @override
   Future<void> createModuleWithDetails({
     required Module module,
     required List<Unit> units,
     required List<Activity> activities,
   }) async {
-    await db.transaction(() async {
-      await moduleDao.insertModule(
+    await _db.transaction(() async {
+      await _repository.insertModule(
         ModulesCompanion.insert(
           codModule: module.codModule,
           nombre: module.nombre,
@@ -35,7 +40,7 @@ class ModuleController {
       );
 
       for (final unit in units) {
-        await unitDao.insertUnit(
+        await _repository.insertUnit(
           UnitsCompanion.insert(
             codUnit: unit.codUnit,
             nombre: unit.nombre,
@@ -48,7 +53,7 @@ class ModuleController {
       }
 
       for (final activity in activities) {
-        await activityDao.insertActivity(
+        await _repository.insertActivity(
           ActivitiesCompanion.insert(
             codActivity: activity.codActivity,
             descripcion: activity.descripcion,
@@ -61,22 +66,23 @@ class ModuleController {
     });
   }
 
+  @override
   Future<void> updateModuleWithDetails({
     required Module module,
     required List<Unit> units,
     required List<Activity> activities,
   }) async {
-    await db.transaction(() async {
-      await moduleDao.updateModule(module);
+    await _db.transaction(() async {
+      await _repository.updateModule(module);
 
-      final existingUnits = await unitDao.getUnitsByModule(module.codModule);
+      final existingUnits = await _repository.getUnitsByModule(module.codModule);
       for (final u in existingUnits) {
-        await activityDao.deleteActivitiesByUnit(u.codUnit);
+        await _repository.deleteActivitiesByUnit(u.codUnit);
       }
-      await unitDao.deleteUnitsByModule(module.codModule);
+      await _repository.deleteUnitsByModule(module.codModule);
 
       for (final unit in units) {
-        await unitDao.insertUnit(
+        await _repository.insertUnit(
           UnitsCompanion.insert(
             codUnit: unit.codUnit,
             nombre: unit.nombre,
@@ -89,7 +95,7 @@ class ModuleController {
       }
 
       for (final activity in activities) {
-        await activityDao.insertActivity(
+        await _repository.insertActivity(
           ActivitiesCompanion.insert(
             codActivity: activity.codActivity,
             descripcion: activity.descripcion,
@@ -102,26 +108,55 @@ class ModuleController {
     });
   }
 
+  @override
   Future<bool> checkModuleExists(String codModule) async {
-    final existing = await moduleDao.getModuleByCod(codModule);
+    final existing = await _repository.getModuleByCod(codModule);
     return existing != null;
   }
 
+  @override
+  Future<List<Module>> getAllModules() => _repository.getAllModules();
+
+  @override
+  Stream<List<Module>> watchModulesByCareer(String career) =>
+      _repository.watchModulesByCareer(career);
+
+  @override
+  Future<void> updateModule(Module module) => _repository.updateModule(module);
+
+  @override
   Future<List<Unit>> getUnitsByModule(String moduleCode) =>
-      unitDao.getUnitsByModule(moduleCode);
+      _repository.getUnitsByModule(moduleCode);
+
+  @override
+  Future<void> updateUnit(Unit unit) => _repository.updateUnit(unit);
+
+  @override
   Future<List<Activity>> getActivitiesByUnit(String unitCode) =>
-      activityDao.getActivitiesByUnit(unitCode);
-  Future<void> insertUnit(UnitsCompanion unit) => unitDao.insertUnit(unit);
+      _repository.getActivitiesByUnit(unitCode);
+
+  @override
+  Future<void> updateActivity(Activity activity) => _repository.updateActivity(activity);
+
+  @override
+  Future<void> insertUnit(UnitsCompanion unit) => _repository.insertUnit(unit);
+
+  @override
   Future<void> deleteUnit(String unitCode) async {
-    await activityDao.deleteActivitiesByUnit(unitCode);
-    await (db.delete(db.units)..where((t) => t.codUnit.equals(unitCode))).go();
-  }
-  Future<void> insertActivity(ActivitiesCompanion activity) =>
-      activityDao.insertActivity(activity);
-  Future<void> deleteActivity(String activityCode) async {
-    await activityDao.deleteActivityByCode(activityCode);
+    await _repository.deleteActivitiesByUnit(unitCode);
+    await (_db.delete(_db.units)..where((t) => t.codUnit.equals(unitCode))).go();
   }
 
+  @override
+  Future<void> insertActivity(ActivitiesCompanion activity) =>
+      _repository.insertActivity(activity);
+
+  @override
+  Future<void> deleteActivity(String activityCode) async {
+    await _repository.deleteActivityByCode(activityCode);
+  }
+
+  @override
   Future<void> createModuleFromMaps({
     required String codModule,
     required String nombre,
@@ -131,78 +166,43 @@ class ModuleController {
     required List<Map<String, dynamic>> units,
     required List<Map<String, dynamic>> activities,
   }) async {
-    final existing = await moduleDao.getModuleByCod(codModule);
-    if (existing != null) {
-      throw Exception('El módulo con código "$codModule" ya existe.');
-    }
-
-    final unitsData = <Unit>[];
-    final activitiesData = <Activity>[];
-
-    for (int i = 0; i < units.length; i++) {
-      final u = units[i];
-      final unitCode = '$codModule-U${i + 1}';
-
-      unitsData.add(Unit(
-        codUnit: unitCode,
-        nombre: u['nombre'].toString().isEmpty
-            ? 'Unidad ${i + 1}'
-            : u['nombre'].toString(),
-        totalHoraAcademic: u['ha'] as int? ?? 0,
-        totalHoraReloj: u['hr'] as int? ?? 0,
-        ponderacion: u['ponderacion'] as double? ?? 0.0,
-        idModule: codModule,
-      ));
-
-      final actsForUnit = activities.where((a) => a['unitIndex'] == i).toList();
-      for (int j = 0; j < actsForUnit.length; j++) {
-        final act = actsForUnit[j];
-        final customCode = (act['codigo']?.toString().trim() ?? '').isEmpty
-            ? 'A${j + 1}'
-            : act['codigo'].toString().trim();
-        final actCode = '$unitCode-$customCode';
-
-        activitiesData.add(Activity(
-          codActivity: actCode,
-          descripcion: act['descripcion'].toString().isEmpty
-              ? 'Actividad ${j + 1}'
-              : act['descripcion'].toString(),
-          totalHoraAcademic: act['ha'] as int? ?? 0,
-          totalHoraReloj: act['hr'] as int? ?? 0,
-          idUnit: unitCode,
-        ));
-      }
-    }
-
+    await _moduleFactory.validateModuleCodeNotExists(codModule);
+    final unitsData = await _moduleFactory.createUnitsFromMaps(codModule, units);
+    final activitiesData = await _moduleFactory.createActivitiesFromMaps(
+      codModule,
+      units,
+      activities,
+    );
+    final module = _moduleFactory.createModule(
+      codModule: codModule,
+      nombre: nombre,
+      carrera: carrera,
+      totalHoraAcademic: totalHoraAcademic,
+      totalHoraReloj: totalHoraReloj,
+    );
     await createModuleWithDetails(
-      module: Module(
-        codModule: codModule,
-        nombre: nombre.isEmpty ? 'Nuevo Módulo' : nombre,
-        totalHoraAcademic: totalHoraAcademic,
-        totalHoraReloj: totalHoraReloj,
-        carrera: carrera,
-        fechaCreacion: DateTime.now(),
-      ),
+      module: module,
       units: unitsData,
       activities: activitiesData,
     );
   }
 
+  @override
   Future<void> deleteModuleWithDetails(String moduleCode) async {
-    await db.transaction(() async {
-      final units = await unitDao.getUnitsByModule(moduleCode);
+    await _db.transaction(() async {
+      final units = await _repository.getUnitsByModule(moduleCode);
       for (final unit in units) {
-        await activityDao.deleteActivitiesByUnit(unit.codUnit);
+        await _repository.deleteActivitiesByUnit(unit.codUnit);
       }
-      await unitDao.deleteUnitsByModule(moduleCode);
+      await _repository.deleteUnitsByModule(moduleCode);
 
-      final bitacoras = await bitacoraDao.getBitacorasByModule(moduleCode);
+      final bitacoras = await _bitacoraDao.getBitacorasByModule(moduleCode);
       for (final bitacora in bitacoras) {
-        await bitacoraDao.deleteCalendarioForBitacora(bitacora.id);
+        await _bitacoraDao.deleteCalendarioForBitacora(bitacora.id);
       }
-      await bitacoraDao.deleteBitacorasByModule(moduleCode);
+      await _bitacoraDao.deleteBitacorasByModule(moduleCode);
 
-      await (db.delete(db.modules)..where((m) => m.codModule.equals(moduleCode))).go();
+      await (_db.delete(_db.modules)..where((m) => m.codModule.equals(moduleCode))).go();
     });
   }
 }

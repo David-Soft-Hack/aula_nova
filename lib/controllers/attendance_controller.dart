@@ -1,24 +1,27 @@
 import 'package:drift/drift.dart' as drift;
 import '../database/app_database.dart';
-import '../database/daos.dart';
 import '../database/tables.dart';
+import '../models/app_models.dart';
+import '../interfaces/controllers/i_attendance_controller.dart';
+import '../interfaces/repositories/i_attendance_repository.dart';
+import '../interfaces/repositories/i_student_repository.dart';
 
-class AttendanceController {
-  final AttendanceDao attendanceDao;
-  final StudentDao studentDao;
+class AttendanceController implements IAttendanceController {
+  final IAttendanceRepository _attendanceRepository;
+  final IStudentRepository _studentRepository;
 
   AttendanceController({
-    required this.attendanceDao,
-    required this.studentDao,
-  });
+    required IAttendanceRepository attendanceRepository,
+    required IStudentRepository studentRepository,
+  })  : _attendanceRepository = attendanceRepository,
+        _studentRepository = studentRepository;
 
-  /// Recupera los estudiantes de un grupo y los mapea a su registro de asistencia
-  /// para la sesión especificada. Si aún no hay asistencia, devuelve una lista base con 'presente'.
+  @override
   Future<List<AttendanceRecord>> getAttendanceListForSession(int sessionId, String groupCode) async {
-    final students = await studentDao.searchStudents(groupCode);
+    final students = await _studentRepository.searchStudents(groupCode);
     final groupStudents = students.where((s) => s.grupo?.toLowerCase() == groupCode.toLowerCase() && s.estado == StudentStatus.activo).toList();
-    
-    final savedAttendances = await attendanceDao.getAttendancesBySession(sessionId);
+
+    final savedAttendances = await _attendanceRepository.getAttendancesBySession(sessionId);
     final savedMap = {for (var a in savedAttendances) a.idStudent: a};
 
     List<AttendanceRecord> records = [];
@@ -34,7 +37,7 @@ class AttendanceController {
     return records;
   }
 
-  /// Guarda la lista completa de asistencias de una sesión de forma masiva
+  @override
   Future<void> saveAttendances(int sessionId, List<AttendanceRecord> records) async {
     final companions = records.map((r) {
       return AttendancesCompanion.insert(
@@ -45,19 +48,6 @@ class AttendanceController {
       );
     }).toList();
 
-    await attendanceDao.saveAttendances(companions);
-  }
-}
-
-/// Helper class para unir al estudiante con su estado de asistencia en la UI
-class AttendanceRecord {
-  final Student student;
-  final Attendance? attendance;
-  EstadoAsistencia? currentStatus;
-  String? observacion;
-
-  AttendanceRecord({required this.student, this.attendance}) {
-    currentStatus = attendance?.estado ?? EstadoAsistencia.presente;
-    observacion = attendance?.observacion;
+    await _attendanceRepository.saveAttendances(companions);
   }
 }

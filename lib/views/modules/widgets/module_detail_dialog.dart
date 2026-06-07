@@ -5,7 +5,6 @@ import 'package:drift/drift.dart' hide Column;
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../providers/module_providers.dart';
-import '../../../providers/database_providers.dart';
 import 'activity_list_view.dart';
 import 'unit_side_panel.dart';
 import 'edit_unit_dialog.dart';
@@ -33,7 +32,8 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
   }
 
   void _loadDetails() async {
-    final uList = await ref.read(unitDaoProvider).getUnitsByModule(
+    final controller = ref.read(moduleControllerProvider);
+    final uList = await controller.getUnitsByModule(
       widget.module.codModule,
     );
     setState(() {
@@ -43,8 +43,7 @@ class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
     if (uList.isNotEmpty) {
       final allActs = <Activity>[];
       for (final unit in uList) {
-        final acts = await ref.read(activityDaoProvider)
-            .getActivitiesByUnit(unit.codUnit);
+        final acts = await controller.getActivitiesByUnit(unit.codUnit);
         allActs.addAll(acts);
       }
       setState(() {

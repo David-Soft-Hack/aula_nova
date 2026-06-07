@@ -1,11 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../controllers/career_controller.dart';
 import '../database/app_database.dart';
+import '../controllers/career_controller.dart';
+import '../repositories/career_repository.dart';
+import '../interfaces/controllers/i_career_controller.dart';
 import 'database_providers.dart';
 
-final careerControllerProvider = Provider<CareerController>((ref) {
+final careerRepositoryProvider = Provider<CareerRepository>((ref) {
+  return CareerRepository(ref.watch(careerDaoProvider));
+});
+
+final careerControllerProvider = Provider<ICareerController>((ref) {
   return CareerController(
-    careerDao: ref.watch(careerDaoProvider),
+    careerRepository: ref.watch(careerRepositoryProvider),
   );
 });
 

@@ -57,7 +57,7 @@ class FormModuleDropdown extends ConsumerWidget {
           ),
           hint: const Text('Seleccionar módulo...'),
           items: modules.map((m) {
-            return DropdownMenuItem(
+            return DropdownMenuItem<Module>(
               value: m,
               child: Text(
                 m.nombre,

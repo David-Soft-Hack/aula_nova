@@ -4,6 +4,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../services/student_status_service.dart';
 import 'tables.dart';
 import 'daos.dart';
 
@@ -67,59 +68,10 @@ class AppDatabase extends _$AppDatabase {
       }
     },
     beforeOpen: (details) async {
-      // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.
-      // In course planning, totalHoraAcademic is always strictly greater than totalHoraReloj.
-      // If a row has academic hours less than clock hours, it means they are swapped.
-      // We use a 3-step swap with negative sums to avoid SQLite's left-to-right evaluation gotcha.
-      await customStatement('''
-            UPDATE modules 
-            SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-            WHERE total_hora_academic < total_hora_reloj;
-          ''');
-      await customStatement('''
-            UPDATE modules 
-            SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-      await customStatement('''
-            UPDATE modules 
-            SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-
-      await customStatement('''
-            UPDATE units 
-            SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-            WHERE total_hora_academic < total_hora_reloj;
-          ''');
-      await customStatement('''
-            UPDATE units 
-            SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-      await customStatement('''
-            UPDATE units 
-            SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-
-      await customStatement('''
-            UPDATE activities 
-            SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
-            WHERE total_hora_academic < total_hora_reloj;
-          ''');
-      await customStatement('''
-            UPDATE activities 
-            SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-      await customStatement('''
-            UPDATE activities 
-            SET total_hora_academic = -total_hora_academic - total_hora_reloj 
-            WHERE total_hora_academic < 0;
-          ''');
-
+      await _selfHealHourSwaps();
       await bitacoraDao.autoCompletePastSessions();
+      final statusService = StudentStatusService(db: this, studentDao: studentDao);
+      await _finalizeStudentsForCompletedBitacoras(statusService);
     },
   );
 
@@ -139,6 +91,39 @@ class AppDatabase extends _$AppDatabase {
     }
     if (!existing.contains('ruta_documento')) {
       await m.addColumn(calendarioBitacoras, calendarioBitacoras.rutaDocumento);
+    }
+  }
+  Future<void> _selfHealHourSwaps() async {
+    for (final table in ['modules', 'units', 'activities']) {
+      await customStatement('''
+            UPDATE $table 
+            SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
+            WHERE total_hora_academic < total_hora_reloj;
+          ''');
+      await customStatement('''
+            UPDATE $table 
+            SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
+            WHERE total_hora_academic < 0;
+          ''');
+      await customStatement('''
+            UPDATE $table 
+            SET total_hora_academic = -total_hora_academic - total_hora_reloj 
+            WHERE total_hora_academic < 0;
+          ''');
+    }
+  }
+
+  Future<void> _finalizeStudentsForCompletedBitacoras(StudentStatusService statusService) async {
+    final activeBitacoras = await (select(bitacoras)
+          ..where((t) => t.estado.equals(EstadoBitacora.finalizado.index)))
+        .get();
+    for (final bitacora in activeBitacoras) {
+      if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
+        await statusService.transitionActiveStudentsForGroup(
+          bitacora.codigoGrupo!,
+          StudentStatus.finalizado,
+        );
+      }
     }
   }
 }
