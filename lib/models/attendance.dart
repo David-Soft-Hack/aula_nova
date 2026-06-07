@@ -1,4 +1,5 @@
-import '../database/app_database.dart';
+import 'package:aula_nova/database/app_database.dart';
+
 import '../database/tables.dart';
 
 class AttendanceRecord {
