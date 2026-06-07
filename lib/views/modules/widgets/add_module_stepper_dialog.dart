@@ -368,22 +368,24 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
     return Container(
       padding: EdgeInsets.fromLTRB(
         20,
-        isKeyboardOpen ? 8 : 16,
-        20,
-        isKeyboardOpen ? 8 : 12,
+        isKeyboardOpen ? 10 : 16,
+        16,
+        isKeyboardOpen ? 10 : 14,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(bottom: BorderSide(color: Colors.grey.shade100)),
+        border: Border(bottom: BorderSide(color: Colors.grey.shade100, width: 1.5)),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!isKeyboardOpen) ...[
                 Container(
-                  padding: const EdgeInsets.all(6),
+                  padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                     color: AppTheme.academic50,
                     borderRadius: BorderRadius.circular(10),
@@ -391,35 +393,56 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
                   child: const Icon(
                     LucideIcons.bookOpen,
                     color: AppTheme.academic600,
-                    size: 18,
+                    size: 20,
                   ),
                 ),
-                const SizedBox(width: 10),
+                const SizedBox(width: 12),
               ],
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // Badge de paso
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      decoration: BoxDecoration(
+                        color: AppTheme.academic50,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        'Paso $_step de 3',
+                        style: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.academic600,
+                          letterSpacing: 0.3,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    // Titulo principal
                     Text(
                       'Plan de Módulo Académico',
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
-                        fontSize: isKeyboardOpen ? 14 : 16,
+                        fontSize: isKeyboardOpen ? 15 : 17,
                         color: AppTheme.slate900,
                       ),
                     ),
-                    if (!isKeyboardOpen)
-                      Text(
-                        'Paso $_step de 3: ${_getStepTitle()}',
-                        style: TextStyle(
-                          color: Colors.grey.shade500,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w500,
-                        ),
+                    const SizedBox(height: 2),
+                    // Subtítulo descriptivo según el paso
+                    Text(
+                      _getStepDescription(),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                        fontSize: isKeyboardOpen ? 11 : 12,
+                        fontWeight: FontWeight.w400,
                       ),
+                    ),
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               IconButton(
                 onPressed: () => Navigator.pop(context),
                 icon: Icon(
@@ -433,20 +456,41 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
               ),
             ],
           ),
-          if (!isKeyboardOpen) ...[
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(
-                value: _step / 3,
-                backgroundColor: Colors.grey.shade100,
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  AppTheme.academic600,
-                ),
-                minHeight: 4,
+          const SizedBox(height: 12),
+          // Barra de progreso siempre visible
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: _step / 3,
+              backgroundColor: Colors.grey.shade100,
+              valueColor: const AlwaysStoppedAnimation<Color>(
+                AppTheme.academic600,
               ),
+              minHeight: 5,
             ),
-          ],
+          ),
+          const SizedBox(height: 4),
+          // Etiqueta del paso actual
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                _getStepTitle(),
+                style: TextStyle(
+                  color: AppTheme.academic600,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '$_step/3 completado',
+                style: TextStyle(
+                  color: Colors.grey.shade400,
+                  fontSize: 11,
+                ),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -460,6 +504,19 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
         return 'Unidades Didácticas';
       case 3:
         return 'Actividades de Aprendizaje';
+      default:
+        return '';
+    }
+  }
+
+  String _getStepDescription() {
+    switch (_step) {
+      case 1:
+        return 'Ingresa el nombre, código y horas del módulo';
+      case 2:
+        return 'Define las unidades didácticas y su ponderación';
+      case 3:
+        return 'Agrega las actividades de aprendizaje por unidad';
       default:
         return '';
     }

@@ -92,21 +92,33 @@ class BitacoraStep1Form extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        const Text(
+          'Código de Grupo',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF374151),
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Identifica el grupo al que pertenece esta bitácora',
+          style: TextStyle(
+            fontSize: 11,
+            color: Color(0xFF9CA3AF),
+          ),
+        ),
+        const SizedBox(height: 8),
         TextFormField(
           controller: grupoCtrl,
           decoration: InputDecoration(
-            labelText: 'Código de Grupo',
-            labelStyle: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
-            ),
+            hintText: 'Ej. S-24A',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             prefixIcon: const Icon(
               LucideIcons.users,
               size: 18,
               color: AppTheme.academic600,
             ),
-            hintText: 'Ej. S-24A',
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
@@ -127,21 +139,33 @@ class BitacoraStep1Form extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 20),
+        const Text(
+          'Carrera / Programa',
+          style: TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF374151),
+          ),
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Programa académico al que pertenece este grupo',
+          style: TextStyle(
+            fontSize: 11,
+            color: Color(0xFF9CA3AF),
+          ),
+        ),
+        const SizedBox(height: 8),
         TextFormField(
           controller: carreraCtrl,
           decoration: InputDecoration(
-            labelText: 'Carrera / Programa',
-            labelStyle: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey.shade600,
-            ),
+            hintText: 'Ej. Computación',
+            hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             prefixIcon: const Icon(
               LucideIcons.graduationCap,
               size: 18,
               color: AppTheme.academic600,
             ),
-            hintText: 'Ej. Computación',
             filled: true,
             fillColor: Colors.white,
             contentPadding: const EdgeInsets.symmetric(
@@ -166,55 +190,55 @@ class BitacoraStep1Form extends StatelessWidget {
   }
 
   Widget _buildStartDatePicker(BuildContext context) {
-    return InkWell(
-      onTap: onPickDate,
-      borderRadius: BorderRadius.circular(16),
-      child: InputDecorator(
-        decoration: InputDecoration(
-          labelText: 'Fecha de Inicio de Clases',
-          labelStyle: TextStyle(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Fecha de Inicio de Clases',
+          style: TextStyle(
             fontSize: 13,
-            fontWeight: FontWeight.bold,
-            color: Colors.grey.shade600,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF374151),
           ),
-          prefixIcon: const Icon(
-            LucideIcons.calendar,
-            size: 18,
-            color: AppTheme.academic600,
+        ),
+        const SizedBox(height: 4),
+        const Text(
+          'Primera sesión a partir de la cual se generará el calendario',
+          style: TextStyle(
+            fontSize: 11,
+            color: Color(0xFF9CA3AF),
           ),
-          filled: true,
-          fillColor: Colors.white,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide(color: Colors.grey.shade200),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: const BorderSide(
-              color: AppTheme.academic600,
-              width: 1.5,
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: onPickDate,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Colors.grey.shade200),
+            ),
+            child: Row(
+              children: [
+                const Icon(LucideIcons.calendar, size: 18, color: AppTheme.academic600),
+                const SizedBox(width: 12),
+                Text(
+                  DateFormat('dd MMMM, yyyy', 'es').format(startDate),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+                const Spacer(),
+                Icon(
+                  LucideIcons.chevronDown,
+                  size: 16,
+                  color: Colors.grey.shade400,
+                ),
+              ],
             ),
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              DateFormat('dd MMMM, yyyy', 'es').format(startDate),
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-            ),
-            Icon(
-              LucideIcons.chevronDown,
-              size: 16,
-              color: Colors.grey.shade400,
-            ),
-          ],
-        ),
-      ),
+      ],
     );
   }
 }

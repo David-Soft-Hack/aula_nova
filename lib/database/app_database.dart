@@ -19,105 +19,87 @@ part 'app_database.g.dart';
     CalendarioBitacoras,
     Students,
   ],
-  daos: [
-    CareerDao,
-    ModuleDao,
-    UnitDao,
-    ActivityDao,
-    BitacoraDao,
-    StudentDao,
-  ],
+  daos: [CareerDao, ModuleDao, UnitDao, ActivityDao, BitacoraDao, StudentDao],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-<<<<<<< HEAD
-  int get schemaVersion => 6;
-=======
   int get schemaVersion => 7;
->>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await m.drop(calendarioBitacoras);
-            await m.create(calendarioBitacoras);
-          }
-          if (from < 3) {
-            await m.addColumn(bitacoras, bitacoras.usarHorasReloj);
-          }
-          if (from < 4) {
-            await _addCalendarioEvalColumnsIfMissing(m);
-          }
-          if (from < 5) {
-            await m.create(students);
-          }
-          // v6: StudentStatus gained suspendido/finalizado/desertado.
-          // Stored as INTEGER, no DDL changes required.
-          if (from < 6) {}
-<<<<<<< HEAD
-=======
-          // v7: Add turno column to bitacoras
-          if (from < 7) {
-            await m.addColumn(bitacoras, bitacoras.turno);
-          }
->>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
-        },
-        beforeOpen: (details) async {
-          // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.
-          // In course planning, totalHoraAcademic is always strictly greater than totalHoraReloj.
-          // If a row has academic hours less than clock hours, it means they are swapped.
-          // We use a 3-step swap with negative sums to avoid SQLite's left-to-right evaluation gotcha.
-          await customStatement('''
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.drop(calendarioBitacoras);
+        await m.create(calendarioBitacoras);
+      }
+      if (from < 3) {
+        await m.addColumn(bitacoras, bitacoras.usarHorasReloj);
+      }
+      if (from < 4) {
+        await _addCalendarioEvalColumnsIfMissing(m);
+      }
+      if (from < 5) {
+        await m.create(students);
+      }
+      // v6: StudentStatus gained suspendido/finalizado/desertado.
+      // Stored as INTEGER, no DDL changes required.
+      if (from < 6) {}
+    },
+    beforeOpen: (details) async {
+      // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.
+      // In course planning, totalHoraAcademic is always strictly greater than totalHoraReloj.
+      // If a row has academic hours less than clock hours, it means they are swapped.
+      // We use a 3-step swap with negative sums to avoid SQLite's left-to-right evaluation gotcha.
+      await customStatement('''
             UPDATE modules 
             SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
             WHERE total_hora_academic < total_hora_reloj;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE modules 
             SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE modules 
             SET total_hora_academic = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
 
-          await customStatement('''
+      await customStatement('''
             UPDATE units 
             SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
             WHERE total_hora_academic < total_hora_reloj;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE units 
             SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE units 
             SET total_hora_academic = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
 
-          await customStatement('''
+      await customStatement('''
             UPDATE activities 
             SET total_hora_academic = -(total_hora_academic + total_hora_reloj) 
             WHERE total_hora_academic < total_hora_reloj;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE activities 
             SET total_hora_reloj = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
-          await customStatement('''
+      await customStatement('''
             UPDATE activities 
             SET total_hora_academic = -total_hora_academic - total_hora_reloj 
             WHERE total_hora_academic < 0;
           ''');
-        },
-      );
+    },
+  );
 
   /// Adds evaluation columns only when absent (e.g. after v2 recreates the
   /// table with the current schema, or after a partial failed migration).
@@ -125,23 +107,16 @@ class AppDatabase extends _$AppDatabase {
     final rows = await m.database
         .customSelect('PRAGMA table_info(calendario_bitacoras)')
         .get();
-    final existing =
-        rows.map((row) => row.read<String>('name')).toSet();
+    final existing = rows.map((row) => row.read<String>('name')).toSet();
 
     if (!existing.contains('es_evaluativa')) {
-      await m.addColumn(
-        calendarioBitacoras,
-        calendarioBitacoras.esEvaluativa,
-      );
+      await m.addColumn(calendarioBitacoras, calendarioBitacoras.esEvaluativa);
     }
     if (!existing.contains('puntaje')) {
       await m.addColumn(calendarioBitacoras, calendarioBitacoras.puntaje);
     }
     if (!existing.contains('ruta_documento')) {
-      await m.addColumn(
-        calendarioBitacoras,
-        calendarioBitacoras.rutaDocumento,
-      );
+      await m.addColumn(calendarioBitacoras, calendarioBitacoras.rutaDocumento);
     }
   }
 }

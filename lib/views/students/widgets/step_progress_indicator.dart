@@ -20,6 +20,7 @@ class StepProgressIndicator extends StatelessWidget {
     return Row(
       children: List.generate(totalSteps, (index) {
         final isActive = index <= currentStep;
+        final isCurrent = index == currentStep;
         return Expanded(
           child: Column(
             children: [
@@ -35,8 +36,8 @@ class StepProgressIndicator extends StatelessWidget {
                       ),
                     ),
                   Container(
-                    width: isKeyboardVisible ? 28 : 40,
-                    height: isKeyboardVisible ? 28 : 40,
+                    width: isKeyboardVisible ? 26 : 36,
+                    height: isKeyboardVisible ? 26 : 36,
                     decoration: BoxDecoration(
                       color: isActive
                           ? AppTheme.academic600
@@ -48,6 +49,15 @@ class StepProgressIndicator extends StatelessWidget {
                             : Colors.grey.shade300,
                         width: 1.5,
                       ),
+                      boxShadow: isCurrent
+                          ? [
+                              BoxShadow(
+                                color: AppTheme.academic600.withValues(alpha: 0.3),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              ),
+                            ]
+                          : null,
                     ),
                     child: Center(
                       child: Text(
@@ -56,7 +66,7 @@ class StepProgressIndicator extends StatelessWidget {
                           color:
                               isActive ? Colors.white : Colors.grey.shade600,
                           fontWeight: FontWeight.bold,
-                          fontSize: isKeyboardVisible ? 11 : 14,
+                          fontSize: isKeyboardVisible ? 11 : 13,
                         ),
                       ),
                     ),
@@ -72,20 +82,22 @@ class StepProgressIndicator extends StatelessWidget {
                     ),
                 ],
               ),
-              if (!isKeyboardVisible && index < stepLabels.length) ...[
-                const SizedBox(height: 8),
+              // Etiqueta siempre visible, solo con tamano ajustado
+              if (index < stepLabels.length) ...[
+                SizedBox(height: isKeyboardVisible ? 4 : 8),
                 Text(
                   stepLabels[index],
                   style: TextStyle(
-                    color: index <= currentStep
+                    color: isActive
                         ? AppTheme.slate900
-                        : Colors.grey.shade500,
-                    fontWeight: index <= currentStep
+                        : Colors.grey.shade400,
+                    fontWeight: isActive
                         ? FontWeight.w600
                         : FontWeight.w400,
-                    fontSize: 12,
+                    fontSize: isKeyboardVisible ? 10 : 12,
                   ),
                   textAlign: TextAlign.center,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ],

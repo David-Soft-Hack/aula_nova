@@ -258,23 +258,47 @@ class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.academic50,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      'Paso $_currentStep de 2',
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppTheme.academic600,
+                                        fontFamily: 'Outfit',
+                                        letterSpacing: 0.3,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 2),
                               Text(
-                                'Paso $_currentStep de 2',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.grey.shade500,
+                                _currentStep == 1
+                                    ? 'Configuración de la Bitácora'
+                                    : 'Vista Previa del Calendario',
+                                style: const TextStyle(
+                                  fontSize: 17,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E293B),
                                   fontFamily: 'Outfit',
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               Text(
                                 _currentStep == 1
-                                    ? 'Configurar Bitácora'
-                                    : 'Vista Previa del Calendario',
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1E293B),
+                                    ? 'Selecciona el módulo y configura los parámetros del grupo'
+                                    : 'Revisa las sesiones generadas y confirma el calendario',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey.shade500,
                                   fontFamily: 'Outfit',
                                 ),
                               ),

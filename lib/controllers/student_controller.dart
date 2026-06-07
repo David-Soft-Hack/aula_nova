@@ -74,13 +74,13 @@ class StudentController {
     try {
       final bitacoras = await DatabaseProvider.bitacoraDao.getAllBitacoras();
       final grupos = <String>{};
-      
+
       for (final bitacora in bitacoras) {
         if (bitacora.codigoGrupo != null && bitacora.codigoGrupo!.isNotEmpty) {
           grupos.add(bitacora.codigoGrupo!);
         }
       }
-      
+
       return grupos.toList();
     } catch (e) {
       debugPrint('Error fetching groups: $e');
@@ -93,7 +93,11 @@ class StudentController {
     try {
       final all = await getAllStudents();
       final groupStudents = all
-          .where((s) => s.grupo?.trim().toLowerCase() == grupoCodigo.trim().toLowerCase())
+          .where(
+            (s) =>
+                s.grupo?.trim().toLowerCase() ==
+                grupoCodigo.trim().toLowerCase(),
+          )
           .toList();
 
       int maxNum = 0;
@@ -113,11 +117,7 @@ class StudentController {
       final suffix = nextNum.toString().padLeft(2, '0');
       return '${grupoCodigo.trim()}-$suffix';
     } catch (e) {
-<<<<<<< HEAD
-      print('Error generating next student code: $e');
-=======
       debugPrint('Error generating next student code: $e');
->>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
       return '${grupoCodigo.trim()}-01';
     }
   }

@@ -179,6 +179,10 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
             children: [
               DialogHeader(
                 title: 'Nuevo Estudiante',
+                stepBadge: 'Paso ${_currentStep + 1} de 2',
+                subtitle: _currentStep == 0
+                    ? 'Ingresa el nombre, apellidos y datos de contacto'
+                    : 'Asigna la carrera, grupo y estado del estudiante',
                 icon: LucideIcons.userPlus,
                 isKeyboardVisible: isKeyboardVisible,
                 isSaving: _isSaving,

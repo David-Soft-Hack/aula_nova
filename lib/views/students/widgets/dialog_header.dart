@@ -4,6 +4,8 @@ import '../../../config/theme/app_theme.dart';
 
 class DialogHeader extends StatelessWidget {
   final String title;
+  final String? subtitle;
+  final String? stepBadge;
   final IconData icon;
   final bool isKeyboardVisible;
   final bool isSaving;
@@ -12,6 +14,8 @@ class DialogHeader extends StatelessWidget {
   const DialogHeader({
     super.key,
     required this.title,
+    this.subtitle,
+    this.stepBadge,
     required this.icon,
     required this.isKeyboardVisible,
     required this.isSaving,
@@ -22,6 +26,7 @@ class DialogHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           padding: EdgeInsets.all(isKeyboardVisible ? 6 : 10),
@@ -37,13 +42,49 @@ class DialogHeader extends StatelessWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
-            title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-              fontSize: isKeyboardVisible ? 16 : 20,
-              color: AppTheme.slate900,
-            ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (stepBadge != null) ...[
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: AppTheme.academic50,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    stepBadge!,
+                    style: const TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w700,
+                      color: AppTheme.academic600,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 4),
+              ],
+              Text(
+                title,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  fontSize: isKeyboardVisible ? 16 : 20,
+                  color: AppTheme.slate900,
+                ),
+              ),
+              if (subtitle != null && !isKeyboardVisible) ...[
+                const SizedBox(height: 3),
+                Text(
+                  subtitle!,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade500,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
         IconButton(
