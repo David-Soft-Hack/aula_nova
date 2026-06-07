@@ -1,29 +1,28 @@
 import 'package:drift/drift.dart' hide Column;
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../controllers/student_controller.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
+import '../../../providers/student_providers.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
 import 'form_action_buttons.dart';
 
-class EditStudentDialog extends StatefulWidget {
-  final StudentController controller;
+class EditStudentDialog extends ConsumerStatefulWidget {
   final Student student;
 
   const EditStudentDialog({
     super.key,
-    required this.controller,
     required this.student,
   });
 
   @override
-  State<EditStudentDialog> createState() => _EditStudentDialogState();
+  ConsumerState<EditStudentDialog> createState() => _EditStudentDialogState();
 }
 
-class _EditStudentDialogState extends State<EditStudentDialog> {
+class _EditStudentDialogState extends ConsumerState<EditStudentDialog> {
   late final TextEditingController _codigoCtrl;
   late final TextEditingController _nombresCtrl;
   late final TextEditingController _apellidosCtrl;
@@ -56,8 +55,9 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
   Future<void> _loadDropdownData() async {
     setState(() => _isLoadingData = true);
     try {
-      final carreras = await widget.controller.getAllCareers();
-      final grupos = await widget.controller.getAllGroups();
+      final controller = ref.read(studentControllerProvider);
+      final carreras = await controller.getAllCareers();
+      final grupos = await controller.getAllGroups();
       setState(() {
         _carreras = carreras;
         _grupos = grupos;
@@ -117,7 +117,7 @@ class _EditStudentDialogState extends State<EditStudentDialog> {
       fechaIngreso: Value(_fechaIngreso),
     );
 
-    await widget.controller.updateStudent(updatedStudent);
+    await ref.read(studentControllerProvider).updateStudent(updatedStudent);
     if (mounted) Navigator.pop(context);
   }
 

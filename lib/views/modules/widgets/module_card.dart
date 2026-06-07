@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../models/database_provider.dart';
+import '../../../providers/database_providers.dart';
 
 /// Tarjeta de módulo con información de horas, unidades y carrera.
 class ModuleCard extends StatelessWidget {
@@ -297,14 +298,14 @@ class _HourCard extends StatelessWidget {
 }
 
 // ─── Widget auxiliar: Indicador de unidades ──────────────────────────────────
-class _UnitsIndicator extends StatelessWidget {
+class _UnitsIndicator extends ConsumerWidget {
   final Module module;
   const _UnitsIndicator({required this.module});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return FutureBuilder<List<Unit>>(
-      future: DatabaseProvider.unitDao.getUnitsByModule(module.codModule),
+      future: ref.read(unitDaoProvider).getUnitsByModule(module.codModule),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Row(

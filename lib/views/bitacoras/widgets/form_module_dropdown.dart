@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../../config/theme/app_theme.dart';
 import '../../../../database/app_database.dart';
-import '../../../../models/database_provider.dart';
+import '../../../../providers/module_providers.dart';
 
-class FormModuleDropdown extends StatelessWidget {
+class FormModuleDropdown extends ConsumerWidget {
   final Module? selectedModule;
   final ValueChanged<Module?> onModuleChanged;
 
@@ -15,11 +16,12 @@ class FormModuleDropdown extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder<List<Module>>(
-      stream: DatabaseProvider.moduleDao.watchAllModules(),
-      builder: (context, snapshot) {
-        final modules = snapshot.data ?? [];
+  Widget build(BuildContext context, WidgetRef ref) {
+    final modulesAsync = ref.watch(allModulesStreamProvider);
+    return modulesAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (modules) {
         return DropdownButtonFormField<Module>(
           isExpanded: true,
           initialValue: selectedModule,

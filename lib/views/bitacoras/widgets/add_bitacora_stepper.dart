@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:drift/drift.dart' show Value;
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
-import '../../../models/database_provider.dart';
+import '../../../providers/database_providers.dart';
 import '../../../services/dosificacion_service.dart';
 import 'bitacora_step_1_form.dart';
 import 'bitacora_step_2_preview.dart';
 
-/// Un asistente/wizard de dos pasos interactivo y premium para crear una Bitácora Académica.
-class AddBitacoraStepper extends StatefulWidget {
+class AddBitacoraStepper extends ConsumerStatefulWidget {
   const AddBitacoraStepper({super.key});
 
   @override
-  State<AddBitacoraStepper> createState() => _AddBitacoraStepperState();
+  ConsumerState<AddBitacoraStepper> createState() => _AddBitacoraStepperState();
 }
 
-class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
+class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
   int _currentStep = 1;
   Module? _selectedModule;
   final TextEditingController _grupoCtrl = TextEditingController();
@@ -111,13 +111,14 @@ class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
     });
 
     try {
-      final units = await DatabaseProvider.unitDao.getUnitsByModule(
+      final db = ref.read(appDatabaseProvider);
+      final units = await ref.read(unitDaoProvider).getUnitsByModule(
         _selectedModule!.codModule,
       );
       final unitIds = units.map((u) => u.codUnit).toList();
 
-      final activities = await (DatabaseProvider.db.select(
-        DatabaseProvider.db.activities,
+      final activities = await (db.select(
+        db.activities,
       )..where((t) => t.idUnit.isIn(unitIds))).get();
 
       final holidayStrings = _fechasFeriadas.map((d) {
@@ -186,7 +187,7 @@ class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
         turno: Value(_selectedShift),
       );
 
-      final bitacoraId = await DatabaseProvider.bitacoraDao.createBitacora(
+      final bitacoraId = await ref.read(bitacoraDaoProvider).createBitacora(
         bitacoraCompanion,
       );
 
@@ -194,7 +195,7 @@ class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
         return s.copyWith(idBitacora: Value(bitacoraId));
       }).toList();
 
-      await DatabaseProvider.bitacoraDao.createCalendarioEntries(
+      await ref.read(bitacoraDaoProvider).createCalendarioEntries(
         sessionsToSave,
       );
 

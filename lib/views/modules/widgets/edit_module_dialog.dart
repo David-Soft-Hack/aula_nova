@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
-import '../../../models/database_provider.dart';
 import '../../../database/app_database.dart';
-import '../../../controllers/career_controller.dart';
+import '../../../providers/database_providers.dart';
+import '../../../providers/career_providers.dart';
 
 /// Diálogo altamente optimizado, seguro y con diseño premium M3 para editar un Módulo Formativo.
-class EditModuleDialog extends StatefulWidget {
+class EditModuleDialog extends ConsumerStatefulWidget {
   final Module module;
 
   const EditModuleDialog({super.key, required this.module});
 
   @override
-  State<EditModuleDialog> createState() => _EditModuleDialogState();
+  ConsumerState<EditModuleDialog> createState() => _EditModuleDialogState();
 }
 
-class _EditModuleDialogState extends State<EditModuleDialog> {
+class _EditModuleDialogState extends ConsumerState<EditModuleDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreCtrl;
   late final TextEditingController _haCtrl;
@@ -47,7 +48,7 @@ class _EditModuleDialogState extends State<EditModuleDialog> {
 
   void _loadCareers() async {
     try {
-      final controller = CareerController();
+      final controller = ref.read(careerControllerProvider);
       final careers = await controller.getAllCareers();
       if (mounted) {
         setState(() {
@@ -143,7 +144,7 @@ class _EditModuleDialogState extends State<EditModuleDialog> {
         fechaCreacion: widget.module.fechaCreacion,
       );
 
-      await DatabaseProvider.moduleDao.updateModule(updatedModule);
+      await ref.read(moduleDaoProvider).updateModule(updatedModule);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

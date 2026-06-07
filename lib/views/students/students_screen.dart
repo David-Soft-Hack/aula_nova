@@ -1,35 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
-import '../../controllers/student_controller.dart';
 import '../../database/app_database.dart';
 import '../../models/student.dart';
+import '../../providers/student_providers.dart';
 import 'widgets/add_student_dialog.dart';
 import 'widgets/edit_student_dialog.dart';
 import 'widgets/student_card.dart';
 
-class StudentsScreen extends StatefulWidget {
+class StudentsScreen extends ConsumerStatefulWidget {
   const StudentsScreen({super.key});
 
   @override
-  State<StudentsScreen> createState() => _StudentsScreenState();
+  ConsumerState<StudentsScreen> createState() => _StudentsScreenState();
 }
 
-class _StudentsScreenState extends State<StudentsScreen> {
-  final StudentController _controller = StudentController();
+class _StudentsScreenState extends ConsumerState<StudentsScreen> {
   String _searchQuery = '';
 
   void _showAddStudentDialog() {
     showDialog(
       context: context,
-      builder: (context) => AddStudentDialog(controller: _controller),
+      builder: (context) => const AddStudentDialog(),
     );
   }
 
   void _showEditStudentDialog(Student student) {
     showDialog(
       context: context,
-      builder: (context) => EditStudentDialog(controller: _controller, student: student),
+      builder: (context) => EditStudentDialog(student: student),
     );
   }
 
@@ -47,7 +47,7 @@ class _StudentsScreenState extends State<StudentsScreen> {
     );
 
     if (confirmed == true) {
-      await _controller.deleteStudent(student);
+      await ref.read(studentControllerProvider).deleteStudent(student);
     }
   }
 
@@ -151,14 +151,12 @@ class _StudentsScreenState extends State<StudentsScreen> {
   }
 
   Widget _buildStudentList() {
-    return StreamBuilder<List<Student>>(
-      stream: _controller.watchAllStudents(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    final studentsAsync = ref.watch(allStudentsStreamProvider);
 
-        final students = snapshot.data ?? [];
+    return studentsAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+      data: (students) {
         final filtered = _searchQuery.trim().isEmpty
             ? students
             : students.where((student) {

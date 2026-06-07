@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:drift/drift.dart' hide Column, Table;
 import '../../../config/theme/app_theme.dart';
-import '../../../models/database_provider.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../database/daos.dart';
+import '../../../providers/database_providers.dart';
 import '../../../services/dosificacion_service.dart';
 import 'bitacora_resumen_header.dart';
 import 'bitacora_session_item.dart';
 import 'edit_bitacora_bottom_sheet.dart';
 import 'manage_bitacora_footer.dart';
 
-/// Pantalla completa para gestionar las sesiones de una Bitácora.
-class ManageBitacoraDialog extends StatefulWidget {
+class ManageBitacoraDialog extends ConsumerStatefulWidget {
   final BitacoraWithModule bitacoraWithModule;
   final List<CalendarioBitacora> initialSessions;
 
@@ -24,10 +24,10 @@ class ManageBitacoraDialog extends StatefulWidget {
   });
 
   @override
-  State<ManageBitacoraDialog> createState() => _ManageBitacoraDialogState();
+  ConsumerState<ManageBitacoraDialog> createState() => _ManageBitacoraDialogState();
 }
 
-class _ManageBitacoraDialogState extends State<ManageBitacoraDialog> {
+class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
   late List<CalendarioBitacora> _sessions;
   late Bitacora _bitacora;
   bool _isUpdating = false;
@@ -42,7 +42,7 @@ class _ManageBitacoraDialogState extends State<ManageBitacoraDialog> {
   void _toggleSessionCompleted(int index, bool val) async {
     final updated = _sessions[index].copyWith(estadoImpartido: val);
     try {
-      await DatabaseProvider.bitacoraDao.updateCalendarioEntry(updated);
+      await ref.read(bitacoraDaoProvider).updateCalendarioEntry(updated);
       if (mounted) setState(() => _sessions[index] = updated);
     } catch (e) {
       if (mounted) {
@@ -54,7 +54,7 @@ class _ManageBitacoraDialogState extends State<ManageBitacoraDialog> {
   }
 
   Future<void> _onSessionUpdated(int index, CalendarioBitacora updated) async {
-    await DatabaseProvider.bitacoraDao.updateCalendarioEntry(updated);
+    await ref.read(bitacoraDaoProvider).updateCalendarioEntry(updated);
     if (mounted) setState(() => _sessions[index] = updated);
   }
 
@@ -80,15 +80,16 @@ class _ManageBitacoraDialogState extends State<ManageBitacoraDialog> {
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     try {
-      await DatabaseProvider.bitacoraDao.updateBitacora(updated);
+      await ref.read(bitacoraDaoProvider).updateBitacora(updated);
 
       final module = widget.bitacoraWithModule.module;
-      final units = await DatabaseProvider.unitDao.getUnitsByModule(
+      final db = ref.read(appDatabaseProvider);
+      final units = await ref.read(unitDaoProvider).getUnitsByModule(
         module.codModule,
       );
       final unitIds = units.map((u) => u.codUnit).toList();
-      final activities = await (DatabaseProvider.db.select(
-        DatabaseProvider.db.activities,
+      final activities = await (db.select(
+        db.activities,
       )..where((t) => t.idUnit.isIn(unitIds))).get();
 
       final reDosified = DosificacionService.dosificar(
@@ -102,16 +103,16 @@ class _ManageBitacoraDialogState extends State<ManageBitacoraDialog> {
         usarHorasReloj: usarReloj,
       );
 
-      await DatabaseProvider.bitacoraDao.deleteCalendarioForBitacora(
+      await ref.read(bitacoraDaoProvider).deleteCalendarioForBitacora(
         _bitacora.id,
       );
-      await DatabaseProvider.bitacoraDao.createCalendarioEntries(
+      await ref.read(bitacoraDaoProvider).createCalendarioEntries(
         reDosified
             .map((s) => s.copyWith(idBitacora: Value(_bitacora.id)))
             .toList(),
       );
 
-      final newSessions = await DatabaseProvider.bitacoraDao
+      final newSessions = await ref.read(bitacoraDaoProvider)
           .getCalendarioForBitacora(_bitacora.id);
 
       if (!mounted) return;

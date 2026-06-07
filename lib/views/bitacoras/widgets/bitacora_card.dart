@@ -1,31 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/daos.dart';
-import '../../../models/database_provider.dart';
+import '../../../providers/bitacora_providers.dart';
 import 'bitacora_delete_dialog.dart';
 
-/// Tarjeta de bitácora — compacta y eficiente en espacio.
-/// Al tocarla abre el diálogo de gestión de sesiones.
-class BitacoraCard extends StatelessWidget {
+class BitacoraCard extends ConsumerWidget {
   final BitacoraWithModule item;
   final void Function(List<CalendarioBitacora> sessions) onManage;
 
   const BitacoraCard({super.key, required this.item, required this.onManage});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final bitacora = item.bitacora;
     final module = item.module;
+    final calendarioAsync = ref.watch(calendarioStreamProvider(bitacora.id));
 
-    return StreamBuilder<List<CalendarioBitacora>>(
-      stream: DatabaseProvider.bitacoraDao.watchCalendarioForBitacora(
-        bitacora.id,
-      ),
-      builder: (context, snapshot) {
-        final sessions = snapshot.data ?? [];
+    return calendarioAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (sessions) {
         final totalSessions = sessions.length;
         final completedSessions = sessions.where((s) => s.estadoImpartido).length;
         final progress = totalSessions == 0 ? 0.0 : (completedSessions / totalSessions);

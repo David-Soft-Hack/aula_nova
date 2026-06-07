@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
-import '../../../models/database_provider.dart';
 import '../../../database/app_database.dart';
+import '../../../providers/database_providers.dart';
 
-class EditUnitDialog extends StatefulWidget {
+class EditUnitDialog extends ConsumerStatefulWidget {
   final Unit unit;
 
   const EditUnitDialog({super.key, required this.unit});
 
   @override
-  State<EditUnitDialog> createState() => _EditUnitDialogState();
+  ConsumerState<EditUnitDialog> createState() => _EditUnitDialogState();
 }
 
-class _EditUnitDialogState extends State<EditUnitDialog> {
+class _EditUnitDialogState extends ConsumerState<EditUnitDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _nombreCtrl;
   late final TextEditingController _haCtrl;
@@ -87,7 +88,7 @@ class _EditUnitDialogState extends State<EditUnitDialog> {
         idModule: widget.unit.idModule,
       );
 
-      await DatabaseProvider.unitDao.updateUnit(updatedUnit);
+      await ref.read(unitDaoProvider).updateUnit(updatedUnit);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

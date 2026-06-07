@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../database/app_database.dart';
-import '../../../controllers/module_controller.dart';
+import '../../../providers/module_providers.dart';
 
-/// Hoja modal de opciones de acción para un módulo.
-class ModuleOptionsSheet extends StatelessWidget {
+class ModuleOptionsSheet extends ConsumerWidget {
   final Module module;
   final VoidCallback? onEdit;
 
@@ -15,7 +15,7 @@ class ModuleOptionsSheet extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -75,7 +75,7 @@ class ModuleOptionsSheet extends StatelessWidget {
                   try {
                     // Instanciamos el controller localmente ya que no podemos importarlo directamente sin modificar imports.
                     // Actually, let me just add the import to the file if needed.
-                    await ModuleController().deleteModuleWithDetails(module.codModule);
+                    await ref.read(moduleControllerProvider).deleteModuleWithDetails(module.codModule);
                   } catch (e) {
                     if (context.mounted) {
                       ScaffoldMessenger.of(context).showSnackBar(

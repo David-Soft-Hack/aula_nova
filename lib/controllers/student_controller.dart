@@ -3,21 +3,28 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
 import '../database/tables.dart';
-import '../models/database_provider.dart';
 
 class StudentController {
-  final StudentDao _dao = DatabaseProvider.studentDao;
+  final StudentDao studentDao;
+  final CareerDao careerDao;
+  final BitacoraDao bitacoraDao;
+
+  StudentController({
+    required this.studentDao,
+    required this.careerDao,
+    required this.bitacoraDao,
+  });
 
   Future<List<Student>> getAllStudents() async {
-    return await _dao.getAllStudents();
+    return await studentDao.getAllStudents();
   }
 
   Stream<List<Student>> watchAllStudents() {
-    return _dao.watchAllStudents();
+    return studentDao.watchAllStudents();
   }
 
   Future<bool> existsStudentByCodigo(String codigo) async {
-    final current = await _dao.getStudentByCodigo(codigo);
+    final current = await studentDao.getStudentByCodigo(codigo);
     return current != null;
   }
 
@@ -45,34 +52,32 @@ class StudentController {
       fechaCreacion: Value(DateTime.now()),
     );
 
-    await _dao.insertStudent(student);
+    await studentDao.insertStudent(student);
   }
 
   Future<void> updateStudent(Student student) async {
-    await _dao.updateStudent(student);
+    await studentDao.updateStudent(student);
   }
 
   Future<void> deleteStudent(Student student) async {
-    await _dao.deleteStudent(student);
+    await studentDao.deleteStudent(student);
   }
 
   Future<List<Student>> searchStudents(String query) async {
     if (query.trim().isEmpty) {
       return await getAllStudents();
     }
-    return await _dao.searchStudents(query);
+    return await studentDao.searchStudents(query);
   }
 
-  /// Obtiene todas las carreras disponibles en la base de datos
   Future<List<String>> getAllCareers() async {
-    final careers = await DatabaseProvider.careerDao.getAllCareers();
+    final careers = await careerDao.getAllCareers();
     return careers.map((career) => career.nombre).toList();
   }
 
-  /// Obtiene todos los códigos de grupo únicos de la bitácora
   Future<List<String>> getAllGroups() async {
     try {
-      final bitacoras = await DatabaseProvider.bitacoraDao.getAllBitacoras();
+      final bitacoras = await bitacoraDao.getAllBitacoras();
       final grupos = <String>{};
 
       for (final bitacora in bitacoras) {
@@ -88,7 +93,6 @@ class StudentController {
     }
   }
 
-  /// Genera el siguiente código de estudiante autoincremental de acuerdo con el grupo
   Future<String> generateNextStudentCodigo(String grupoCodigo) async {
     try {
       final all = await getAllStudents();

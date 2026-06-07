@@ -1,22 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
-import '../../../controllers/career_controller.dart';
 import '../../../database/tables.dart' show TipoCarrera;
+import '../../../providers/career_providers.dart';
 import 'career_type_selector.dart';
 
-/// Diálogo modal rediseñado para agregar una nueva carrera o programa formativo,
-/// ofreciendo una estética profesional, fluida y con micro-interacciones.
-class AddCareerDialog extends StatefulWidget {
-  final CareerController controller;
-
-  const AddCareerDialog({super.key, required this.controller});
+class AddCareerDialog extends ConsumerStatefulWidget {
+  const AddCareerDialog({super.key});
 
   @override
-  State<AddCareerDialog> createState() => _AddCareerDialogState();
+  ConsumerState<AddCareerDialog> createState() => _AddCareerDialogState();
 }
 
-class _AddCareerDialogState extends State<AddCareerDialog> {
+class _AddCareerDialogState extends ConsumerState<AddCareerDialog> {
   final _nombreCtrl = TextEditingController();
   TipoCarrera _selectedTipo = TipoCarrera.curso;
   bool _isSaving = false;
@@ -35,7 +32,8 @@ class _AddCareerDialogState extends State<AddCareerDialog> {
       _isSaving = true;
     });
 
-    final exists = await widget.controller.existsCareer(nombre);
+    final controller = ref.read(careerControllerProvider);
+    final exists = await controller.existsCareer(nombre);
     if (exists) {
       setState(() {
         _isSaving = false;
@@ -65,7 +63,7 @@ class _AddCareerDialogState extends State<AddCareerDialog> {
       return;
     }
 
-    await widget.controller.addCareer(nombre, _selectedTipo);
+    await ref.read(careerControllerProvider).addCareer(nombre, _selectedTipo);
     if (mounted) Navigator.pop(context);
   }
 

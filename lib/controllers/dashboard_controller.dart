@@ -1,29 +1,34 @@
 import '../database/daos.dart';
 import '../database/tables.dart';
-import '../models/database_provider.dart';
 
 class DashboardController {
-  final ModuleDao _moduleDao = DatabaseProvider.moduleDao;
-  final BitacoraDao _bitacoraDao = DatabaseProvider.bitacoraDao;
-  final StudentDao _studentDao = DatabaseProvider.studentDao;
+  final ModuleDao moduleDao;
+  final BitacoraDao bitacoraDao;
+  final StudentDao studentDao;
+
+  DashboardController({
+    required this.moduleDao,
+    required this.bitacoraDao,
+    required this.studentDao,
+  });
 
   Stream<int> get totalModules =>
-      _moduleDao.watchAllModules().map((list) => list.length);
+      moduleDao.watchAllModules().map((list) => list.length);
 
-  Stream<int> get activeBitacoras => _bitacoraDao
+  Stream<int> get activeBitacoras => bitacoraDao
       .watchBitacorasWithModule()
       .map((list) => list.where((item) => item.bitacora.estado == EstadoBitacora.activo).length);
 
   Stream<int> get activeStudents =>
-      _studentDao.watchAllStudents().map((list) => list.where((s) => s.estado == StudentStatus.activo).length);
+      studentDao.watchAllStudents().map((list) => list.where((s) => s.estado == StudentStatus.activo).length);
 
-  Stream<int> get totalHours => _moduleDao
+  Stream<int> get totalHours => moduleDao
       .watchAllModules()
       .map((list) => list.fold(0, (sum, m) => sum + (m.totalHoraAcademic)));
 
   Stream<List<TodaySessionData>> get todaySessions =>
-      _bitacoraDao.watchTodaySessions();
+      bitacoraDao.watchTodaySessions();
 
   Stream<List<TodaySessionData>> get upcomingSessions =>
-      _bitacoraDao.watchUpcomingSessions(days: 7);
+      bitacoraDao.watchUpcomingSessions(days: 7);
 }

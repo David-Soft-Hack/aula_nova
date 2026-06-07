@@ -2,17 +2,18 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/tables.dart';
 import '../database/daos.dart';
-import '../models/database_provider.dart';
 
 class CareerController {
-  final CareerDao _dao = DatabaseProvider.careerDao;
+  final CareerDao careerDao;
 
-  Future<List<Career>> getAllCareers() => _dao.getAllCareers();
+  CareerController({required this.careerDao});
 
-  Stream<List<Career>> watchAllCareers() => _dao.watchAllCareers();
+  Future<List<Career>> getAllCareers() => careerDao.getAllCareers();
+
+  Stream<List<Career>> watchAllCareers() => careerDao.watchAllCareers();
 
   Future<Career?> getCareerByName(String nombre) async {
-    final careers = await _dao.getAllCareers();
+    final careers = await careerDao.getAllCareers();
     final normalized = nombre.trim().toLowerCase();
     try {
       return careers.firstWhere((c) => c.nombre.trim().toLowerCase() == normalized);
@@ -31,14 +32,14 @@ class CareerController {
       tipoCarrera: Value(tipo),
       fechaCreacion: Value(DateTime.now()),
     );
-    await _dao.insertCareer(career);
+    await careerDao.insertCareer(career);
   }
 
   Future<void> updateCareer(Career career) async {
-    await _dao.updateCareer(career);
+    await careerDao.updateCareer(career);
   }
 
   Future<void> deleteCareer(Career career) async {
-    await _dao.deleteCareer(career);
+    await careerDao.deleteCareer(career);
   }
 }

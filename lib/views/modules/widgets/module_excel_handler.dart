@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
 import '../../../controllers/career_controller.dart';
 import '../../../models/app_models.dart';
+import '../../../providers/database_providers.dart';
 import '../../../services/module_extractor.dart';
 import '../../../services/excel_template_generator.dart';
 
@@ -104,7 +106,7 @@ class ModuleExcelHandler {
 
         if (normalizedCareer.isNotEmpty && !careerExists) {
           // Si el programa no existe en la base de datos, se agrega automáticamente
-          await CareerController().addCareer(
+          await CareerController(careerDao: ProviderScope.containerOf(context).read(careerDaoProvider)).addCareer(
             normalizedCareer,
             TipoCarrera.tecnica,
           );
@@ -180,8 +182,7 @@ class ModuleExcelHandler {
         '[EXCEL DOWNLOAD] Iniciando generación de plantilla premium...',
       );
 
-      // Obtener carreras reales registradas en SQLite
-      final careers = await DatabaseProvider.careerDao.getAllCareers();
+      final careers = await ProviderScope.containerOf(context).read(careerDaoProvider).getAllCareers();
       debugPrint(
         '[EXCEL DOWNLOAD] Carreras recuperadas de SQLite: ${careers.length} registradas.',
       );

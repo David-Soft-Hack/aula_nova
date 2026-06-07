@@ -1,21 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
-import '../../../controllers/career_controller.dart';
 import '../../../database/tables.dart' show TipoCarrera;
+import '../../../providers/career_providers.dart';
 
-/// Diálogo modal para editar una carrera o programa formativo existente.
-class EditCareerDialog extends StatefulWidget {
-  final CareerController controller;
-  final dynamic career; // Career model
+class EditCareerDialog extends ConsumerStatefulWidget {
+  final dynamic career;
 
-  const EditCareerDialog({super.key, required this.controller, required this.career});
+  const EditCareerDialog({super.key, required this.career});
 
   @override
-  State<EditCareerDialog> createState() => _EditCareerDialogState();
+  ConsumerState<EditCareerDialog> createState() => _EditCareerDialogState();
 }
 
-class _EditCareerDialogState extends State<EditCareerDialog> {
+class _EditCareerDialogState extends ConsumerState<EditCareerDialog> {
   late TextEditingController _nombreCtrl;
   late TipoCarrera _selectedTipo;
 
@@ -37,7 +36,7 @@ class _EditCareerDialogState extends State<EditCareerDialog> {
     if (nombre.isEmpty) return;
 
     if (nombre.toLowerCase() != widget.career.nombre.toLowerCase()) {
-      final exists = await widget.controller.existsCareer(nombre);
+      final exists = await ref.read(careerControllerProvider).existsCareer(nombre);
       if (exists) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -70,7 +69,7 @@ class _EditCareerDialogState extends State<EditCareerDialog> {
       tipoCarrera: _selectedTipo,
     );
 
-    await widget.controller.updateCareer(updatedCareer);
+    await ref.read(careerControllerProvider).updateCareer(updatedCareer);
     if (mounted) Navigator.pop(context);
   }
 

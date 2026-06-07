@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
 import '../../database/app_database.dart';
 import '../../database/tables.dart' show TipoCarrera;
-import '../../models/database_provider.dart';
+import '../../providers/database_providers.dart';
 import '../modules/widgets/module_card.dart';
 import '../modules/widgets/module_options_sheet.dart';
 import '../modules/widgets/edit_module_dialog.dart';
@@ -11,15 +12,16 @@ import '../modules/widgets/module_detail_dialog.dart';
 
 /// Pantalla de detalle para visualizar información consolidada de una carrera/programa
 /// y la lista de sus módulos asignados.
-class CareerDetailScreen extends StatelessWidget {
+class CareerDetailScreen extends ConsumerWidget {
   final Career career;
 
   const CareerDetailScreen({super.key, required this.career});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final isTecnica = career.tipoCarrera == TipoCarrera.tecnica;
+    final modulesAsync = ref.watch(moduleDaoProvider).watchModulesByCareer(career.nombre);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
@@ -50,7 +52,7 @@ class CareerDetailScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: StreamBuilder<List<Module>>(
-          stream: DatabaseProvider.moduleDao.watchModulesByCareer(career.nombre),
+          stream: modulesAsync,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(

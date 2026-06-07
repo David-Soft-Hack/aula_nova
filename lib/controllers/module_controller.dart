@@ -1,17 +1,26 @@
 import 'package:drift/drift.dart';
-import '../models/database_provider.dart';
 import '../database/app_database.dart';
+import '../database/daos.dart';
 
 class ModuleController {
-  /// Crea un nuevo módulo junto con sus unidades didácticas y actividades
-  /// utilizando las clases del modelo generadas por Drift.
+  final AppDatabase db;
+  final ModuleDao moduleDao;
+  final UnitDao unitDao;
+  final ActivityDao activityDao;
+
+  ModuleController({
+    required this.db,
+    required this.moduleDao,
+    required this.unitDao,
+    required this.activityDao,
+  });
+
   Future<void> createModuleWithDetails({
     required Module module,
     required List<Unit> units,
     required List<Activity> activities,
   }) async {
-    // 1. Insert Module
-    await DatabaseProvider.moduleDao.insertModule(
+    await moduleDao.insertModule(
       ModulesCompanion.insert(
         codModule: module.codModule,
         nombre: module.nombre,
@@ -22,9 +31,8 @@ class ModuleController {
       ),
     );
 
-    // 2. Insert Units
     for (final unit in units) {
-      await DatabaseProvider.unitDao.insertUnit(
+      await unitDao.insertUnit(
         UnitsCompanion.insert(
           codUnit: unit.codUnit,
           nombre: unit.nombre,
@@ -36,9 +44,8 @@ class ModuleController {
       );
     }
 
-    // 3. Insert Activities using ActivityDao (SOLID - SRP & DIP compliant)
     for (final activity in activities) {
-      await DatabaseProvider.activityDao.insertActivity(
+      await activityDao.insertActivity(
         ActivitiesCompanion.insert(
           codActivity: activity.codActivity,
           descripcion: activity.descripcion,
@@ -50,25 +57,22 @@ class ModuleController {
     }
   }
 
-  /// Actualiza un módulo completo: reemplaza unidades y actividades.
   Future<void> updateModuleWithDetails({
     required Module module,
     required List<Unit> units,
     required List<Activity> activities,
   }) async {
-    final db = DatabaseProvider.db;
-
     await db.transaction(() async {
-      await DatabaseProvider.moduleDao.updateModule(module);
+      await moduleDao.updateModule(module);
 
-      final existingUnits = await DatabaseProvider.unitDao.getUnitsByModule(module.codModule);
+      final existingUnits = await unitDao.getUnitsByModule(module.codModule);
       for (final u in existingUnits) {
         await (db.delete(db.activities)..where((a) => a.idUnit.equals(u.codUnit))).go();
       }
-      await DatabaseProvider.unitDao.deleteUnitsByModule(module.codModule);
+      await unitDao.deleteUnitsByModule(module.codModule);
 
       for (final unit in units) {
-        await DatabaseProvider.unitDao.insertUnit(
+        await unitDao.insertUnit(
           UnitsCompanion.insert(
             codUnit: unit.codUnit,
             nombre: unit.nombre,
@@ -81,7 +85,7 @@ class ModuleController {
       }
 
       for (final activity in activities) {
-        await DatabaseProvider.activityDao.insertActivity(
+        await activityDao.insertActivity(
           ActivitiesCompanion.insert(
             codActivity: activity.codActivity,
             descripcion: activity.descripcion,
@@ -94,30 +98,22 @@ class ModuleController {
     });
   }
 
-  /// Elimina un módulo y todas sus dependencias (unidades, actividades, bitácoras)
   Future<void> deleteModuleWithDetails(String moduleCode) async {
-    final db = DatabaseProvider.db;
-    
     await db.transaction(() async {
-      // 1. Delete Activities
       final units = await (db.select(db.units)..where((u) => u.idModule.equals(moduleCode))).get();
       for (final unit in units) {
         await (db.delete(db.activities)..where((a) => a.idUnit.equals(unit.codUnit))).go();
       }
 
-      // 2. Delete Units
       await (db.delete(db.units)..where((u) => u.idModule.equals(moduleCode))).go();
 
-      // 3. Delete Calendarios from Bitacoras
       final bitacoras = await (db.select(db.bitacoras)..where((b) => b.idModule.equals(moduleCode))).get();
       for (final bitacora in bitacoras) {
         await (db.delete(db.calendarioBitacoras)..where((c) => c.idBitacora.equals(bitacora.id))).go();
       }
 
-      // 4. Delete Bitacoras
       await (db.delete(db.bitacoras)..where((b) => b.idModule.equals(moduleCode))).go();
 
-      // 5. Delete Module
       await (db.delete(db.modules)..where((m) => m.codModule.equals(moduleCode))).go();
     });
   }

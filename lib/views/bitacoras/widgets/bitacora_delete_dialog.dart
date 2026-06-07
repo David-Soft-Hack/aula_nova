@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
-import '../../../models/database_provider.dart';
+import '../../../providers/database_providers.dart';
 
 /// Muestra un diálogo de confirmación para eliminar una bitácora.
 /// Retorna true si el usuario confirmó, false si canceló.
@@ -52,7 +53,7 @@ Future<void> confirmDeleteBitacora(
 
   if (confirm == true && context.mounted) {
     final messenger = ScaffoldMessenger.of(context);
-    await DatabaseProvider.bitacoraDao.deleteBitacora(bitacora.id);
+    await ProviderScope.containerOf(context).read(bitacoraDaoProvider).deleteBitacora(bitacora.id);
     messenger.showSnackBar(
       const SnackBar(
         content: Text('Bitácora eliminada'),

@@ -2,26 +2,39 @@ import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
 import '../database/tables.dart';
-import '../models/database_provider.dart';
 import '../services/dosificacion_service.dart';
 
 class BitacoraController {
-  final BitacoraDao _dao = DatabaseProvider.bitacoraDao;
+  final AppDatabase db;
+  final BitacoraDao bitacoraDao;
+  final ModuleDao moduleDao;
+  final CareerDao careerDao;
+  final UnitDao unitDao;
+  final ActivityDao activityDao;
+
+  BitacoraController({
+    required this.db,
+    required this.bitacoraDao,
+    required this.moduleDao,
+    required this.careerDao,
+    required this.unitDao,
+    required this.activityDao,
+  });
 
   Stream<List<BitacoraWithModule>> watchBitacorasWithModule() =>
-      _dao.watchBitacorasWithModule();
+      bitacoraDao.watchBitacorasWithModule();
 
   Future<List<Module>> getAllModules() =>
-      DatabaseProvider.moduleDao.getAllModules();
+      moduleDao.getAllModules();
 
   Future<List<Career>> getAllCareers() =>
-      DatabaseProvider.careerDao.getAllCareers();
+      careerDao.getAllCareers();
 
   Future<List<Unit>> getUnitsByModule(String moduleCode) =>
-      DatabaseProvider.unitDao.getUnitsByModule(moduleCode);
+      unitDao.getUnitsByModule(moduleCode);
 
   Future<List<Activity>> getActivitiesByUnit(String unitCode) =>
-      DatabaseProvider.activityDao.getActivitiesByUnit(unitCode);
+      activityDao.getActivitiesByUnit(unitCode);
 
   Future<int> createBitacora({
     required Module module,
@@ -49,7 +62,7 @@ class BitacoraController {
 
     if (schedule.isEmpty) return -1;
 
-    final bitacoraId = await _dao.createBitacora(BitacorasCompanion(
+    final bitacoraId = await bitacoraDao.createBitacora(BitacorasCompanion(
       frecuenciaClase: Value(frecuenciaClase),
       fechaInicio: Value(fechaInicio),
       usarHorasReloj: Value(usarHorasReloj),
@@ -66,12 +79,12 @@ class BitacoraController {
       idBitacora: Value(bitacoraId),
     ));
 
-    await _dao.createCalendarioEntries(entries.toList());
+    await bitacoraDao.createCalendarioEntries(entries.toList());
     return bitacoraId;
   }
 
   Future<void> finalizeBitacora(int idBitacora) async {
-    await (DatabaseProvider.db.update(DatabaseProvider.db.bitacoras)
+    await (db.update(db.bitacoras)
           ..where((t) => t.id.equals(idBitacora)))
         .write(BitacorasCompanion(
       estado: const Value(EstadoBitacora.finalizado),
@@ -80,17 +93,17 @@ class BitacoraController {
   }
 
   Future<void> deleteBitacora(int idBitacora) =>
-      _dao.deleteBitacora(idBitacora);
+      bitacoraDao.deleteBitacora(idBitacora);
 
   Future<void> updateBitacora(Bitacora bitacora) =>
-      _dao.updateBitacora(bitacora);
+      bitacoraDao.updateBitacora(bitacora);
 
   Future<List<CalendarioBitacora>> getCalendario(int idBitacora) =>
-      _dao.getCalendarioForBitacora(idBitacora);
+      bitacoraDao.getCalendarioForBitacora(idBitacora);
 
   Stream<List<CalendarioBitacora>> watchCalendario(int idBitacora) =>
-      _dao.watchCalendarioForBitacora(idBitacora);
+      bitacoraDao.watchCalendarioForBitacora(idBitacora);
 
   Future<void> updateCalendarioEntry(CalendarioBitacora entry) =>
-      _dao.updateCalendarioEntry(entry);
+      bitacoraDao.updateCalendarioEntry(entry);
 }

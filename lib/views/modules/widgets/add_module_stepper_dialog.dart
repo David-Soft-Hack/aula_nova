@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../controllers/module_controller.dart';
-import '../../../controllers/career_controller.dart';
 import '../../../models/app_models.dart';
+import '../../../providers/module_providers.dart';
+import '../../../providers/database_providers.dart';
+import '../../../providers/career_providers.dart';
 import '../../../services/excel_extractor_service.dart';
 import '../../../services/module_extractor.dart';
 import 'stepper_nav_widgets.dart';
@@ -13,14 +15,14 @@ import 'module_step_3_activities.dart';
 import 'module_excel_handler.dart';
 import '../../../config/theme/app_theme.dart';
 
-class AddModuleStepperDialog extends StatefulWidget {
+class AddModuleStepperDialog extends ConsumerStatefulWidget {
   const AddModuleStepperDialog({super.key});
 
   @override
-  State<AddModuleStepperDialog> createState() => _AddModuleStepperDialogState();
+  ConsumerState<AddModuleStepperDialog> createState() => _AddModuleStepperDialogState();
 }
 
-class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
+class _AddModuleStepperDialogState extends ConsumerState<AddModuleStepperDialog> {
   int _step = 1;
   String _creationTab = 'manual'; // 'manual' or 'upload'
   bool _isProcessing = false;
@@ -132,7 +134,7 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
   }
 
   void _loadCareers() async {
-    final controller = CareerController();
+    final controller = ref.read(careerControllerProvider);
     final careers = await controller.getAllCareers();
     if (careers.isNotEmpty) {
       if (mounted) {
@@ -236,7 +238,7 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
           : _codCtrl.text.trim();
 
       // Check if a module with this code already exists in the database
-      final existing = await DatabaseProvider.moduleDao.getModuleByCod(
+      final existing = await ref.read(moduleDaoProvider).getModuleByCod(
         moduleCode,
       );
       if (!localContext.mounted) return;
@@ -312,8 +314,7 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
         }
       }
 
-      final controller = ModuleController();
-      await controller.createModuleWithDetails(
+      await ref.read(moduleControllerProvider).createModuleWithDetails(
         module: moduleData,
         units: unitsData,
         activities: activitiesData,
@@ -561,7 +562,7 @@ class _AddModuleStepperDialogState extends State<AddModuleStepperDialog> {
                           _isProcessing = true;
                         });
                         try {
-                          final existing = await DatabaseProvider.moduleDao
+                          final existing = await ref.read(moduleDaoProvider)
                               .getModuleByCod(moduleCode);
                           if (!localContext.mounted) return;
                           if (existing != null) {

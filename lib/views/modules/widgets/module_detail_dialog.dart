@@ -1,23 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:drift/drift.dart' hide Column;
 import '../../../config/theme/app_theme.dart';
-import '../../../models/database_provider.dart';
 import '../../../database/app_database.dart';
+import '../../../providers/database_providers.dart';
 import 'activity_list_view.dart';
 import 'unit_side_panel.dart';
 import 'edit_unit_dialog.dart';
 import 'edit_activity_dialog.dart';
 
-class ModuleDetailDialog extends StatefulWidget {
+class ModuleDetailDialog extends ConsumerStatefulWidget {
   final Module module;
   const ModuleDetailDialog({super.key, required this.module});
 
   @override
-  State<ModuleDetailDialog> createState() => _ModuleDetailDialogState();
+  ConsumerState<ModuleDetailDialog> createState() => _ModuleDetailDialogState();
 }
 
-class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
+class _ModuleDetailDialogState extends ConsumerState<ModuleDetailDialog> {
   List<Unit> _units = [];
   List<Activity> _activities = [];
   String? _selectedUnitId;
@@ -31,12 +32,13 @@ class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
   }
 
   void _loadDetails() async {
-    final uList = await DatabaseProvider.unitDao.getUnitsByModule(
+    final db = ref.read(appDatabaseProvider);
+    final uList = await ref.read(unitDaoProvider).getUnitsByModule(
       widget.module.codModule,
     );
     if (uList.isNotEmpty) {
-      final actQuery = DatabaseProvider.db.select(
-        DatabaseProvider.db.activities,
+      final actQuery = db.select(
+        db.activities,
       );
       final aList = await actQuery.get();
 
@@ -60,7 +62,7 @@ class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
     final idx = _units.length + 1;
     final unitCode = '${widget.module.codModule}-U$idx';
 
-    await DatabaseProvider.unitDao.insertUnit(
+    await ref.read(unitDaoProvider).insertUnit(
       UnitsCompanion(
         codUnit: Value(unitCode),
         nombre: Value('Unidad Didáctica $idx: Fundamentos'),
@@ -75,8 +77,8 @@ class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
   }
 
   void _deleteUnit(Unit unit) async {
-    await (DatabaseProvider.db.delete(
-      DatabaseProvider.db.units,
+    await (ref.read(appDatabaseProvider).delete(
+      ref.read(appDatabaseProvider).units,
     )..where((t) => t.codUnit.equals(unit.codUnit))).go();
     _loadDetails();
   }
@@ -99,8 +101,8 @@ class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
         .toList();
     final actCode = '$_selectedUnitId-A${unitActs.length + 1}';
 
-    await DatabaseProvider.db
-        .into(DatabaseProvider.db.activities)
+    await ref.read(appDatabaseProvider)
+        .into(ref.read(appDatabaseProvider).activities)
         .insert(
           ActivitiesCompanion(
             codActivity: Value(actCode),
@@ -117,8 +119,8 @@ class _ModuleDetailDialogState extends State<ModuleDetailDialog> {
   }
 
   void _deleteActivity(Activity act) async {
-    await (DatabaseProvider.db.delete(
-      DatabaseProvider.db.activities,
+    await (ref.read(appDatabaseProvider).delete(
+      ref.read(appDatabaseProvider).activities,
     )..where((t) => t.codActivity.equals(act.codActivity))).go();
     _loadDetails();
   }

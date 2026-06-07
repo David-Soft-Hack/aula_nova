@@ -1,24 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../config/theme/app_theme.dart';
-import '../../models/database_provider.dart';
 import '../../database/app_database.dart';
 import '../../database/tables.dart';
 import '../../database/daos.dart';
-// Widgets extraídos
+import '../../providers/bitacora_providers.dart';
+import '../../providers/database_providers.dart';
 import 'widgets/bitacora_grid.dart';
 import 'widgets/bitacoras_layout.dart';
 import 'widgets/add_bitacora_stepper.dart';
 import 'widgets/manage_bitacora_dialog.dart';
 import 'widgets/bitacora_delete_dialog.dart';
 
-class BitacorasScreen extends StatefulWidget {
+class BitacorasScreen extends ConsumerStatefulWidget {
   const BitacorasScreen({super.key});
 
   @override
-  State<BitacorasScreen> createState() => _BitacorasScreenState();
+  ConsumerState<BitacorasScreen> createState() => _BitacorasScreenState();
 }
 
-class _BitacorasScreenState extends State<BitacorasScreen>
+class _BitacorasScreenState extends ConsumerState<BitacorasScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String _searchTerm = '';
@@ -40,13 +41,13 @@ class _BitacorasScreenState extends State<BitacorasScreen>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final bitacorasAsync = ref.watch(bitacorasWithModuleStreamProvider);
 
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
-            // Header + búsqueda
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Column(
@@ -69,7 +70,6 @@ class _BitacorasScreenState extends State<BitacorasScreen>
               ),
             ),
 
-            // Tab Bar
             Container(
               alignment: Alignment.centerLeft,
               padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -93,20 +93,13 @@ class _BitacorasScreenState extends State<BitacorasScreen>
             ),
             const Divider(height: 1, thickness: 1),
 
-            // Contenido principal
             Expanded(
-              child: StreamBuilder<List<BitacoraWithModule>>(
-                stream: DatabaseProvider.bitacoraDao.watchBitacorasWithModule(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: AppTheme.academic600,
-                      ),
-                    );
-                  }
-
-                  final list = snapshot.data ?? [];
+              child: bitacorasAsync.when(
+                loading: () => const Center(
+                  child: CircularProgressIndicator(color: AppTheme.academic600),
+                ),
+                error: (e, _) => Center(child: Text('Error: $e')),
+                data: (list) {
                   if (list.isEmpty) {
                     return BitacorasEmptyState(
                       onCreateBitacora: () => _showAddBitacoraModal(context),
@@ -128,19 +121,13 @@ class _BitacorasScreenState extends State<BitacorasScreen>
                     children: [
                       BitacoraGrid(
                         items: filtered
-                            .where(
-                              (i) => i.bitacora.estado == EstadoBitacora.activo,
-                            )
+                            .where((i) => i.bitacora.estado == EstadoBitacora.activo)
                             .toList(),
                         onManage: _showManageBitacoraModal,
                       ),
                       BitacoraGrid(
                         items: filtered
-                            .where(
-                              (i) =>
-                                  i.bitacora.estado ==
-                                  EstadoBitacora.finalizado,
-                            )
+                            .where((i) => i.bitacora.estado == EstadoBitacora.finalizado)
                             .toList(),
                         onManage: _showManageBitacoraModal,
                       ),
@@ -156,7 +143,7 @@ class _BitacorasScreenState extends State<BitacorasScreen>
   }
 
   Future<void> _showAddBitacoraModal(BuildContext context) async {
-    final modules = await DatabaseProvider.moduleDao.getAllModules();
+    final modules = await ref.read(moduleDaoProvider).getAllModules();
     if (!context.mounted) return;
 
     if (modules.isEmpty) {

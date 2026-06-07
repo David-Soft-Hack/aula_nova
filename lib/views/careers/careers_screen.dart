@@ -1,41 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
-import '../../controllers/career_controller.dart';
 import '../../database/app_database.dart';
+import '../../providers/career_providers.dart';
 import 'widgets/add_career_dialog.dart';
 import 'widgets/edit_career_dialog.dart';
 import 'widgets/career_card.dart';
 
-/// Pantalla de gestión de Carreras y Programas Formativos.
-class CareersScreen extends StatefulWidget {
+class CareersScreen extends ConsumerStatefulWidget {
   const CareersScreen({super.key});
 
   @override
-  State<CareersScreen> createState() => _CareersScreenState();
+  ConsumerState<CareersScreen> createState() => _CareersScreenState();
 }
 
-class _CareersScreenState extends State<CareersScreen> {
-  final CareerController _controller = CareerController();
-
+class _CareersScreenState extends ConsumerState<CareersScreen> {
   void _showAddCareerDialog() {
     showDialog(
       context: context,
-      builder: (context) => AddCareerDialog(controller: _controller),
+      builder: (context) => const AddCareerDialog(),
     );
   }
 
   Future<void> _onDelete(Career career) async {
     final confirmed = await showDeleteCareerDialog(context);
     if (confirmed == true) {
-      await _controller.deleteCareer(career);
+      await ref.read(careerControllerProvider).deleteCareer(career);
     }
   }
 
   void _showEditCareerDialog(Career career) {
     showDialog(
       context: context,
-      builder: (context) => EditCareerDialog(controller: _controller, career: career),
+      builder: (context) => EditCareerDialog(career: career),
     );
   }
 
@@ -104,13 +102,12 @@ class _CareersScreenState extends State<CareersScreen> {
   }
 
   Widget _buildCareerList() {
-    return StreamBuilder<List<Career>>(
-      stream: _controller.watchAllCareers(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        final careers = snapshot.data ?? [];
+    final careersAsync = ref.watch(allCareersStreamProvider);
+
+    return careersAsync.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (e, _) => Center(child: Text('Error: $e')),
+      data: (careers) {
         if (careers.isEmpty) {
           return const _CareersEmptyState();
         }
@@ -131,7 +128,6 @@ class _CareersScreenState extends State<CareersScreen> {
   }
 }
 
-/// Estado vacío para la pantalla de Carreras.
 class _CareersEmptyState extends StatelessWidget {
   const _CareersEmptyState();
 

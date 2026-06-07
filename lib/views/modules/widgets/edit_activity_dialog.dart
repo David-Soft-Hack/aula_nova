@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
-import '../../../models/database_provider.dart';
 import '../../../database/app_database.dart';
+import '../../../providers/database_providers.dart';
 
-class EditActivityDialog extends StatefulWidget {
+class EditActivityDialog extends ConsumerStatefulWidget {
   final Activity activity;
 
   const EditActivityDialog({super.key, required this.activity});
 
   @override
-  State<EditActivityDialog> createState() => _EditActivityDialogState();
+  ConsumerState<EditActivityDialog> createState() => _EditActivityDialogState();
 }
 
-class _EditActivityDialogState extends State<EditActivityDialog> {
+class _EditActivityDialogState extends ConsumerState<EditActivityDialog> {
   final _formKey = GlobalKey<FormState>();
   late final TextEditingController _descCtrl;
   late final TextEditingController _haCtrl;
@@ -83,7 +84,7 @@ class _EditActivityDialogState extends State<EditActivityDialog> {
         idUnit: widget.activity.idUnit,
       );
 
-      await DatabaseProvider.activityDao.updateActivity(updatedActivity);
+      await ref.read(activityDaoProvider).updateActivity(updatedActivity);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

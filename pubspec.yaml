@@ -47,6 +47,7 @@ dependencies:
   excel: ^4.0.6
   open_filex: ^4.7.0
   syncfusion_flutter_xlsio: ^29.1.38
+  flutter_riverpod: ^2.6.1
 
 dev_dependencies:
   flutter_test:

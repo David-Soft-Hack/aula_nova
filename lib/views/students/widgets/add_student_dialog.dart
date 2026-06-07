@@ -1,23 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import '../../../controllers/student_controller.dart';
 import '../../../database/tables.dart';
+import '../../../providers/student_providers.dart';
 import 'personal_data_section.dart';
 import 'academic_data_section.dart';
 import 'dialog_header.dart';
 import 'step_progress_indicator.dart';
 import 'form_action_buttons.dart';
 
-class AddStudentDialog extends StatefulWidget {
-  final StudentController controller;
-
-  const AddStudentDialog({super.key, required this.controller});
+class AddStudentDialog extends ConsumerStatefulWidget {
+  const AddStudentDialog({super.key});
 
   @override
-  State<AddStudentDialog> createState() => _AddStudentDialogState();
+  ConsumerState<AddStudentDialog> createState() => _AddStudentDialogState();
 }
 
-class _AddStudentDialogState extends State<AddStudentDialog> {
+class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
   // Paso 1: Datos personales
   final _codigoCtrl = TextEditingController();
   final _nombresCtrl = TextEditingController();
@@ -49,8 +48,9 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
   Future<void> _loadDropdownData() async {
     setState(() => _isLoadingData = true);
     try {
-      final carreras = await widget.controller.getAllCareers();
-      final grupos = await widget.controller.getAllGroups();
+      final controller = ref.read(studentControllerProvider);
+      final carreras = await controller.getAllCareers();
+      final grupos = await controller.getAllGroups();
       setState(() {
         _carreras = carreras;
         _grupos = grupos;
@@ -110,12 +110,13 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
     final codigo = _codigoCtrl.text.trim();
     setState(() => _isSaving = true);
     try {
-      final exists = await widget.controller.existsStudentByCodigo(codigo);
+      final controller = ref.read(studentControllerProvider);
+      final exists = await controller.existsStudentByCodigo(codigo);
       if (exists) {
         _showMessage('Ya existe un estudiante con ese código.');
         return;
       }
-      await widget.controller.addStudent(
+      await controller.addStudent(
         codigo: codigo,
         nombres: _nombresCtrl.text.trim(),
         apellidos: _apellidosCtrl.text.trim(),
@@ -224,7 +225,8 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
                             onGrupoChanged: (value) async {
                               setState(() => _selectedGrupo = value);
                               if (value != null && value.isNotEmpty) {
-                                final code = await widget.controller
+                                final code = await ref
+                                    .read(studentControllerProvider)
                                     .generateNextStudentCodigo(value);
                                 setState(() => _codigoCtrl.text = code);
                               }

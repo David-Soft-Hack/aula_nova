@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import '../../../config/theme/app_theme.dart';
 import '../../../database/tables.dart' show TipoCarrera;
-import '../../../models/database_provider.dart';
+import '../../../providers/database_providers.dart';
 import '../career_detail_screen.dart';
 
 /// Diálogo de confirmación para eliminar una carrera.
@@ -106,7 +107,7 @@ class CareerCard extends StatelessWidget {
                           ),
                         ),
                         FutureBuilder<int>(
-                          future: DatabaseProvider.moduleDao.countModulesByCareer(career.nombre),
+                          future: ProviderScope.containerOf(context).read(moduleDaoProvider).countModulesByCareer(career.nombre),
                           builder: (context, snapshot) {
                             final count = snapshot.data ?? 0;
                             return Text(
