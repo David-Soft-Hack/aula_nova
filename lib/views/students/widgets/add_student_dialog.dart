@@ -56,7 +56,7 @@ class _AddStudentDialogState extends State<AddStudentDialog> {
         _grupos = grupos;
       });
     } catch (e) {
-      print('Error loading dropdown data: $e');
+      debugPrint('Error loading dropdown data: $e');
     } finally {
       setState(() => _isLoadingData = false);
     }

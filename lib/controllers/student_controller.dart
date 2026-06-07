@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:drift/drift.dart';
 import '../database/app_database.dart';
 import '../database/daos.dart';
@@ -82,7 +83,7 @@ class StudentController {
       
       return grupos.toList();
     } catch (e) {
-      print('Error fetching groups: $e');
+      debugPrint('Error fetching groups: $e');
       return [];
     }
   }
@@ -112,7 +113,11 @@ class StudentController {
       final suffix = nextNum.toString().padLeft(2, '0');
       return '${grupoCodigo.trim()}-$suffix';
     } catch (e) {
+<<<<<<< HEAD
       print('Error generating next student code: $e');
+=======
+      debugPrint('Error generating next student code: $e');
+>>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
       return '${grupoCodigo.trim()}-01';
     }
   }

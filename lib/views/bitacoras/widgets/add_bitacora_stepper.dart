@@ -183,6 +183,7 @@ class _AddBitacoraStepperState extends State<AddBitacoraStepper> {
         tipoCarrera: TipoCarrera.tecnica,
         estado: EstadoBitacora.activo,
         idModule: _selectedModule!.codModule,
+        turno: Value(_selectedShift),
       );
 
       final bitacoraId = await DatabaseProvider.bitacoraDao.createBitacora(

@@ -32,7 +32,11 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
+<<<<<<< HEAD
   int get schemaVersion => 6;
+=======
+  int get schemaVersion => 7;
+>>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onUpgrade: (m, from, to) async {
@@ -52,6 +56,13 @@ class AppDatabase extends _$AppDatabase {
           // v6: StudentStatus gained suspendido/finalizado/desertado.
           // Stored as INTEGER, no DDL changes required.
           if (from < 6) {}
+<<<<<<< HEAD
+=======
+          // v7: Add turno column to bitacoras
+          if (from < 7) {
+            await m.addColumn(bitacoras, bitacoras.turno);
+          }
+>>>>>>> eaffd0af617602f9ecbb70b852bf206881f158e1
         },
         beforeOpen: (details) async {
           // Self-healing: Correct any crossed totalHoraAcademic and totalHoraReloj values.
