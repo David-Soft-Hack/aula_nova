@@ -74,6 +74,7 @@ abstract class IStudentRepository {
   Future<Student?> getStudentById(int id);
   Future<Student?> getStudentByCodigo(String codigo);
   Future<List<Student>> searchStudents(String query);
+  Future<List<Student>> getActiveStudentsByGroup(String groupCode);
   Future<void> insertStudent(Insertable<Student> student);
   Future<void> updateStudent(Insertable<Student> student);
   Future<void> deleteStudent(Insertable<Student> student);

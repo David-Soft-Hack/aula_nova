@@ -24,6 +24,9 @@ class StudentRepository implements IStudentRepository {
   Future<List<Student>> searchStudents(String query) => _dao.searchStudents(query);
 
   @override
+  Future<List<Student>> getActiveStudentsByGroup(String groupCode) => _dao.getActiveStudentsByGroup(groupCode);
+
+  @override
   Future<void> insertStudent(Insertable<Student> student) => _dao.insertStudent(student);
 
   @override

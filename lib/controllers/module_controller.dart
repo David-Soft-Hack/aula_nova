@@ -76,8 +76,13 @@ class ModuleController implements IModuleController {
       await _repository.updateModule(module);
 
       final existingUnits = await _repository.getUnitsByModule(module.codModule);
-      for (final u in existingUnits) {
-        await _repository.deleteActivitiesByUnit(u.codUnit);
+      final unitCodes = existingUnits.map((u) => u.codUnit).toList();
+      if (unitCodes.isNotEmpty) {
+        await _db.batch((batch) {
+          for (final code in unitCodes) {
+            batch.deleteWhere(_db.activities, (t) => t.idUnit.equals(code));
+          }
+        });
       }
       await _repository.deleteUnitsByModule(module.codModule);
 
@@ -191,8 +196,13 @@ class ModuleController implements IModuleController {
   Future<void> deleteModuleWithDetails(String moduleCode) async {
     await _db.transaction(() async {
       final units = await _repository.getUnitsByModule(moduleCode);
-      for (final unit in units) {
-        await _repository.deleteActivitiesByUnit(unit.codUnit);
+      final unitCodes = units.map((u) => u.codUnit).toList();
+      if (unitCodes.isNotEmpty) {
+        await _db.batch((batch) {
+          for (final code in unitCodes) {
+            batch.deleteWhere(_db.activities, (t) => t.idUnit.equals(code));
+          }
+        });
       }
       await _repository.deleteUnitsByModule(moduleCode);
 

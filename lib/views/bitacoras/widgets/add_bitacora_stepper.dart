@@ -6,6 +6,7 @@ import '../../../config/theme/app_theme.dart';
 import '../../../database/app_database.dart';
 import '../../../database/tables.dart';
 import '../../../providers/bitacora_providers.dart';
+import '../../../providers/class_group_providers.dart';
 import '../../shared/app_snackbar.dart';
 import 'bitacora_step_1_form.dart';
 import 'bitacora_step_2_preview.dart';
@@ -42,11 +43,38 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
     'Domingo',
   ];
 
+  List<String> _availableGroups = [];
+  bool _isLoadingGroups = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGroups();
+  }
+
   @override
   void dispose() {
     _grupoCtrl.dispose();
     _carreraCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadGroups() async {
+    setState(() => _isLoadingGroups = true);
+    try {
+      final groups = await ref.read(classGroupControllerProvider).getAllGroups();
+      if (!mounted) return;
+      setState(() {
+        _availableGroups = groups.map((g) => g.codigo).toList();
+      });
+    } catch (e) {
+      if (!mounted) return;
+      AppSnackbar.showWarning(context, 'No se pudieron cargar los grupos.');
+    } finally {
+      if (mounted) {
+        setState(() => _isLoadingGroups = false);
+      }
+    }
   }
 
   Future<void> _pickDate(BuildContext context) async {
@@ -68,10 +96,8 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         );
       },
     );
-    if (picked != null) {
-      setState(() {
-        _startDate = picked;
-      });
+    if (picked != null && mounted) {
+      setState(() => _startDate = picked);
     }
   }
 
@@ -94,21 +120,37 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         );
       },
     );
-    if (picked != null) {
-      if (!_fechasFeriadas.contains(picked)) {
-        setState(() {
+    if (picked != null && mounted) {
+      setState(() {
+        if (!_fechasFeriadas.contains(picked)) {
           _fechasFeriadas.add(picked);
           _fechasFeriadas.sort();
-        });
-      }
+        }
+      });
     }
   }
 
+  bool _isValidGroup(String? value) {
+    if (value == null || value.isEmpty) return false;
+    return _availableGroups.contains(value);
+  }
+
   void _generateCalendarPreview() async {
-    if (_selectedModule == null) return;
-    setState(() {
-      _generating = true;
-    });
+    if (_selectedModule == null) {
+      AppSnackbar.showWarning(context, 'Selecciona un módulo');
+      return;
+    }
+
+    final groupValue = _grupoCtrl.text.trim();
+    if (!_isValidGroup(groupValue)) {
+      AppSnackbar.showError(
+        context,
+        'Código de grupo inválido. Selecciona un grupo de la lista o crea el grupo previamente.',
+      );
+      return;
+    }
+
+    setState(() => _generating = true);
 
     try {
       final holidayStrings = _fechasFeriadas.map((d) {
@@ -127,25 +169,33 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         usarHorasReloj: _usarHorasReloj,
       );
 
-      if (mounted) {
-        setState(() {
-          _generatedPreview = preview;
-          _generating = false;
-          _currentStep = 2;
-        });
-      }
+      if (!mounted) return;
+      setState(() {
+        _generatedPreview = preview;
+        _generating = false;
+        _currentStep = 2;
+      });
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _generating = false;
-        });
-        AppSnackbar.showError(context, 'Error al dosificar: $e');
-      }
+      if (!mounted) return;
+      setState(() => _generating = false);
+      AppSnackbar.showError(context, 'Error al dosificar: $e');
     }
   }
 
   void _saveBitacora() async {
-    if (_selectedModule == null) return;
+    if (_selectedModule == null) {
+      AppSnackbar.showWarning(context, 'Selecciona un módulo');
+      return;
+    }
+
+    final groupValue = _grupoCtrl.text.trim();
+    if (!_isValidGroup(groupValue)) {
+      AppSnackbar.showError(
+        context,
+        'Código de grupo inválido. Selecciona un grupo de la lista o crea el grupo previamente.',
+      );
+      return;
+    }
 
     try {
       final holidayStrings = _fechasFeriadas.map((d) {
@@ -161,12 +211,10 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         fechasFeriadas: holidayStrings,
         diasClase: _diasSeleccionados,
         usarHorasReloj: Value(_usarHorasReloj),
-        codigoGrupo: Value(
-          _grupoCtrl.text.isNotEmpty ? _grupoCtrl.text : 'G-A',
-        ),
+        codigoGrupo: Value(groupValue),
         carrera: _carreraCtrl.text.isNotEmpty
             ? _carreraCtrl.text
-            : 'Ing. de Software',
+            : (_selectedModule?.carrera ?? ''),
         tipoCarrera: TipoCarrera.tecnica,
         estado: EstadoBitacora.activo,
         idModule: _selectedModule!.codModule,
@@ -178,14 +226,15 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
         sessions: _generatedPreview,
       );
 
-      if (mounted) {
-        Navigator.of(context).pop();
-        AppSnackbar.showSuccess(context, 'Bitácora y calendario creados con éxito');
-      }
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      AppSnackbar.showSuccess(
+        context,
+        'Bitácora y calendario creados con éxito',
+      );
     } catch (e) {
-      if (mounted) {
-        AppSnackbar.showError(context, 'Error al guardar bitácora: $e');
-      }
+      if (!mounted) return;
+      AppSnackbar.showError(context, 'Error al guardar bitácora: $e');
     }
   }
 
@@ -198,187 +247,182 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
       body: SafeArea(
         child: Column(
           children: [
-            // Premium Header
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x08000000),
-                    blurRadius: 10,
-                    offset: Offset(0, 2),
-                  ),
-                ],
-                border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 24,
-                          decoration: BoxDecoration(
-                            color: AppTheme.academic600,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Row(
-                                children: [
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.academic50,
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      'Paso $_currentStep de 2',
-                                      style: TextStyle(
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w700,
-                                        color: AppTheme.academic600,
-                                        fontFamily: 'Outfit',
-                                        letterSpacing: 0.3,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _currentStep == 1
-                                    ? 'Configuración de la Bitácora'
-                                    : 'Vista Previa del Calendario',
-                                style: const TextStyle(
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFF1E293B),
-                                  fontFamily: 'Outfit',
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                _currentStep == 1
-                                    ? 'Selecciona el módulo y configura los parámetros del grupo'
-                                    : 'Revisa las sesiones generadas y confirma el calendario',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade500,
-                                  fontFamily: 'Outfit',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(LucideIcons.x, color: Color(0xFF64748B)),
-                    style: IconButton.styleFrom(
-                      backgroundColor: const Color(0xFFF1F5F9),
-                      padding: const EdgeInsets.all(8),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            _buildHeader(),
 
             // Step Content
             Expanded(child: _buildStepContent()),
 
             // Sticky Bottom Actions
-            Container(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 16,
-                bottom: isKeyboardOpen ? 12 : 20,
-              ),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Color(0x08000000),
-                    blurRadius: 10,
-                    offset: Offset(0, -2),
-                  ),
-                ],
-                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  if (_currentStep == 2)
-                    OutlinedButton.icon(
-                      onPressed: () {
-                        setState(() {
-                          _currentStep = 1;
-                        });
-                      },
-                      icon: const Icon(LucideIcons.arrowLeft, size: 18),
-                      label: const Text('Atrás'),
-                      style: OutlinedButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 24,
-                          vertical: 14,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        side: const BorderSide(color: Color(0xFFCBD5E1)),
-                        foregroundColor: const Color(0xFF475569),
-                      ),
-                    )
-                  else
-                    const SizedBox.shrink(),
-                  ElevatedButton(
-                    onPressed: _currentStep == 1
-                        ? _generateCalendarPreview
-                        : _saveBitacora,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.academic600,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 32,
-                        vertical: 14,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: _generating
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
-                            ),
-                          )
-                        : Text(
-                            _currentStep == 1
-                                ? 'Siguiente'
-                                : 'Generar Bitácora',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                  ),
-                ],
-              ),
-            ),
+            _buildActionsBar(isKeyboardOpen),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildActionsBar(bool isKeyboardOpen) {
+    return Container(
+      padding: EdgeInsets.only(
+        left: 20,
+        right: 20,
+        top: 16,
+        bottom: isKeyboardOpen ? 12 : 20,
+      ),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 10,
+            offset: Offset(0, -2),
+          ),
+        ],
+        border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          if (_currentStep == 2) _buildBackButton() else const SizedBox.shrink(),
+          _buildSubmitButton(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBackButton() {
+    return OutlinedButton.icon(
+      onPressed: () => setState(() => _currentStep = 1),
+      icon: const Icon(LucideIcons.arrowLeft, size: 18),
+      label: const Text('Atrás'),
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        side: const BorderSide(color: Color(0xFFCBD5E1)),
+        foregroundColor: const Color(0xFF475569),
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return ElevatedButton(
+      onPressed: _currentStep == 1 ? _generateCalendarPreview : _saveBitacora,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppTheme.academic600,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        elevation: 0,
+      ),
+      child: _generating
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(
+              _currentStep == 1 ? 'Siguiente' : 'Generar Bitácora',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x08000000),
+            blurRadius: 10,
+            offset: Offset(0, 2),
+          ),
+        ],
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Row(
+              children: [
+                Container(
+                  width: 8,
+                  height: 24,
+                  decoration: BoxDecoration(
+                    color: AppTheme.academic600,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            decoration: BoxDecoration(
+                              color: AppTheme.academic50,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              'Paso $_currentStep de 2',
+                              style: TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.w700,
+                                color: AppTheme.academic600,
+                                fontFamily: 'Outfit',
+                                letterSpacing: 0.3,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _currentStep == 1
+                            ? 'Configuración de la Bitácora'
+                            : 'Vista Previa del Calendario',
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF1E293B),
+                          fontFamily: 'Outfit',
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _currentStep == 1
+                            ? 'Selecciona el módulo y configura los parámetros del grupo'
+                            : 'Revisa las sesiones generadas y confirma el calendario',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade500,
+                          fontFamily: 'Outfit',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            onPressed: () => Navigator.of(context).pop(),
+            icon: const Icon(LucideIcons.x, color: Color(0xFF64748B)),
+            style: IconButton.styleFrom(
+              backgroundColor: const Color(0xFFF1F5F9),
+              padding: const EdgeInsets.all(8),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -399,6 +443,13 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
               });
             },
             grupoCtrl: _grupoCtrl,
+            onGroupChanged: (value) {
+              if (value != null) {
+                _grupoCtrl.text = value;
+              }
+            },
+            availableGroups: _availableGroups,
+            isLoadingGroups: _isLoadingGroups,
             carreraCtrl: _carreraCtrl,
             selectedShift: _selectedShift,
             onShiftChanged: (val) {

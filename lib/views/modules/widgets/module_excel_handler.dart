@@ -1,10 +1,11 @@
 import 'dart:io';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:open_filex/open_filex.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import '../../../models/app_models.dart';
 import '../../../providers/career_providers.dart';
 import '../../../services/module_extractor.dart';
@@ -39,17 +40,31 @@ class ModuleExcelHandler {
 
       if (!context.mounted) return;
 
-      if (result != null && result.files.single.path != null) {
-        final filePath = result.files.single.path!;
-        final fileName = result.files.single.name;
+      if (result != null && result.files.isNotEmpty) {
+        final file = result.files.first;
+        final String? rawPath = file.path;
+        if (rawPath == null || rawPath.isEmpty) return;
 
-        // Check if there is already manual data
+        final normalizedPath = p.normalize(rawPath);
+        final baseDir = (Platform.isAndroid)
+            ? await getExternalStorageDirectory() ?? await getApplicationDocumentsDirectory()
+            : await getApplicationDocumentsDirectory();
+
+        if (!p.isWithin(baseDir.path, normalizedPath)) {
+          if (!context.mounted) return;
+          AppSnackbar.showError(context, 'La ruta del archivo seleccionado no es válida.');
+          return;
+        }
+
+        final filePath = normalizedPath;
+        final fileName = file.name;
         final hasManualData =
             nombreCtrl.text.trim().isNotEmpty ||
             codCtrl.text.trim().isNotEmpty;
 
         bool confirm = true;
         if (hasManualData) {
+          if (!mounted) return;
           confirm =
               await showDialog<bool>(
                 context: context,
@@ -189,9 +204,16 @@ class ModuleExcelHandler {
 
       dir ??= await getTemporaryDirectory();
 
-      final savePath = '${dir.path}/planeacion_template.xlsx';
+      String savePath = p.join(dir.path, 'planeacion_template.xlsx');
       final file = File(savePath);
-      await file.writeAsBytes(updatedBytes);
+
+      try {
+        await file.writeAsBytes(updatedBytes);
+      } on FileSystemException {
+        final tempDir = await getTemporaryDirectory();
+        savePath = p.join(tempDir.path, 'planeacion_template.xlsx');
+        await File(savePath).writeAsBytes(updatedBytes);
+      }
       debugPrint(
         '[EXCEL DOWNLOAD] Archivo guardado físicamente en la ruta: $savePath',
       );

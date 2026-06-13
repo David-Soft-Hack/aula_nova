@@ -18,8 +18,7 @@ class AttendanceController implements IAttendanceController {
 
   @override
   Future<List<AttendanceRecord>> getAttendanceListForSession(int sessionId, String groupCode) async {
-    final students = await _studentRepository.searchStudents(groupCode);
-    final groupStudents = students.where((s) => s.grupo?.toLowerCase() == groupCode.toLowerCase() && s.estado == StudentStatus.activo).toList();
+    final groupStudents = await _studentRepository.getActiveStudentsByGroup(groupCode);
 
     final savedAttendances = await _attendanceRepository.getAttendancesBySession(sessionId);
     final savedMap = {for (var a in savedAttendances) a.idStudent: a};

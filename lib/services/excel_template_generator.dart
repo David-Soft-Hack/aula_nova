@@ -1,13 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:syncfusion_flutter_xlsio/xlsio.dart' as xlsio;
 import '../database/app_database.dart';
-/// Un servicio especializado y optimizado encargado de generar la plantilla de
-/// Excel premium del módulo de forma programática y 100% offline.
+
 class ExcelTemplateGenerator {
-  /// Genera y compila el libro de trabajo de Excel con todas las hojas, estilos
-  /// y validaciones de datos requeridos a partir de la lista de carreras provista.
   static Future<List<int>> generate(List<Career> careers) async {
-    debugPrint('[EXCEL GENERATOR] Iniciando compilación de hojas de cálculo...');
+    if (kDebugMode) {
+      debugPrint('[EXCEL GENERATOR] Iniciando compilación de hojas de cálculo...');
+    }
 
     // 1. Crear el libro de trabajo con Syncfusion
     final xlsio.Workbook workbook = xlsio.Workbook();
@@ -277,13 +276,16 @@ class ExcelTemplateGenerator {
     validation.errorBoxText = 'Debe seleccionar una carrera válida registrada en la aplicación';
     validation.showErrorBox = true;
 
-    debugPrint('[EXCEL GENERATOR] Datos y validaciones inyectadas de forma exitosa.');
+    if (kDebugMode) {
+      debugPrint('[EXCEL GENERATOR] Datos y validaciones inyectadas de forma exitosa.');
+    }
 
-    // Guardar el libro completo a bytes
     final List<int> updatedBytes = workbook.saveAsStream();
     workbook.dispose();
 
-    debugPrint('[EXCEL GENERATOR] Excel generado con éxito (${updatedBytes.length} bytes).');
+    if (kDebugMode) {
+      debugPrint('[EXCEL GENERATOR] Excel generado con éxito (${updatedBytes.length} bytes).');
+    }
     return updatedBytes;
   }
 }

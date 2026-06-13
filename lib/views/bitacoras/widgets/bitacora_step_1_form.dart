@@ -12,6 +12,9 @@ class BitacoraStep1Form extends StatelessWidget {
   final Module? selectedModule;
   final ValueChanged<Module?> onModuleChanged;
   final TextEditingController grupoCtrl;
+  final ValueChanged<String?> onGroupChanged;
+  final List<String> availableGroups;
+  final bool isLoadingGroups;
   final TextEditingController carreraCtrl;
   final String selectedShift;
   final ValueChanged<String?> onShiftChanged;
@@ -33,6 +36,9 @@ class BitacoraStep1Form extends StatelessWidget {
     required this.selectedModule,
     required this.onModuleChanged,
     required this.grupoCtrl,
+    required this.onGroupChanged,
+    required this.availableGroups,
+    required this.isLoadingGroups,
     required this.carreraCtrl,
     required this.selectedShift,
     required this.onShiftChanged,
@@ -60,7 +66,7 @@ class BitacoraStep1Form extends StatelessWidget {
           onModuleChanged: onModuleChanged,
         ),
         const SizedBox(height: 20),
-        _buildGroupAndCareerFields(),
+        _buildGroupAndCareerFields(context),
         const SizedBox(height: 20),
         FormSessionHours(
           selectedShift: selectedShift,
@@ -88,7 +94,11 @@ class BitacoraStep1Form extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupAndCareerFields() {
+  Widget _buildGroupAndCareerFields(BuildContext context) {
+    final groupValue = availableGroups.contains(grupoCtrl.text)
+        ? grupoCtrl.text
+        : null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -101,18 +111,18 @@ class BitacoraStep1Form extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'Identifica el grupo al que pertenece esta bitácora',
+        Text(
+          'Selecciona un grupo registrado',
           style: TextStyle(
             fontSize: 11,
-            color: Color(0xFF9CA3AF),
+            color: Colors.grey.shade500,
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
-          controller: grupoCtrl,
+        DropdownButtonFormField<String>(
+          initialValue: groupValue,
           decoration: InputDecoration(
-            hintText: 'Ej. S-24A',
+            hintText: isLoadingGroups ? 'Cargando grupos...' : 'Seleccionar grupo...',
             hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
             prefixIcon: const Icon(
               LucideIcons.users,
@@ -137,6 +147,35 @@ class BitacoraStep1Form extends StatelessWidget {
               ),
             ),
           ),
+          items: [
+            if (isLoadingGroups)
+              const DropdownMenuItem<String>(
+                value: null,
+                child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              )
+            else if (availableGroups.isEmpty)
+              const DropdownMenuItem<String>(
+                value: null,
+                child: Text('Sin grupos registrados'),
+              )
+            else
+              ...availableGroups.map(
+                (code) => DropdownMenuItem<String>(
+                  value: code,
+                  child: Text(code),
+                ),
+              ),
+          ],
+          onChanged: (value) {
+            if (value != null) {
+              grupoCtrl.text = value;
+            }
+            onGroupChanged(value);
+          },
         ),
         const SizedBox(height: 20),
         const Text(
@@ -156,7 +195,7 @@ class BitacoraStep1Form extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-        TextFormField(
+        TextField(
           controller: carreraCtrl,
           decoration: InputDecoration(
             hintText: 'Ej. Computación',

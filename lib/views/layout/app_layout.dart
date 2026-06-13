@@ -12,7 +12,6 @@ import '../groups/groups_screen.dart';
 import '../attendance/attendance_screen.dart';
 import '../shared/app_snackbar.dart';
 import 'widgets/bottom_nav_bar.dart';
-import 'widgets/app_drawer.dart';
 import 'widgets/secondary_menu_sheet.dart';
 
 /// Pantallas de navegación principal de la aplicación.
@@ -54,25 +53,37 @@ class _AppLayoutState extends ConsumerState<AppLayout> {
             icon: LucideIcons.users,
             title: 'Estudiantes',
             color: Colors.green.shade600,
-            onTap: () { Navigator.pop(context); _navigateTo(4); },
+            onTap: () {
+              Navigator.pop(context);
+              _navigateTo(4);
+            },
           ),
           SecondaryMenuItem(
             icon: LucideIcons.checkSquare,
             title: 'Asistencia',
             color: Colors.purple.shade600,
-            onTap: () { Navigator.pop(context); _navigateTo(5); },
+            onTap: () {
+              Navigator.pop(context);
+              _navigateTo(5);
+            },
           ),
           SecondaryMenuItem(
             icon: LucideIcons.graduationCap,
             title: 'Programas',
             color: Colors.indigo.shade600,
-            onTap: () { Navigator.pop(context); _navigateTo(6); },
+            onTap: () {
+              Navigator.pop(context);
+              _navigateTo(6);
+            },
           ),
           SecondaryMenuItem(
             icon: LucideIcons.library,
             title: 'Grupos',
             color: Colors.deepOrange.shade600,
-            onTap: () { Navigator.pop(context); _navigateTo(7); },
+            onTap: () {
+              Navigator.pop(context);
+              _navigateTo(7);
+            },
           ),
           SecondaryMenuItem(
             icon: LucideIcons.settings,
@@ -114,12 +125,7 @@ class _AppLayoutState extends ConsumerState<AppLayout> {
   Widget build(BuildContext context) {
     final selectedIndex = ref.watch(appLayoutIndexProvider);
     return Scaffold(
-      drawer: AppDrawer(
-        selectedIndex: selectedIndex,
-        onItemSelected: _navigateTo,
-        onSettings: () => _showSnack('Configuración - Próximamente'),
-        onLogout: () => _showSnack('Sesión Cerrada'),
-      ),
+      drawer: null,
       body: _kScreens[selectedIndex],
       bottomNavigationBar: BottomNavBar(
         selectedIndex: selectedIndex >= 4 ? 4 : selectedIndex,

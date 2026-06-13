@@ -74,9 +74,14 @@ class AppDatabase extends _$AppDatabase {
     },
     beforeOpen: (details) async {
       await _selfHealHourSwaps();
-      await bitacoraDao.autoCompletePastSessions();
-      final statusService = StudentStatusService(db: this, studentDao: studentDao);
-      await _finalizeStudentsForCompletedBitacoras(statusService);
+
+      if (details.wasCreated) return;
+
+      Future.microtask(() async {
+        await bitacoraDao.autoCompletePastSessions();
+        final statusService = StudentStatusService(db: this, studentDao: studentDao);
+        await _finalizeStudentsForCompletedBitacoras(statusService);
+      });
     },
   );
 

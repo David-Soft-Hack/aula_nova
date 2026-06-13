@@ -100,14 +100,7 @@ class StudentController implements IStudentController {
   @override
   Future<String> generateNextStudentCodigo(String grupoCodigo) async {
     try {
-      final all = await getAllStudents();
-      final groupStudents = all
-          .where(
-            (s) =>
-                s.grupo?.trim().toLowerCase() ==
-                grupoCodigo.trim().toLowerCase(),
-          )
-          .toList();
+      final groupStudents = await _repository.getActiveStudentsByGroup(grupoCodigo);
 
       int maxNum = 0;
       final prefix = '${grupoCodigo.trim()}-';

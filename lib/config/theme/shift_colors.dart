@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 /// Maps shift names (turno) to a consistent color pair [accent, background].
 class ShiftColors {
   static const _map = <String, _ShiftColor>{
-    'mañana':    _ShiftColor(Color(0xFF0EA5E9), Color(0xFFE0F2FE)), // sky
-    'matutino':  _ShiftColor(Color(0xFF0EA5E9), Color(0xFFE0F2FE)),
-    'tarde':     _ShiftColor(Color(0xFFF97316), Color(0xFFFFF7ED)), // orange
-    'vespertino':_ShiftColor(Color(0xFFF97316), Color(0xFFFFF7ED)),
-    'noche':     _ShiftColor(Color(0xFF8B5CF6), Color(0xFFF5F3FF)), // violet
-    'nocturno':  _ShiftColor(Color(0xFF8B5CF6), Color(0xFFF5F3FF)),
-    'sabatino':  _ShiftColor(Color(0xFF10B981), Color(0xFFECFDF5)), // emerald
-    'sabado':    _ShiftColor(Color(0xFF10B981), Color(0xFFECFDF5)),
+    'mañana': _ShiftColor(Color(0xFF0EA5E9), Color(0xFFE0F2FE)),
+    'matutino': _ShiftColor(Color(0xFF0EA5E9), Color(0xFFE0F2FE)),
+    'tarde': _ShiftColor(Color(0xFFF97316), Color(0xFFFFF7ED)),
+    'vespertino': _ShiftColor(Color(0xFFF97316), Color(0xFFFFF7ED)),
+    'noche': _ShiftColor(Color(0xFF8B5CF6), Color(0xFFF5F3FF)),
+    'nocturno': _ShiftColor(Color(0xFF8B5CF6), Color(0xFFF5F3FF)),
+    'sabatino': _ShiftColor(Color(0xFF10B981), Color(0xFFECFDF5)),
+    'sabado': _ShiftColor(Color(0xFF10B981), Color(0xFFECFDF5)),
   };
 
   static Color accent(String? turno) {

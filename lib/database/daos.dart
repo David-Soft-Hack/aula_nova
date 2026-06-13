@@ -93,6 +93,15 @@ class StudentDao extends DatabaseAccessor<AppDatabase> with _$StudentDaoMixin {
         .get();
   }
 
+  Future<List<Student>> getActiveStudentsByGroup(String groupCode) {
+    final normalized = groupCode.trim().toLowerCase();
+    return (select(students)
+          ..where((s) =>
+              s.grupo.equals(normalized) &
+              s.estado.equals(StudentStatus.activo.index)))
+        .get();
+  }
+
   Future insertStudent(Insertable<Student> student) => into(students).insert(student);
   Future updateStudent(Insertable<Student> student) => update(students).replace(student);
   Future deleteStudent(Insertable<Student> student) => delete(students).delete(student);
