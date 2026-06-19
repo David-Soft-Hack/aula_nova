@@ -261,6 +261,9 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
   }
 
   Widget _buildActionsBar(bool isKeyboardOpen) {
+    if (!_isLoadingGroups && _availableGroups.isEmpty) {
+      return const SizedBox.shrink();
+    }
     return Container(
       padding: EdgeInsets.only(
         left: 20,
@@ -428,6 +431,74 @@ class _AddBitacoraStepperState extends ConsumerState<AddBitacoraStepper> {
   }
 
   Widget _buildStepContent() {
+    if (_isLoadingGroups) {
+      return const Center(
+        child: CircularProgressIndicator(
+          color: AppTheme.academic600,
+        ),
+      );
+    }
+
+    if (_availableGroups.isEmpty) {
+      return Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  LucideIcons.users,
+                  color: Colors.red.shade600,
+                  size: 48,
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                'No hay grupos activos',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF1E293B),
+                  fontFamily: 'Outfit',
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'No se puede crear una bitácora si no existe un grupo activo. Por favor, crea un grupo en la sección de grupos antes de continuar.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(LucideIcons.arrowLeft, size: 16),
+                label: const Text('Volver a Bitácoras'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.academic600,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     if (_currentStep == 1) {
       return SingleChildScrollView(
         child: Padding(

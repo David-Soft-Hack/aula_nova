@@ -159,14 +159,28 @@ class _BitacoraAttendanceViewState extends ConsumerState<BitacoraAttendanceView>
           return const Center(child: Text('Sin sesiones programadas.'));
         }
 
+        // Ordenar cronológicamente
         final sorted = List<CalendarioBitacora>.from(sessions)
           ..sort((a, b) => (a.fechaProgramada ?? DateTime.now()).compareTo(b.fechaProgramada ?? DateTime.now()));
 
+        // Deduplicar por fecha: conservar solo la primera sesión de cada fecha única
+        final Map<String, CalendarioBitacora> uniqueByDate = {};
+        for (final session in sorted) {
+          final fecha = session.fechaProgramada;
+          // Normalizar la clave como 'yyyy-MM-dd' para comparar solo la fecha, sin la hora
+          final key = fecha != null
+              ? '${fecha.year.toString().padLeft(4, '0')}-${fecha.month.toString().padLeft(2, '0')}-${fecha.day.toString().padLeft(2, '0')}'
+              : 'sin-fecha';
+          uniqueByDate.putIfAbsent(key, () => session);
+        }
+
+        final uniqueSessions = uniqueByDate.values.toList();
+
         return ListView.builder(
           padding: const EdgeInsets.all(16),
-          itemCount: sorted.length,
+          itemCount: uniqueSessions.length,
           itemBuilder: (context, index) {
-            final session = sorted[index];
+            final session = uniqueSessions[index];
             return AttendanceSessionCard(
               session: session,
               bitacora: widget.bitacoraWithModule,

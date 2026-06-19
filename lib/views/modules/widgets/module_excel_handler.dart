@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,12 +11,12 @@ import '../../../models/app_models.dart';
 import '../../../providers/career_providers.dart';
 import '../../../services/module_extractor.dart';
 import '../../../services/excel_template_generator.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../shared/app_snackbar.dart';
 
 class ModuleExcelHandler {
   static Future<void> pickAndImportExcel({
     required BuildContext context,
-    required bool mounted,
     required ModuleExtractor extractor,
     required List<String> carreras,
     required TextEditingController nombreCtrl,
@@ -33,9 +34,24 @@ class ModuleExcelHandler {
     }) onImportSuccess,
   }) async {
     try {
+      Directory? baseDir;
+      if (Platform.isAndroid) {
+        baseDir = await getExternalStorageDirectory();
+      } else {
+        baseDir = await getApplicationDocumentsDirectory();
+      }
+      baseDir ??= await getTemporaryDirectory();
+
+      final targetFolder = Directory(p.join(baseDir.path, 'Planeacion Template'));
+      String? initialDir;
+      if (await targetFolder.exists()) {
+        initialDir = targetFolder.path;
+      }
+
       final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['xlsx'],
+        initialDirectory: initialDir,
       );
 
       if (!context.mounted) return;
@@ -46,11 +62,15 @@ class ModuleExcelHandler {
         if (rawPath == null || rawPath.isEmpty) return;
 
         final normalizedPath = p.normalize(rawPath);
-        final baseDir = (Platform.isAndroid)
-            ? await getExternalStorageDirectory() ?? await getApplicationDocumentsDirectory()
-            : await getApplicationDocumentsDirectory();
+        final docsDir = await getApplicationDocumentsDirectory();
+        final extDir = Platform.isAndroid ? await getExternalStorageDirectory() : null;
+        final tempDir = await getTemporaryDirectory();
 
-        if (!p.isWithin(baseDir.path, normalizedPath)) {
+        final isWithinAllowed = p.isWithin(docsDir.path, normalizedPath) ||
+            (extDir != null && p.isWithin(extDir.path, normalizedPath)) ||
+            p.isWithin(tempDir.path, normalizedPath);
+
+        if (!isWithinAllowed) {
           if (!context.mounted) return;
           AppSnackbar.showError(context, 'La ruta del archivo seleccionado no es válida.');
           return;
@@ -64,7 +84,7 @@ class ModuleExcelHandler {
 
         bool confirm = true;
         if (hasManualData) {
-          if (!mounted) return;
+          if (!context.mounted) return;
           confirm =
               await showDialog<bool>(
                 context: context,
@@ -174,51 +194,32 @@ class ModuleExcelHandler {
 
   static Future<void> downloadExcelTemplate({
     required BuildContext context,
-    required bool mounted,
     required Function(bool processing) onProcessingChanged,
   }) async {
     try {
       onProcessingChanged(true);
 
-      debugPrint(
-        '[EXCEL DOWNLOAD] Iniciando generación de plantilla premium...',
-      );
-
+      if (!context.mounted) return;
       final careers = await ProviderScope.containerOf(context).read(careerControllerProvider).getAllCareers();
-      debugPrint(
-        '[EXCEL DOWNLOAD] Carreras recuperadas de SQLite: ${careers.length} registradas.',
-      );
-
-      // Generar libro de trabajo programáticamente usando el nuevo servicio modularizado
+      
       final List<int> updatedBytes = await ExcelTemplateGenerator.generate(
         careers,
       );
 
-      // Get a directory to save the file safely without permission issues
-      Directory? dir;
-      if (Platform.isAndroid) {
-        dir = await getExternalStorageDirectory();
-      } else {
-        dir = await getApplicationDocumentsDirectory();
-      }
+      onProcessingChanged(false);
+      if (!context.mounted) return;
 
-      dir ??= await getTemporaryDirectory();
-
-      String savePath = p.join(dir.path, 'planeacion_template.xlsx');
-      final file = File(savePath);
-
-      try {
-        await file.writeAsBytes(updatedBytes);
-      } on FileSystemException {
-        final tempDir = await getTemporaryDirectory();
-        savePath = p.join(tempDir.path, 'planeacion_template.xlsx');
-        await File(savePath).writeAsBytes(updatedBytes);
-      }
-      debugPrint(
-        '[EXCEL DOWNLOAD] Archivo guardado físicamente en la ruta: $savePath',
+      // Abre el selector nativo para guardar de forma pública y visible para el usuario
+      final savePath = await FilePicker.saveFile(
+        dialogTitle: 'Selecciona dónde guardar la plantilla de Excel',
+        fileName: 'planeacion_template.xlsx',
+        bytes: Uint8List.fromList(updatedBytes),
       );
 
-      onProcessingChanged(false);
+      if (savePath == null) {
+        // El usuario canceló la operación
+        return;
+      }
 
       if (!context.mounted) return;
 
@@ -237,126 +238,148 @@ class ModuleExcelHandler {
                 topRight: Radius.circular(32),
               ),
             ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 40,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade300,
-                    borderRadius: BorderRadius.circular(2),
+            child: SafeArea(
+              top: false,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 4,
+                    margin: const EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade300,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
-                ),
-                Icon(
-                  LucideIcons.fileSpreadsheet,
-                  color: Colors.green.shade600,
-                  size: 48,
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  '¡Plantilla Guardada!',
-                  style: TextStyle(
-                    fontFamily: 'Outfit',
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                  Icon(
+                    LucideIcons.fileSpreadsheet,
+                    color: Colors.green.shade600,
+                    size: 48,
                   ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'El archivo de plantilla excel se guardó con éxito:',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
-                ),
-                const SizedBox(height: 12),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+                  const SizedBox(height: 16),
+                  Text(
+                    '¡Descargada con éxito!',
+                    style: const TextStyle(
+                      fontFamily: 'Outfit',
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade100),
+                  const SizedBox(height: 8),
+                  Text(
+                    'El archivo de plantilla excel se descargó con éxito:',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
-                  child: Row(
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade100),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.folder,
+                          color: Colors.amber.shade700,
+                          size: 16,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            savePath,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontFamily: 'monospace',
+                              color: Colors.grey.shade700,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
                     children: [
-                      Icon(
-                        LucideIcons.folder,
-                        color: Colors.amber.shade700,
-                        size: 16,
+                      Expanded(
+                        child: OutlinedButton(
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                          ),
+                          onPressed: () => Navigator.pop(sheetContext),
+                          child: const Text('Entendido'),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      IconButton.filled(
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.blue.shade600,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.all(14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                        ),
+                        onPressed: () async {
+                          await SharePlus.instance.share(
+                            ShareParams(
+                              files: [XFile(savePath)],
+                            ),
+                          );
+                        },
+                        icon: const Icon(LucideIcons.share2, size: 18),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(
-                          savePath,
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontFamily: 'monospace',
-                            color: Colors.grey.shade700,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green.shade600,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                          onPressed: () async {
+                            Navigator.pop(sheetContext);
+                            try {
+                              final result = await OpenFilex.open(savePath);
+                              if (!context.mounted) return;
+                              if (result.type != ResultType.done) {
+                                AppSnackbar.showWarning(
+                                  context,
+                                  'No se encontró una aplicación compatible para abrir Excel. Motivo: ${result.message}',
+                                );
+                              }
+                            } catch (e) {
+                              if (!context.mounted) return;
+                              AppSnackbar.showError(
+                                context,
+                                'No se pudo abrir el archivo: $e',
+                              );
+                            }
+                          },
+                          icon: const Icon(LucideIcons.externalLink, size: 16),
+                          label: const Text('Abrir'),
                         ),
                       ),
                     ],
                   ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    Expanded(
-                      child: OutlinedButton(
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                        onPressed: () => Navigator.pop(sheetContext),
-                        child: const Text('Entendido'),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green.shade600,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(vertical: 14),
-                          elevation: 0,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                        ),
-                          onPressed: () async {
-                          Navigator.pop(sheetContext);
-                          try {
-                            final result = await OpenFilex.open(savePath);
-                            if (!context.mounted) return;
-                            if (result.type != ResultType.done) {
-                              AppSnackbar.showWarning(
-                                context,
-                                'No se encontró una aplicación compatible para abrir Excel. Motivo: ${result.message}',
-                              );
-                            }
-                          } catch (e) {
-                            if (!context.mounted) return;
-                            AppSnackbar.showError(
-                              context,
-                              'No se pudo abrir el archivo: $e',
-                            );
-                          }
-                        },
-                        icon: const Icon(LucideIcons.externalLink, size: 16),
-                        label: const Text('Abrir en Excel'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },

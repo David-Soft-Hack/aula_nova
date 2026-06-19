@@ -27,6 +27,9 @@ class StudentRepository implements IStudentRepository {
   Future<List<Student>> getActiveStudentsByGroup(String groupCode) => _dao.getActiveStudentsByGroup(groupCode);
 
   @override
+  Stream<List<Student>> watchActiveStudentsByGroup(String groupCode) => _dao.watchActiveStudentsByGroup(groupCode);
+
+  @override
   Future<void> insertStudent(Insertable<Student> student) => _dao.insertStudent(student);
 
   @override

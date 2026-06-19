@@ -98,7 +98,7 @@ class AttendanceSessionCard extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Actividad: ${session.codActividad ?? 'Sin Actividad'}',
+                        dateStr,
                         style: theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: AppTheme.slate900,
@@ -107,11 +107,11 @@ class AttendanceSessionCard extends ConsumerWidget {
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                          Icon(LucideIcons.calendar, size: 14, color: Colors.grey.shade400),
+                          Icon(LucideIcons.tag, size: 14, color: Colors.grey.shade400),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              dateStr,
+                              'Actividad: ${session.codActividad ?? 'Sin Actividad'}',
                               style: TextStyle(
                                 color: Colors.grey.shade500,
                                 fontSize: 13,

@@ -19,7 +19,7 @@ class ModuleDao extends DatabaseAccessor<AppDatabase> with _$ModuleDaoMixin {
   Future insertModule(Insertable<Module> module) => into(modules).insert(module);
   Future updateModule(Insertable<Module> module) => update(modules).replace(module);
   Future deleteModule(Insertable<Module> module) => delete(modules).delete(module);
-  Future<Module?> getModuleByCod(String cod) => 
+  Future<Module?> getModuleByCod(String cod) =>
       (select(modules)..where((t) => t.codModule.equals(cod))).getSingleOrNull();
 
   Future<int> countModulesByCareer(String careerName) async {
@@ -55,10 +55,10 @@ class ClassGroupDao extends DatabaseAccessor<AppDatabase> with _$ClassGroupDaoMi
   Future insertGroup(Insertable<ClassGroup> group) => into(classGroups).insert(group);
   Future updateGroup(Insertable<ClassGroup> group) => update(classGroups).replace(group);
   Future deleteGroup(Insertable<ClassGroup> group) => delete(classGroups).delete(group);
-  
+
   Future<ClassGroup?> getGroupByCodigo(String codigo) =>
       (select(classGroups)..where((g) => g.codigo.equals(codigo))).getSingleOrNull();
-      
+
   Future<List<ClassGroup>> searchGroups(String query) {
     final likeQuery = '%${query.trim()}%';
     return (select(classGroups)
@@ -97,9 +97,20 @@ class StudentDao extends DatabaseAccessor<AppDatabase> with _$StudentDaoMixin {
     final normalized = groupCode.trim().toLowerCase();
     return (select(students)
           ..where((s) =>
-              s.grupo.equals(normalized) &
+              s.grupo.lower().equals(normalized) &
               s.estado.equals(StudentStatus.activo.index)))
         .get();
+  }
+
+  /// Stream reactivo: emite una nueva lista cada vez que cambia un estudiante del grupo.
+  /// Esto permite que TakeAttendanceScreen detecte automáticamente nuevos estudiantes.
+  Stream<List<Student>> watchActiveStudentsByGroup(String groupCode) {
+    final normalized = groupCode.trim().toLowerCase();
+    return (select(students)
+          ..where((s) =>
+              s.grupo.lower().equals(normalized) &
+              s.estado.equals(StudentStatus.activo.index)))
+        .watch();
   }
 
   Future insertStudent(Insertable<Student> student) => into(students).insert(student);
@@ -111,12 +122,12 @@ class StudentDao extends DatabaseAccessor<AppDatabase> with _$StudentDaoMixin {
 class UnitDao extends DatabaseAccessor<AppDatabase> with _$UnitDaoMixin {
   UnitDao(super.db);
 
-  Future<List<Unit>> getUnitsByModule(String idModule) => 
+  Future<List<Unit>> getUnitsByModule(String idModule) =>
       (select(units)..where((t) => t.idModule.equals(idModule))).get();
   Future<List<Unit>> getAllUnits() => select(units).get();
-  Future<Unit?> getUnitByCod(String codUnit) => 
+  Future<Unit?> getUnitByCod(String codUnit) =>
       (select(units)..where((t) => t.codUnit.equals(codUnit))).getSingleOrNull();
-  Stream<Unit?> watchUnitByCod(String codUnit) => 
+  Stream<Unit?> watchUnitByCod(String codUnit) =>
       (select(units)..where((t) => t.codUnit.equals(codUnit))).watchSingleOrNull();
   Future insertUnit(Insertable<Unit> unit) => into(units).insert(unit);
   Future updateUnit(Insertable<Unit> unit) => update(units).replace(unit);
@@ -150,12 +161,12 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   BitacoraDao(super.db);
 
   Future<int> createBitacora(Insertable<Bitacora> bitacora) => into(bitacoras).insert(bitacora);
-  
+
   Future<List<Bitacora>> getAllBitacoras() => select(bitacoras).get();
-  
+
   Future<void> autoCompletePastSessions() async {
     final now = DateTime.now();
-    
+
     await (update(calendarioBitacoras)
           ..where((t) => t.fechaProgramada.isSmallerOrEqualValue(now) & t.estadoImpartido.equals(false)))
         .write(const CalendarioBitacorasCompanion(
@@ -180,12 +191,12 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       }
     }
   }
-  
+
   Stream<List<BitacoraWithModule>> watchBitacorasWithModule() {
     final query = select(bitacoras).join([
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ]);
-    
+
     return query.watch().map((rows) {
       return rows.map((row) {
         return BitacoraWithModule(
@@ -197,18 +208,17 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
   }
 
   // Calendar entries methods
-  Future<void> createCalendarioEntries(List<CalendarioBitacorasCompanion> entries) => 
+  Future<void> createCalendarioEntries(List<CalendarioBitacorasCompanion> entries) =>
       batch((batch) => batch.insertAll(calendarioBitacoras, entries));
 
   Stream<List<CalendarioBitacora>> watchCalendarioForBitacora(int idBitacora) {
     return (select(calendarioBitacoras)..where((t) => t.idBitacora.equals(idBitacora))).watch();
   }
 
-  Future<List<CalendarioBitacora>> getCalendarioForBitacora(int idBitacora) => 
+  Future<List<CalendarioBitacora>> getCalendarioForBitacora(int idBitacora) =>
       (select(calendarioBitacoras)..where((t) => t.idBitacora.equals(idBitacora))).get();
 
-  Future<void>
-  updateCalendarioEntry(Insertable<CalendarioBitacora> entry) =>
+  Future<void> updateCalendarioEntry(Insertable<CalendarioBitacora> entry) =>
       update(calendarioBitacoras).replace(entry);
 
   Future<int> deleteCalendarioForBitacora(int idBitacora) =>
@@ -220,6 +230,7 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
     });
   }
+
   // Update a bitacora record
   Future<void> updateBitacora(Insertable<Bitacora> bitacora) => update(bitacoras).replace(bitacora);
 
@@ -237,7 +248,9 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ])
-      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(todayStart, todayEnd) & calendarioBitacoras.estadoImpartido.equals(false) & bitacoras.estado.equals(EstadoBitacora.activo.index));
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(todayStart, todayEnd) &
+          calendarioBitacoras.estadoImpartido.equals(false) &
+          bitacoras.estado.equals(EstadoBitacora.activo.index));
 
     return query.watch().map((rows) {
       return rows.map((row) {
@@ -262,7 +275,9 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ])
-      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(start, end) & calendarioBitacoras.estadoImpartido.equals(false) & bitacoras.estado.equals(EstadoBitacora.activo.index))
+      ..where(calendarioBitacoras.fechaProgramada.isBetweenValues(start, end) &
+          calendarioBitacoras.estadoImpartido.equals(false) &
+          bitacoras.estado.equals(EstadoBitacora.activo.index))
       ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
 
     return query.watch().map((rows) {

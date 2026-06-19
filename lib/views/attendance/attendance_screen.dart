@@ -4,6 +4,7 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
 import '../../providers/bitacora_providers.dart';
 import 'widgets/bitacora_attendance_card.dart';
+import '../../database/tables.dart';
 
 class AttendanceScreen extends ConsumerWidget {
   const AttendanceScreen({super.key});
@@ -40,7 +41,10 @@ class AttendanceScreen extends ConsumerWidget {
                 error: (e, _) =>
                     Center(child: Text('Error al cargar bitácoras: $e')),
                 data: (bitacoras) {
-                  if (bitacoras.isEmpty) {
+                  final activeBitacoras = bitacoras
+                      .where((b) => b.bitacora.estado == EstadoBitacora.activo)
+                      .toList();
+                  if (activeBitacoras.isEmpty) {
                     return Center(
                       child: Padding(
                         padding: const EdgeInsets.all(24.0),
@@ -54,7 +58,7 @@ class AttendanceScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 16),
                             Text(
-                              'No tienes bitácoras registradas',
+                              'No tienes bitácoras activas',
                               style: theme.textTheme.titleMedium?.copyWith(
                                 color: Colors.grey.shade600,
                                 fontWeight: FontWeight.bold,
@@ -62,7 +66,7 @@ class AttendanceScreen extends ConsumerWidget {
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              'Crea una bitácora en la sección correspondiente para comenzar a pasar asistencia.',
+                              'Crea o activa una bitácora en la sección correspondiente para comenzar a pasar asistencia.',
                               textAlign: TextAlign.center,
                               style: TextStyle(color: Colors.grey.shade500),
                             ),
@@ -77,9 +81,9 @@ class AttendanceScreen extends ConsumerWidget {
                       horizontal: 24,
                       vertical: 8,
                     ),
-                    itemCount: bitacoras.length,
+                    itemCount: activeBitacoras.length,
                     itemBuilder: (context, index) {
-                      final bitacora = bitacoras[index];
+                      final bitacora = activeBitacoras[index];
                       return BitacoraAttendanceCard(
                         bitacoraWithModule: bitacora,
                       );

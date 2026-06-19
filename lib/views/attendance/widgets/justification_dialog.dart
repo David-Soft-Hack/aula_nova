@@ -135,272 +135,305 @@ class _JustificationDialogState extends State<JustificationDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      elevation: 8,
-      child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+    final isKeyboardVisible = MediaQuery.of(context).viewInsets.bottom > 0;
+
+    return Dialog.fullscreen(
+      backgroundColor: Colors.white,
+      child: SafeArea(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 12, 8),
+              child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      'Justificar Inasistencia',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Outfit',
-                        color: AppTheme.slate900,
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Justificar Inasistencia',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Outfit',
+                            color: AppTheme.slate900,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.studentName,
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(LucideIcons.x),
+                    icon: Icon(LucideIcons.x, color: Colors.grey.shade600),
                     onPressed: () => Navigator.of(context).pop(),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
-              Text(
-                widget.studentName,
-                style: TextStyle(
-                  color: Colors.grey.shade600,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Detalle de la justificación *',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: _detailController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  hintText: 'Ej. Cita médica, enfermedad, urgencia familiar...',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: AppTheme.academic600,
-                      width: 2,
-                    ),
-                  ),
-                  contentPadding: const EdgeInsets.all(12),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Evidencia adjunta (${_evidencePaths.length}/3)',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Colors.grey.shade800,
-                      fontSize: 14,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              if (_evidencePaths.isNotEmpty)
-                Container(
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade200),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _evidencePaths.length,
-                    separatorBuilder: (_, _) => const Divider(height: 8),
-                    itemBuilder: (context, idx) {
-                      final path = _evidencePaths[idx];
-                      final isImage = [
-                        '.jpg',
-                        '.jpeg',
-                        '.png',
-                      ].any((ext) => path.toLowerCase().endsWith(ext));
-
-                      return ListTile(
-                        leading: isImage
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(6),
-                                child: Image.file(
-                                  File(path),
-                                  width: 40,
-                                  height: 40,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (_, _, _) => const Icon(
-                                    LucideIcons.file,
-                                    color: AppTheme.academic500,
-                                  ),
-                                ),
-                              )
-                            : const Icon(
-                                LucideIcons.fileText,
-                                color: AppTheme.academic500,
-                              ),
-                        title: Text(
-                          p.basename(path),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(fontSize: 13),
-                        ),
-                        trailing: IconButton(
-                          icon: const Icon(
-                            LucideIcons.trash2,
-                            color: Colors.red,
-                            size: 20,
-                          ),
-                          onPressed: () => _removeEvidence(idx),
-                        ),
-                      );
-                    },
-                  ),
-                )
-              else
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.shade50,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: Colors.grey.shade200,
-                      style: BorderStyle.solid,
-                    ),
-                  ),
-                  child: const Center(
-                    child: Text(
-                      'Sin archivos adjuntos',
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(LucideIcons.camera, size: 16),
-                      label: const Text(
-                        'Cámara',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      onPressed: _evidencePaths.length >= 3
-                          ? null
-                          : () => _pickImage(ImageSource.camera),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(LucideIcons.image, size: 16),
-                      label: const Text(
-                        'Galería',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      onPressed: _evidencePaths.length >= 3
-                          ? null
-                          : () => _pickImage(ImageSource.gallery),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      icon: const Icon(LucideIcons.paperclip, size: 16),
-                      label: const Text(
-                        'Archivo',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                      onPressed: _evidencePaths.length >= 3
-                          ? null
-                          : () => _pickFile(),
-                      style: OutlinedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 24),
-              if (_isSaving)
-                const Center(child: CircularProgressIndicator())
-              else
-                Row(
+            ),
+            const Divider(height: 1),
+            
+            // Scrollable Content
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text(
-                          'Cancelar',
-                          style: TextStyle(color: Colors.grey),
-                        ),
+                    Text(
+                      'Detalle de la justificación *',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                        fontSize: 14,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () {
-                          if (_detailController.text.trim().isEmpty) {
-                            AppSnackbar.showWarning(
-                              context,
-                              'Por favor, ingresa el detalle de la justificación.',
-                            );
-                            return;
-                          }
-                          Navigator.of(context).pop({
-                            'detalle': _detailController.text.trim(),
-                            'evidencias': _evidencePaths,
-                          });
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppTheme.academic600,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _detailController,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: 'Ej. Cita médica, enfermedad, urgencia familiar...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: Colors.grey.shade300),
                         ),
-                        child: const Text('Guardar'),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: AppTheme.academic600,
+                            width: 2,
+                          ),
+                        ),
+                        contentPadding: const EdgeInsets.all(12),
                       ),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Evidencia adjunta (${_evidencePaths.length}/3)',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade800,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    if (_evidencePaths.isNotEmpty)
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        padding: const EdgeInsets.all(8),
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: _evidencePaths.length,
+                          separatorBuilder: (_, _) => const Divider(height: 8),
+                          itemBuilder: (context, idx) {
+                            final path = _evidencePaths[idx];
+                            final isImage = [
+                              '.jpg',
+                              '.jpeg',
+                              '.png',
+                            ].any((ext) => path.toLowerCase().endsWith(ext));
+
+                            return ListTile(
+                              leading: isImage
+                                  ? ClipRRect(
+                                      borderRadius: BorderRadius.circular(6),
+                                      child: Image.file(
+                                        File(path),
+                                        width: 40,
+                                        height: 40,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, _, _) => const Icon(
+                                          LucideIcons.file,
+                                          color: AppTheme.academic500,
+                                        ),
+                                      ),
+                                    )
+                                  : const Icon(
+                                      LucideIcons.fileText,
+                                      color: AppTheme.academic500,
+                                    ),
+                              title: Text(
+                                p.basename(path),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 13),
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(
+                                  LucideIcons.trash2,
+                                  color: Colors.red,
+                                  size: 20,
+                                ),
+                                onPressed: () => _removeEvidence(idx),
+                              ),
+                            );
+                          },
+                        ),
+                      )
+                    else
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade50,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: Colors.grey.shade200,
+                            style: BorderStyle.solid,
+                          ),
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'Sin archivos adjuntos',
+                            style: TextStyle(color: Colors.grey, fontSize: 13),
+                          ),
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            icon: const Icon(LucideIcons.camera, size: 16),
+                            label: const Text(
+                              'Cámara',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            onPressed: _evidencePaths.length >= 3
+                                ? null
+                                : () => _pickImage(ImageSource.camera),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            icon: const Icon(LucideIcons.image, size: 16),
+                            label: const Text(
+                              'Galería',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            onPressed: _evidencePaths.length >= 3
+                                ? null
+                                : () => _pickImage(ImageSource.gallery),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            icon: const Icon(LucideIcons.paperclip, size: 16),
+                            label: const Text(
+                              'Archivo',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            onPressed: _evidencePaths.length >= 3
+                                ? null
+                                : () => _pickFile(),
+                            style: OutlinedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-            ],
-          ),
+              ),
+            ),
+            
+            // Bottom Action Buttons
+            const Divider(height: 1),
+            Padding(
+              padding: EdgeInsets.only(
+                left: 20.0,
+                right: 20.0,
+                top: 12.0,
+                bottom: isKeyboardVisible ? 12.0 : 20.0,
+              ),
+              child: _isSaving
+                  ? const Center(child: CircularProgressIndicator())
+                  : Row(
+                      children: [
+                        Expanded(
+                          child: TextButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            style: TextButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
+                              'Cancelar',
+                              style: TextStyle(color: Colors.grey, fontSize: 15, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: () {
+                              if (_detailController.text.trim().isEmpty) {
+                                AppSnackbar.showWarning(
+                                  context,
+                                  'Por favor, ingresa el detalle de la justificación.',
+                                );
+                                return;
+                              }
+                              Navigator.of(context).pop({
+                                'detalle': _detailController.text.trim(),
+                                'evidencias': _evidencePaths,
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppTheme.academic600,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 0,
+                            ),
+                            child: const Text(
+                              'Guardar',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ],
         ),
       ),
     );

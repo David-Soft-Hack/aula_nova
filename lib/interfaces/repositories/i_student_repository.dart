@@ -8,6 +8,7 @@ abstract class IStudentRepository {
   Future<Student?> getStudentByCodigo(String codigo);
   Future<List<Student>> searchStudents(String query);
   Future<List<Student>> getActiveStudentsByGroup(String groupCode);
+  Stream<List<Student>> watchActiveStudentsByGroup(String groupCode);
   Future<void> insertStudent(Insertable<Student> student);
   Future<void> updateStudent(Insertable<Student> student);
   Future<void> deleteStudent(Insertable<Student> student);

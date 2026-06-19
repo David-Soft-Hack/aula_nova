@@ -49,6 +49,7 @@ dependencies:
   open_filex: ^4.7.0
   syncfusion_flutter_xlsio: ^29.1.38
   flutter_riverpod: ^2.6.1
+  share_plus: ^12.0.2
 
 dev_dependencies:
   flutter_test:

@@ -25,6 +25,17 @@ subprojects {
             defaultConfig {
                 minSdkVersion(24)
             }
+            compileOptions {
+                sourceCompatibility = JavaVersion.VERSION_17
+                targetCompatibility = JavaVersion.VERSION_17
+            }
+        }
+
+        // Suppress "source/target 8 is obsolete" warnings from plugin subprojects
+        tasks.withType<JavaCompile>().configureEach {
+            options.compilerArgs.addAll(listOf("-Xlint:-options"))
+            sourceCompatibility = JavaVersion.VERSION_17.toString()
+            targetCompatibility = JavaVersion.VERSION_17.toString()
         }
     }
 }
