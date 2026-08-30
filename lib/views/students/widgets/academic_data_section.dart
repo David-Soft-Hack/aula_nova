@@ -82,6 +82,7 @@ class AcademicDataSection extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         DropdownButtonFormField<StudentStatus>(
+          isExpanded: true,
           initialValue: selectedStatus,
           items: StudentStatus.values.map((status) {
             final label = switch (status) {
@@ -92,7 +93,10 @@ class AcademicDataSection extends StatelessWidget {
               StudentStatus.finalizado => 'Finalizado',
               StudentStatus.desertado => 'Desertado',
             };
-            return DropdownMenuItem(value: status, child: Text(label));
+            return DropdownMenuItem(
+              value: status,
+              child: Text(label, overflow: TextOverflow.ellipsis, maxLines: 1),
+            );
           }).toList(),
           onChanged: onStatusChanged,
           decoration: InputDecoration(

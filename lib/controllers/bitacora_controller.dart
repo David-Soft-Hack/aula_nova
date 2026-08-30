@@ -120,12 +120,21 @@ class BitacoraController implements IBitacoraController {
 
   @override
   Future<void> deleteBitacora(int idBitacora) async {
-    final bitacora = await _bitacoraRepository.getAllBitacoras().then(
-      (list) => list.where((b) => b.id == idBitacora).firstOrNull,
-    );
-    await _bitacoraRepository.deleteBitacora(idBitacora);
+    // 1. Obtener datos ANTES de borrar (las sesiones son eliminadas en cascada)
+    final allBitacoras = await _bitacoraRepository.getAllBitacoras();
+    final bitacora = allBitacoras.where((b) => b.id == idBitacora).firstOrNull;
+
+    // 2. Si hay grupo asociado, leer las sesiones ANTES de eliminar
+    List<CalendarioBitacora> sessions = [];
     if (bitacora?.codigoGrupo != null && bitacora!.codigoGrupo!.isNotEmpty) {
-      final sessions = await _bitacoraRepository.getCalendarioForBitacora(idBitacora);
+      sessions = await _bitacoraRepository.getCalendarioForBitacora(idBitacora);
+    }
+
+    // 3. Ahora sí eliminar la bitácora (y sus sesiones en cascada)
+    await _bitacoraRepository.deleteBitacora(idBitacora);
+
+    // 4. Actualizar estado de estudiantes del grupo con las sesiones obtenidas previamente
+    if (bitacora?.codigoGrupo != null && bitacora!.codigoGrupo!.isNotEmpty) {
       final newStatus = await _studentStatusService.determineGroupFinalStatus(
         bitacora.codigoGrupo!,
         sessions,
@@ -190,7 +199,9 @@ class BitacoraController implements IBitacoraController {
     required List<String> diasClase,
     required List<String> fechasFeriadas,
   }) async {
-    await _bitacoraRepository.updateBitacora(BitacorasCompanion(
+    // Actualizar solo la fila correcta usando WHERE (el Companion sin id no funciona con replace())
+    await (_db.update(_db.bitacoras)..where((t) => t.id.equals(bitacoraId)))
+        .write(BitacorasCompanion(
       frecuenciaClase: Value(frecuenciaClase),
       usarHorasReloj: Value(usarHorasReloj),
     ));

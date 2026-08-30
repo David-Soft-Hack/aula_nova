@@ -42,3 +42,9 @@ final todaySessionsProvider = StreamProvider<List<TodaySessionData>>((ref) {
 final upcomingSessionsProvider = StreamProvider<List<TodaySessionData>>((ref) {
   return ref.watch(dashboardControllerProvider).upcomingSessions;
 });
+
+/// Sesiones de días pasados que aún no han sido marcadas como impartidas.
+/// Alimenta el banner de advertencia en el Dashboard.
+final pendingPastSessionsProvider = StreamProvider<List<TodaySessionData>>((ref) {
+  return ref.watch(bitacoraDaoProvider).watchPendingPastSessions();
+});

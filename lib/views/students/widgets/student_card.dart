@@ -54,6 +54,20 @@ class StudentCard extends StatelessWidget {
                       if (student.carrera != null && student.carrera!.isNotEmpty)
                         Text(student.carrera!, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
                       Text(student.statusLabel, style: const TextStyle(color: AppTheme.academic600, fontWeight: FontWeight.bold, fontSize: 12)),
+                      Text(
+                        student.grupo != null && student.grupo!.isNotEmpty
+                            ? student.grupo!
+                            : 'Sin grupo de clase',
+                        style: TextStyle(
+                          color: student.grupo != null && student.grupo!.isNotEmpty
+                              ? Colors.grey.shade600
+                              : Colors.orange.shade700,
+                          fontWeight: student.grupo != null && student.grupo!.isNotEmpty
+                              ? FontWeight.normal
+                              : FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                      ),
                     ],
                   ),
                 ],

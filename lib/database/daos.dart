@@ -54,7 +54,26 @@ class ClassGroupDao extends DatabaseAccessor<AppDatabase> with _$ClassGroupDaoMi
   Stream<List<ClassGroup>> watchAllGroups() => select(classGroups).watch();
   Future insertGroup(Insertable<ClassGroup> group) => into(classGroups).insert(group);
   Future updateGroup(Insertable<ClassGroup> group) => update(classGroups).replace(group);
-  Future deleteGroup(Insertable<ClassGroup> group) => delete(classGroups).delete(group);
+  Future<void> deleteGroup(Insertable<ClassGroup> group) async {
+    String? groupCode;
+    if (group is ClassGroup) {
+      groupCode = group.codigo;
+    } else if (group is ClassGroupsCompanion) {
+      if (group.codigo.present) {
+        groupCode = group.codigo.value;
+      }
+    }
+
+    await db.transaction(() async {
+      if (groupCode != null && groupCode.isNotEmpty) {
+        await (db.update(db.students)..where((t) => t.grupo.equals(groupCode!)))
+            .write(const StudentsCompanion(
+          grupo: Value(null),
+        ));
+      }
+      await delete(classGroups).delete(group);
+    });
+  }
 
   Future<ClassGroup?> getGroupByCodigo(String codigo) =>
       (select(classGroups)..where((g) => g.codigo.equals(codigo))).getSingleOrNull();
@@ -253,8 +272,10 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       (delete(bitacoras)..where((t) => t.idModule.equals(moduleCode))).go();
 
   Stream<List<TodaySessionData>> watchTodaySessions() {
-    final todayStart = DateTime.now();
-    final todayEnd = DateTime(todayStart.year, todayStart.month, todayStart.day, 23, 59, 59);
+    final now = DateTime.now();
+    // Usar medianoche del día actual para no perder sesiones de horas previas
+    final todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
+    final todayEnd = DateTime(now.year, now.month, now.day, 23, 59, 59);
 
     final query = select(calendarioBitacoras).join([
       innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
@@ -312,6 +333,33 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
       innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
     ])
       ..where(bitacoras.estado.equals(EstadoBitacora.activo.index))
+      ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
+
+    return query.watch().map((rows) {
+      return rows.map((row) {
+        final bitacora = row.readTable(bitacoras);
+        return TodaySessionData(
+          entry: row.readTable(calendarioBitacoras),
+          moduleName: row.readTable(modules).nombre,
+          groupCode: bitacora.codigoGrupo,
+          career: bitacora.carrera,
+          turno: bitacora.turno,
+        );
+      }).toList();
+    });
+  }
+
+  Stream<List<TodaySessionData>> watchPendingPastSessions() {
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day, 0, 0, 0);
+
+    final query = select(calendarioBitacoras).join([
+      innerJoin(bitacoras, bitacoras.id.equalsExp(calendarioBitacoras.idBitacora)),
+      innerJoin(modules, modules.codModule.equalsExp(bitacoras.idModule)),
+    ])
+      ..where(calendarioBitacoras.fechaProgramada.isSmallerThanValue(todayStart) &
+          calendarioBitacoras.estadoImpartido.equals(false) &
+          bitacoras.estado.equals(EstadoBitacora.activo.index))
       ..orderBy([OrderingTerm(expression: calendarioBitacoras.fechaProgramada, mode: OrderingMode.asc)]);
 
     return query.watch().map((rows) {

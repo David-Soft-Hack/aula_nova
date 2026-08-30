@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../database/app_database.dart';
-import '../../../providers/database_providers.dart';
+import '../../../providers/bitacora_providers.dart';
 import '../../shared/confirm_delete_dialog.dart';
 import '../../shared/app_snackbar.dart';
 
@@ -23,8 +23,18 @@ Future<void> confirmDeleteBitacora(
   );
 
   if (confirm == true && context.mounted) {
-    await ProviderScope.containerOf(context).read(bitacoraDaoProvider).deleteBitacora(bitacora.id);
-    if (context.mounted) AppSnackbar.showError(context, 'Bitácora eliminada');
+    try {
+      await ProviderScope.containerOf(context)
+          .read(bitacoraControllerProvider)
+          .deleteBitacora(bitacora.id);
+      if (context.mounted) {
+        AppSnackbar.showSuccess(context, 'Bitácora eliminada con éxito');
+      }
+    } catch (e) {
+      if (context.mounted) {
+        AppSnackbar.showError(context, 'Error al eliminar bitácora: $e');
+      }
+    }
   }
 }
 

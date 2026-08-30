@@ -26,7 +26,7 @@ import '../utils/excel_cell_helper.dart';
 /// 2. Invocarlo desde [generarBitacora] después de [_llenarHojaPlanCalendario].
 class CuadernoDocenteService {
   static const String _assetPath = 'assets/Plan Bitacora.xlsx';
-  static const String _outputFileName = 'Bitacora_GENERADA.xlsx';
+  static const String _defaultOutputFileName = 'Bitacora_GENERADA.xlsx';
   static final DateFormat _dateFmt = DateFormat('dd/MM/yyyy', 'es');
 
   // Filas de la plantilla que contienen el bloque de firma (0-based)
@@ -48,17 +48,20 @@ class CuadernoDocenteService {
   ///   1. Carga la plantilla desde assets.
   ///   2. Llena cada hoja con los datos de [data].
   ///   3. Guarda el resultado en el directorio de documentos de la app.
-  Future<File> generarBitacora(DocenteData data) async {
+  ///
+  /// [outputFileName] permite personalizar el nombre del archivo .xlsx resultante.
+  /// Si se omite, se usa el nombre por defecto `Bitacora_GENERADA.xlsx`.
+  Future<File> generarBitacora(DocenteData data, {String? outputFileName}) async {
     // 1. Cargar la plantilla desde assets (bytes)
     final byteData = await rootBundle.load(_assetPath);
     final templateBytes = byteData.buffer.asUint8List();
-    return _procesarPlantilla(templateBytes, data);
+    return _procesarPlantilla(templateBytes, data, outputFileName: outputFileName);
   }
 
   /// Genera el cuaderno docente a partir de bytes de plantilla ya cargados.
   /// Útil cuando el usuario selecciona la plantilla manualmente.
-  Future<File> generarDesdeBytes(Uint8List templateBytes, DocenteData data) {
-    return _procesarPlantilla(templateBytes, data);
+  Future<File> generarDesdeBytes(Uint8List templateBytes, DocenteData data, {String? outputFileName}) {
+    return _procesarPlantilla(templateBytes, data, outputFileName: outputFileName);
   }
 
   // ─── Escritura pública de celdas ─────────────────────────────────────────
@@ -113,7 +116,7 @@ class CuadernoDocenteService {
 
   // ─── Procesamiento interno ────────────────────────────────────────────────
 
-  Future<File> _procesarPlantilla(Uint8List templateBytes, DocenteData data) async {
+  Future<File> _procesarPlantilla(Uint8List templateBytes, DocenteData data, {String? outputFileName}) async {
     final excel = Excel.decodeBytes(templateBytes);
 
     if (excel.tables.isEmpty) {
@@ -136,7 +139,8 @@ class CuadernoDocenteService {
     if (fileBytes == null) {
       throw Exception('Error al codificar el archivo Excel resultante.');
     }
-    return _guardarArchivo(_outputFileName, fileBytes);
+    final fileName = outputFileName ?? _defaultOutputFileName;
+    return _guardarArchivo(fileName, fileBytes);
   }
 
   // ─── Hoja: Plan calendario ────────────────────────────────────────────────

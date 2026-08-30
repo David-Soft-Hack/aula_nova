@@ -6,20 +6,15 @@ import '../../../database/tables.dart' show TipoCarrera;
 import '../../../providers/database_providers.dart';
 import '../career_detail_screen.dart';
 
+import '../../shared/confirm_delete_dialog.dart';
+
 /// Diálogo de confirmación para eliminar una carrera.
 Future<bool?> showDeleteCareerDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
-    builder: (c) => AlertDialog(
-      title: const Text('Eliminar'),
-      content: const Text('¿Estás seguro de eliminar este programa?'),
-      actions: [
-        TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Cancelar')),
-        TextButton(
-          onPressed: () => Navigator.pop(c, true),
-          child: const Text('Eliminar', style: TextStyle(color: Colors.red)),
-        ),
-      ],
+    builder: (c) => const ConfirmDeleteDialog(
+      title: '¿Eliminar Programa?',
+      message: '¿Estás seguro de eliminar este programa formativo? Esta acción no se puede deshacer.',
     ),
   );
 }

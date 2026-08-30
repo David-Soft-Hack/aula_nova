@@ -22,7 +22,8 @@ class BitacoraExportService {
   Future<File> exportToExcel(BitacoraExportData data) async {
     final docenteData = DocenteData.fromBitacoraExportData(data);
     final service = CuadernoDocenteService();
-    return service.generarBitacora(docenteData);
+    // Pasar el nombre único de la bitácora para evitar sobrescribir archivos anteriores
+    return service.generarBitacora(docenteData, outputFileName: '${data.safeFileName}.xlsx');
   }
 
 

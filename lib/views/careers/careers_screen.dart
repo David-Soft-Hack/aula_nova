@@ -4,54 +4,74 @@ import 'package:lucide_icons/lucide_icons.dart';
 import '../../config/theme/app_theme.dart';
 import '../../database/app_database.dart';
 import '../../providers/career_providers.dart';
+import '../shared/app_snackbar.dart';
 import 'widgets/add_career_dialog.dart';
 import 'widgets/edit_career_dialog.dart';
 import 'widgets/career_card.dart';
 
-class CareersScreen extends ConsumerStatefulWidget {
+/// Pantalla de gestión de carreras y programas formativos.
+///
+/// Refactorizada a [ConsumerWidget] para mejorar la eficiencia al eliminar el
+/// ciclo de vida innecesario de un [StatefulWidget], y delegando las secciones
+/// a widgets independientes para optimizar las reconstrucciones de la UI.
+class CareersScreen extends ConsumerWidget {
   const CareersScreen({super.key});
 
-  @override
-  ConsumerState<CareersScreen> createState() => _CareersScreenState();
-}
-
-class _CareersScreenState extends ConsumerState<CareersScreen> {
-  void _showAddCareerDialog() {
+  void _showAddCareerDialog(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => const AddCareerDialog(),
     );
   }
 
-  Future<void> _onDelete(Career career) async {
-    final confirmed = await showDeleteCareerDialog(context);
-    if (confirmed == true) {
-      await ref.read(careerControllerProvider).deleteCareer(career);
-    }
-  }
-
-  void _showEditCareerDialog(Career career) {
+  void _showEditCareerDialog(BuildContext context, Career career) {
     showDialog(
       context: context,
       builder: (context) => EditCareerDialog(career: career),
     );
   }
 
+  Future<void> _onDelete(BuildContext context, WidgetRef ref, Career career) async {
+    final confirmed = await showDeleteCareerDialog(context);
+    if (confirmed == true && context.mounted) {
+      try {
+        await ref.read(careerControllerProvider).deleteCareer(career);
+        if (context.mounted) {
+          AppSnackbar.showSuccess(context, 'Programa eliminado con éxito');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          AppSnackbar.showError(context, 'Error al eliminar programa: $e');
+        }
+      }
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Column(
         children: [
-          _buildHeader(context),
-          _buildAddButton(),
+          const _CareersHeader(),
+          _AddCareerButton(onPressed: () => _showAddCareerDialog(context)),
           const SizedBox(height: 16),
-          Expanded(child: _buildCareerList()),
+          Expanded(
+            child: _CareerList(
+              onEdit: (career) => _showEditCareerDialog(context, career),
+              onDelete: (career) => _onDelete(context, ref, career),
+            ),
+          ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildHeader(BuildContext context) {
+class _CareersHeader extends StatelessWidget {
+  const _CareersHeader();
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(24.0),
       child: Row(
@@ -79,14 +99,21 @@ class _CareersScreenState extends ConsumerState<CareersScreen> {
       ),
     );
   }
+}
 
-  Widget _buildAddButton() {
+class _AddCareerButton extends StatelessWidget {
+  final VoidCallback onPressed;
+
+  const _AddCareerButton({required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24.0),
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton.icon(
-          onPressed: _showAddCareerDialog,
+          onPressed: onPressed,
           icon: const Icon(LucideIcons.plus, size: 20),
           label: const Text('Agregar Programa'),
           style: ElevatedButton.styleFrom(
@@ -100,8 +127,19 @@ class _CareersScreenState extends ConsumerState<CareersScreen> {
       ),
     );
   }
+}
 
-  Widget _buildCareerList() {
+class _CareerList extends ConsumerWidget {
+  final void Function(Career) onEdit;
+  final void Function(Career) onDelete;
+
+  const _CareerList({
+    required this.onEdit,
+    required this.onDelete,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
     final careersAsync = ref.watch(allCareersStreamProvider);
 
     return careersAsync.when(
@@ -118,8 +156,8 @@ class _CareersScreenState extends ConsumerState<CareersScreen> {
             final career = careers[index];
             return CareerCard(
               career: career,
-              onEdit: () => _showEditCareerDialog(career),
-              onDelete: () => _onDelete(career),
+              onEdit: () => onEdit(career),
+              onDelete: () => onDelete(career),
             );
           },
         );
@@ -145,3 +183,4 @@ class _CareersEmptyState extends StatelessWidget {
     );
   }
 }
+

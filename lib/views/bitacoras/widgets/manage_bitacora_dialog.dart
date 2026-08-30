@@ -55,8 +55,18 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
   }
 
   Future<void> _onSessionUpdated(int index, CalendarioBitacora updated) async {
-    await ref.read(bitacoraControllerProvider).updateCalendarioEntry(updated);
+    final previous = _sessions[index];
+    // Actualizar estado local optimistamente
     if (mounted) setState(() => _sessions[index] = updated);
+    try {
+      await ref.read(bitacoraControllerProvider).updateCalendarioEntry(updated);
+    } catch (e) {
+      // Revertir cambio local si la BD falla
+      if (mounted) {
+        setState(() => _sessions[index] = previous);
+        AppSnackbar.showError(context, 'Error al guardar la sesión: $e');
+      }
+    }
   }
 
   void _editBitacora() {
@@ -256,9 +266,11 @@ class _ManageBitacoraDialogState extends ConsumerState<ManageBitacoraDialog> {
 
   Future<void> _shareFile(File file) async {
     try {
-      await Share.shareXFiles(
-        [XFile(file.path)],
-        subject: 'Bitácora — ${widget.bitacoraWithModule.module.nombre}',
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: 'Bitácora — ${widget.bitacoraWithModule.module.nombre}',
+        ),
       );
     } catch (_) {
       // Si share falla, intentar abrir con la app predeterminada

@@ -7,6 +7,8 @@ import '../../models/student.dart';
 import '../../providers/student_providers.dart';
 import '../../providers/class_group_providers.dart';
 import '../shared/requirement_dialog.dart';
+import '../shared/confirm_delete_dialog.dart';
+import '../shared/app_snackbar.dart';
 import 'widgets/add_student_dialog.dart';
 import 'widgets/edit_student_dialog.dart';
 import 'widgets/student_card.dart';
@@ -50,18 +52,24 @@ class _StudentsScreenState extends ConsumerState<StudentsScreen> {
   Future<void> _deleteStudent(Student student) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar estudiante'),
-        content: const Text('¿Estás seguro de eliminar este estudiante?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancelar')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Eliminar', style: TextStyle(color: Colors.red))),
-        ],
+      builder: (context) => ConfirmDeleteDialog(
+        title: '¿Eliminar estudiante?',
+        message:
+            '¿Estás seguro de eliminar a "${student.fullName}"? Esta acción no se puede deshacer.',
       ),
     );
 
-    if (confirmed == true) {
-      await ref.read(studentControllerProvider).deleteStudent(student);
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(studentControllerProvider).deleteStudent(student);
+        if (mounted) {
+          AppSnackbar.showSuccess(context, 'Estudiante eliminado con éxito');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.showError(context, 'Error al eliminar estudiante: $e');
+        }
+      }
     }
   }
 

@@ -212,42 +212,45 @@ class _AddStudentDialogState extends ConsumerState<AddStudentDialog> {
               Expanded(
                 child: SingleChildScrollView(
                   physics: const BouncingScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: _currentStep == 0
-                        ? PersonalDataSection(
-                            codigoCtrl: _codigoCtrl,
-                            nombresCtrl: _nombresCtrl,
-                            apellidosCtrl: _apellidosCtrl,
-                            emailCtrl: _emailCtrl,
-                            telefonoCtrl: _telefonoCtrl,
-                          )
-                        : AcademicDataSection(
-                            isLoadingData: _isLoadingData,
-                            selectedCarrera: _selectedCarrera,
-                            selectedGrupo: _selectedGrupo,
-                            carreras: _carreras,
-                            grupos: _grupos,
-                            selectedStatus: _selectedStatus,
-                            fechaIngreso: _fechaIngreso,
-                            onCarreraChanged: (value) =>
-                                setState(() => _selectedCarrera = value),
-                            onGrupoChanged: (value) async {
-                              setState(() => _selectedGrupo = value);
-                              if (value != null && value.isNotEmpty) {
-                                final code = await ref
-                                    .read(studentControllerProvider)
-                                    .generateNextStudentCodigo(value);
-                                setState(() => _codigoCtrl.text = code);
-                              }
-                            },
-                            onStatusChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedStatus = value);
-                              }
-                            },
-                            onSelectFechaIngreso: _selectFechaIngreso,
-                          ),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 16.0),
+                      child: _currentStep == 0
+                          ? PersonalDataSection(
+                              codigoCtrl: _codigoCtrl,
+                              nombresCtrl: _nombresCtrl,
+                              apellidosCtrl: _apellidosCtrl,
+                              emailCtrl: _emailCtrl,
+                              telefonoCtrl: _telefonoCtrl,
+                            )
+                          : AcademicDataSection(
+                              isLoadingData: _isLoadingData,
+                              selectedCarrera: _selectedCarrera,
+                              selectedGrupo: _selectedGrupo,
+                              carreras: _carreras,
+                              grupos: _grupos,
+                              selectedStatus: _selectedStatus,
+                              fechaIngreso: _fechaIngreso,
+                              onCarreraChanged: (value) =>
+                                  setState(() => _selectedCarrera = value),
+                              onGrupoChanged: (value) async {
+                                setState(() => _selectedGrupo = value);
+                                if (value != null && value.isNotEmpty) {
+                                  final code = await ref
+                                      .read(studentControllerProvider)
+                                      .generateNextStudentCodigo(value);
+                                  setState(() => _codigoCtrl.text = code);
+                                }
+                              },
+                              onStatusChanged: (value) {
+                                if (value != null) {
+                                  setState(() => _selectedStatus = value);
+                                }
+                              },
+                              onSelectFechaIngreso: _selectFechaIngreso,
+                            ),
+                    ),
                   ),
                 ),
               ),

@@ -36,12 +36,17 @@ class StudentDropdownField<T> extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           DropdownButtonFormField<T>(
+            isExpanded: true,
             initialValue: value,
             items: items.map((item) {
               final text = itemLabel != null ? itemLabel!(item) : item.toString();
               return DropdownMenuItem<T>(
                 value: item,
-                child: Text(text),
+                child: Text(
+                  text,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
               );
             }).toList(),
             onChanged: onChanged,

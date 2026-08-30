@@ -6,6 +6,8 @@ import '../../../database/app_database.dart';
 import '../../../providers/career_providers.dart';
 import '../../../providers/class_group_providers.dart';
 import '../shared/requirement_dialog.dart';
+import '../shared/confirm_delete_dialog.dart';
+import '../shared/app_snackbar.dart';
 import 'widgets/add_group_dialog.dart';
 import 'widgets/edit_group_dialog.dart';
 import 'widgets/group_card.dart';
@@ -40,25 +42,23 @@ class _GroupsScreenState extends ConsumerState<GroupsScreen> {
   Future<void> _onDelete(ClassGroup group) async {
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Eliminar Grupo'),
-        content: Text('¿Estás seguro de que deseas eliminar el grupo ${group.codigo}? Esta acción no se puede deshacer.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: FilledButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Eliminar'),
-          ),
-        ],
+      builder: (context) => ConfirmDeleteDialog(
+        title: '¿Eliminar Grupo?',
+        message: '¿Estás seguro de que deseas eliminar el grupo "${group.codigo}"? Esta acción no se puede deshacer.',
       ),
     );
 
-    if (confirmed == true) {
-      await ref.read(classGroupControllerProvider).deleteGroup(group);
+    if (confirmed == true && mounted) {
+      try {
+        await ref.read(classGroupControllerProvider).deleteGroup(group);
+        if (mounted) {
+          AppSnackbar.showSuccess(context, 'Grupo eliminado con éxito');
+        }
+      } catch (e) {
+        if (mounted) {
+          AppSnackbar.showError(context, 'Error al eliminar grupo: $e');
+        }
+      }
     }
   }
 
