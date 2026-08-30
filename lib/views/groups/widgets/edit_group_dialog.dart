@@ -228,38 +228,37 @@ class _EditGroupDialogState extends ConsumerState<EditGroupDialog> {
 
   Widget _buildHeader(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppTheme.academic50,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(LucideIcons.edit3, color: AppTheme.academic600),
-            ),
-            const SizedBox(width: 16),
-            const Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Editar Grupo',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Outfit',
-                  ),
-                ),
-                Text(
-                  'Modifica los datos del grupo',
-                  style: TextStyle(color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: AppTheme.academic50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(LucideIcons.edit3, color: AppTheme.academic600),
         ),
+        const SizedBox(width: 16),
+        const Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Editar Grupo',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Outfit',
+                ),
+              ),
+              Text(
+                'Modifica los datos del grupo',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 8),
         IconButton(
           onPressed: () => Navigator.pop(context),
           icon: const Icon(LucideIcons.x),

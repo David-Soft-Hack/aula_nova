@@ -226,7 +226,19 @@ class BitacoraDao extends DatabaseAccessor<AppDatabase> with _$BitacoraDaoMixin 
 
   Future<void> deleteBitacora(int idBitacora) async {
     await db.transaction(() async {
+      // 1. Obtener todas las sesiones de esta bitácora
+      final sessions = await getCalendarioForBitacora(idBitacora);
+      final sessionIds = sessions.map((s) => s.id).toList();
+
+      if (sessionIds.isNotEmpty) {
+        // 2. Eliminar asistencias asociadas a estas sesiones
+        await (db.delete(db.attendances)..where((t) => t.idSession.isIn(sessionIds))).go();
+      }
+
+      // 3. Eliminar sesiones de calendario
       await deleteCalendarioForBitacora(idBitacora);
+
+      // 4. Eliminar la bitácora
       await (delete(bitacoras)..where((t) => t.id.equals(idBitacora))).go();
     });
   }

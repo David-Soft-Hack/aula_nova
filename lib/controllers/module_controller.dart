@@ -9,7 +9,6 @@ class ModuleController implements IModuleController {
   final AppDatabase _db;
   final IModuleRepository _repository;
   final ModuleFactory _moduleFactory;
-  final BitacoraDao _bitacoraDao;
 
   ModuleController({
     required AppDatabase db,
@@ -18,8 +17,7 @@ class ModuleController implements IModuleController {
     required BitacoraDao bitacoraDao,
   })  : _db = db,
         _repository = moduleRepository,
-        _moduleFactory = moduleFactory,
-        _bitacoraDao = bitacoraDao;
+        _moduleFactory = moduleFactory;
 
   @override
   Future<void> createModuleWithDetails({
@@ -195,23 +193,46 @@ class ModuleController implements IModuleController {
   @override
   Future<void> deleteModuleWithDetails(String moduleCode) async {
     await _db.transaction(() async {
-      final units = await _repository.getUnitsByModule(moduleCode);
+      // 1. Obtener todas las bitácoras asociadas a este módulo utilizando directamente _db
+      final bitacorasList = await (_db.select(_db.bitacoras)
+            ..where((t) => t.idModule.equals(moduleCode)))
+          .get();
+      final bitacoraIds = bitacorasList.map((b) => b.id).toList();
+
+      if (bitacoraIds.isNotEmpty) {
+        // 2. Obtener todas las sesiones del calendario de estas bitácoras
+        final sessions = await (_db.select(_db.calendarioBitacoras)
+              ..where((t) => t.idBitacora.isIn(bitacoraIds)))
+            .get();
+        final sessionIds = sessions.map((s) => s.id).toList();
+
+        if (sessionIds.isNotEmpty) {
+          // 3. Eliminar todas las asistencias asociadas a estas sesiones
+          await (_db.delete(_db.attendances)..where((t) => t.idSession.isIn(sessionIds))).go();
+        }
+
+        // 4. Eliminar las sesiones del calendario
+        await (_db.delete(_db.calendarioBitacoras)..where((t) => t.idBitacora.isIn(bitacoraIds))).go();
+
+        // 5. Eliminar las bitácoras
+        await (_db.delete(_db.bitacoras)..where((t) => t.idModule.equals(moduleCode))).go();
+      }
+
+      // 6. Obtener unidades del módulo
+      final units = await (_db.select(_db.units)
+            ..where((t) => t.idModule.equals(moduleCode)))
+          .get();
       final unitCodes = units.map((u) => u.codUnit).toList();
+
       if (unitCodes.isNotEmpty) {
-        await _db.batch((batch) {
-          for (final code in unitCodes) {
-            batch.deleteWhere(_db.activities, (t) => t.idUnit.equals(code));
-          }
-        });
+        // 7. Eliminar todas las actividades asociadas a estas unidades
+        await (_db.delete(_db.activities)..where((t) => t.idUnit.isIn(unitCodes))).go();
       }
-      await _repository.deleteUnitsByModule(moduleCode);
 
-      final bitacoras = await _bitacoraDao.getBitacorasByModule(moduleCode);
-      for (final bitacora in bitacoras) {
-        await _bitacoraDao.deleteCalendarioForBitacora(bitacora.id);
-      }
-      await _bitacoraDao.deleteBitacorasByModule(moduleCode);
+      // 8. Eliminar las unidades
+      await (_db.delete(_db.units)..where((t) => t.idModule.equals(moduleCode))).go();
 
+      // 9. Finalmente, eliminar el módulo
       await (_db.delete(_db.modules)..where((m) => m.codModule.equals(moduleCode))).go();
     });
   }

@@ -39,6 +39,7 @@ class ModuleOptionsSheet extends ConsumerWidget {
                 style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
               ),
               onTap: () async {
+                final controller = ref.read(moduleControllerProvider);
                 Navigator.pop(context); // Cerrar la hoja de opciones
                 
                 final confirm = await showDialog<bool>(
@@ -51,7 +52,10 @@ class ModuleOptionsSheet extends ConsumerWidget {
 
                 if (confirm == true) {
                   try {
-                    await ref.read(moduleControllerProvider).deleteModuleWithDetails(module.codModule);
+                    await controller.deleteModuleWithDetails(module.codModule);
+                    if (context.mounted) {
+                      AppSnackbar.showSuccess(context, 'Módulo eliminado con éxito');
+                    }
                   } catch (e) {
                     if (context.mounted) {
                       AppSnackbar.showError(context, 'Error al eliminar: $e');

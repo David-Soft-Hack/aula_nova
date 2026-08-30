@@ -76,7 +76,7 @@ class BitacoraCard extends ConsumerWidget {
                         IconButton(
                           icon: const Icon(LucideIcons.trash2, color: Colors.red, size: 18),
                           padding: EdgeInsets.zero,
-                          constraints: const BoxConstraints(),
+                          constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                           visualDensity: VisualDensity.compact,
                           splashRadius: 20,
                           tooltip: 'Eliminar Bitácora',

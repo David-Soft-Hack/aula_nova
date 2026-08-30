@@ -3,10 +3,12 @@ import '../database/app_database.dart';
 import '../database/daos.dart';
 import '../services/student_status_service.dart';
 import '../services/dosificacion_service.dart';
+import '../services/excel_bitacora_service.dart';
 import '../repositories/bitacora_repository.dart';
 import '../repositories/module_repository.dart';
 import '../controllers/bitacora_controller.dart';
 import '../interfaces/controllers/i_bitacora_controller.dart';
+import '../models/plan_bitacora.dart';
 import 'database_providers.dart';
 
 final dosificacionServiceProvider = Provider<DosificacionService>((ref) => DosificacionService());
@@ -57,3 +59,10 @@ final activityByCodProvider = StreamProvider.family<Activity?, String>((ref, cod
   if (codActivity.isEmpty) return const Stream.empty();
   return ref.watch(moduleRepositoryForBitacoraProvider).watchActivityByCod(codActivity);
 });
+
+/// Carga el Plan de Bitácora desde el asset 'assets/Plan Bitacora.xlsx'.
+/// Se resuelve una sola vez por ciclo de vida de la app (FutureProvider con autoDispose=false).
+final planBitacoraProvider = FutureProvider<PlanBitacora?>((ref) async {
+  return ExcelBitacoraService().loadFromAssets();
+});
+
